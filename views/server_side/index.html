@@ -1,19 +1,67 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Hello World!</title>
-  </head>
-  <body>
-    <h1>Hello World!</h1>
-    <!-- All of the Node.js APIs are available in this renderer process. -->
-    We are using Node.js <script>document.write(process.versions.node)</script>,
-    Chromium <script>document.write(process.versions.chrome)</script>,
-    and Electron <script>document.write(process.versions.electron)</script>.
 
-    <script>
-      // You can also require other files to run in this process
-      require('./renderer.js')
-    </script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <title>Hello World!</title>
+
+  <script src='jquery/jquery.js'></script>
+  <!-- 
+      <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.css"> 
+     <script src='bootstrap/js/bootstrap.js'></script>
+    -->
+  <!--
+  import semantic lib 
+-->
+  <link rel="stylesheet" type="text/css" href="semantic-ui/semantic.css">
+  <script src='semantic-ui/semantic.js'></script>
+
+
+</head>
+
+<body>
+
+
+  <div class="ui sidebar inverted vertical menu ">
+    <!-- To add new items here-->
+    <div class="ui header"></div>
+
+
+    <a class="item">Upload new File</a>
+    <a class="item">show uploaded Files</a>
+
+
+  </div>
+  <div class="pusher">
+    <div class="ui segments  black ">
+      <div class="ui segment left inverted black">
+        <h1 class="ui header center alinged centered">K1 Computer Signature System</h1>
+      </div>
+    </div>
+    <div class="ui container">
+      <div class="segments piled  ui horizontal">
+        <div class="ui segment clearing ">
+          <div class="ui button red  left floated" onclick="$('.ui.sidebar').sidebar('toggle');">Show Sidbar Menu</div>
+        </div>
+        <div class="ui segment right floated ">
+          <div class="ui red ribbon label">Page Title
+
+          </div>
+          <span>TITLE</span>
+        </div>
+      </div>
+
+      <div class="ui container fluid" id="loadPagesSection">
+        
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <script>
+    // $('.ui.sidebar').sidebar('toggle');
+  </script>
+
+</body>
+
 </html>

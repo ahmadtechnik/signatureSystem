@@ -20,8 +20,14 @@
     "electron": "^5.0.0"
   },
   "dependencies": {
+    "app-root-path": "^2.2.1",
     "bootstrap": "^4.3.1",
+    "ejs": "^2.6.1",
+    "express": "^4.17.0",
+    "https": "^1.0.0",
     "jquery": "^3.4.1",
-    "jquery-ui": "^1.12.1"
+    "jquery-ui": "^1.12.1",
+    "portscanner": "^2.2.0",
+    "semantic-ui-css": "^2.4.1"
   }
 }

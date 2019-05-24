@@ -1,41 +1,24 @@
+/**
+ * import importants libs
+ */
+var httpManagment = require("./HTTPs/httpserver");
+//var electronManager = require("./electron/electronManager");
+var socketIOManager = require("./socket.ioManager/socket-io");
 
-const {app, BrowserWindow} = require('electron')
-
-
-let mainWindow
-
-function createWindow () {
- 
-  mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      nodeIntegration: true
-    }
-  })
-
-
-  mainWindow.loadFile('./views/server_side/index.html')
-
-
-  mainWindow.on('closed', function () {
-
-    mainWindow = null
-  })
-}
-
-
-app.on('ready', createWindow)
-
-app.on('window-all-closed', function () {
-
-  if (process.platform !== 'darwin') app.quit()
-})
-
-app.on('activate', function () {
-
-  if (mainWindow === null) createWindow()
-})
-
-
-
+/**
+ * first step, opening the HTTP and HTTPS services
+ */
+httpManagment.startListen((started, openPorts) => {
+  /**
+   * in case https and http from modul started
+   */
+  if (started) {
+    /**
+     * get HTTP and HTTPS objects to cotrol them
+     */
+    var http = openPorts.http;
+    var https = openPorts.https;
+    var expressApp = openPorts.expressApp;
+    
+  }
+});
