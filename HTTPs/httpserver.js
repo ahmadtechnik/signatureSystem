@@ -6,6 +6,8 @@ var portscanner = require("portscanner");
 var path = require('path');
 var root_app = require("app-root-path");
 var os = require("os");
+var formidable = require("formidable");
+var util = require("util");
 
 /**
  * SSL cert
@@ -93,7 +95,7 @@ app.use("/semantic-ui", express.static("node_modules/semantic-ui-css/"));
 /**
  * use main dir server side
  */
-app.use("/" , express.static("views/server_side/"))
+app.use("/", express.static("views/server_side/"))
 
 /**
  * Select the home page for express server.
@@ -128,4 +130,43 @@ app.get("/upload_document", (req, res) => {
         portinuse: localPort,
         pagetitle: "K1 Computer Signature System"
     });
+});
+
+/**
+ * set post action to receive file from client
+ */
+app.post("/uploaded_file", (req, res) => {
+    /**
+     * init formidable object to start receive data form
+     */
+    var form = new formidable.IncomingForm;
+    /**
+     * start parsing the reqest from client
+     */
+    var parserFrom = form.parse(req, () => {
+
+    });
+    /**
+     * store file's size in varible
+     */
+    var fileSizeBytes = parserFrom.bytesExpected;
+    /**
+     * set event on fileBegin
+     */
+    form.on("fileBegin", (name, file) => {
+        file.path = root_app + '/storage/' + file.name;
+    });
+    /**
+     * set event on file moved to Server
+     */
+    form.on("file", (name, file) => {
+        console.log('Uploaded ' + file.name);
+    })
+    /**
+     * set event on file uploading progrssing
+     */
+    form.on('progress', function (bytesReceived, bytesExpected) {
+        console.log(((bytesReceived / fileSizeBytes) * 100).toFixed() + "%");
+    });
+
 })

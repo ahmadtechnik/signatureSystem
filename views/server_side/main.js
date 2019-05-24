@@ -4,30 +4,50 @@
  * set document on ready
  */
 $(document).ready(() => {
+
+
     /**
      * Set btn Action : to load upload JES page
      * **/
-    $(`#showUploadDocumentForm`).click(() => {
-        /**
-         * 
-         */
-        $.ajax({
-            url: "upload_document",
-            type: "GET",
-            success: (data) => {
-                $(`#loadPagesSection`).html(data);
-            }
-        });
-        /**
-         * to close the sidebare menu after loading the page
-         */
-        $('.ui.sidebar').sidebar('toggle');
-    })
+    $(`#showUploadDocumentForm`).click(loadUploadDocumentSection);
 
-    $(`#showFilesHistory`).click(() => {
 
-    });
+
+    /**
+     * set hsow files history btn action 
+     */
+    $(`#showFilesHistory`).click(showFilesHistoryBtnAction);
+
 
 
 })
 
+function showFilesHistoryBtnAction(event) {
+
+}
+
+
+function loadUploadDocumentSection(event) {
+    /**
+     * Clean the container before receiving coming response
+     */
+    $(`#loadPagesSection`).html("");
+    $.ajax({
+        url: "upload_document",
+        type: "GET",
+        success: (data) => {
+            $(`#loadPagesSection`).html(data);
+        },
+
+    });
+    /**
+     * to close the sidebare menu after loading the page
+     */
+    $('.ui.sidebar').sidebar('toggle');
+}
+
+
+/** ------------------ GENARAL FUNCTIONS --------------------- */
+/**
+ * To set ajax on progress action
+ */

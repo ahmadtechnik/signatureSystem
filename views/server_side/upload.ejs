@@ -28,10 +28,28 @@
 
         </div>
     </div>
+    <div class="modalContainer">
+        <div class="ui tiny modal askUserToEnterFileName">
+            <i class="close icon"></i>
+            <div class="header">
+                Change File Name
+            </div>
+            <div class="actions">
+                <div class="ui black deny button">
+                    Cancle
+                </div>
+                <div class="ui positive right labeled icon button">
+                    Ok
+                    <i class="checkmark icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 
 <script>
+
     /** -------------------------------------- upload files page actions ------------------------------------ */
     /**
      * set action for the fake uplad button
@@ -47,6 +65,7 @@
     var uploaded_file;
 
     function upload_file_change(e) {
+        uploaded_file = null;
         /**
          * store the file after change
          * **/
@@ -87,7 +106,7 @@
              * to show file data to user
              * **/
             $(`#uploadedFileData`).html(
-                `File Name : ${file.name}<br>File Szie : ${ (file.size / 1024 / 1024).toFixed(2)} MB <br>File Type: ${file.type}<br>`
+                `File Name : ${file.name}<br>File Szie : ${(file.size / 1024 / 1024).toFixed(2)} MB <br>File Type: ${file.type}<br>`
             );
             $(`#uploadedFileData`).append(remove_upladed_file_button);
             /**
@@ -130,7 +149,52 @@
     $(`#upload_confirm_button`).click(upload_file_confirm);
 
     function upload_file_confirm(e) {
-        if (uploaded_file !== null) {} else {
+        /*
+                * init a data form object to store the file
+                * 
+                **/
+        var dataForm = new FormData();
+        /**
+         * besure that the file object not equal to null
+         * **/
+        if (uploaded_file !== null) {
+
+            /**
+             * Show input field to enter new name for this file
+             * **/
+            $(`.askUserToEnterFileName`).modal({
+                onApprove: modal => {
+                    console.log("APPROVE")
+                    /**
+                     * in case user pressed ok, thats mean i have 
+                     * to check if the entered file name is correct
+                     * **/
+
+                    dataForm.append("uploaded_file", uploaded_file);
+                    $.ajax({
+                        url: "uploaded_file",
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        method: "POST",
+                        data: dataForm,
+                        success: (response) => {
+                            console.log(response);
+                            dataForm = null;
+                        },
+                        error: err => {
+                            console.log(err);
+                        }
+                    })
+
+                }, onDeny: modal => {
+
+                }, onHidden: modal => {
+                    
+                }
+            }).modal("show")
+
+        } else {
 
         }
     }
