@@ -1,0 +1,137 @@
+<!--  -->
+<div class="ui container" id="upload_file_container">
+    <div class="ui placeholder segment">
+        <div class="ui icon header">
+            <i class="pdf file outline icon"></i>
+            <span id="uploaded_document_info"></span>
+        </div>
+        <div class="ui primary button" id="upload_btn_action">Add Document</div>
+        <input type="file" id="fileUploader" style="display: none;" accept="image/*,application/pdf">
+    </div>
+
+    <div class="ui segment" id="Uploaded_file_data" style="display: none;">
+        <div class="ui  segment">
+            <div class="ui two column stackable center aligned grid">
+                <div class="ui vertical divider">THEN</div>
+                <div class="middle aligned row">
+
+                    <div class="column" style="text-align: left;">
+                        <div id="uploadedFileData"></div>
+                    </div>
+
+                    <div class="column ui right alingned">
+                        <div class="ui button blue disabled" id="upload_confirm_button">Confirm</div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    /** -------------------------------------- upload files page actions ------------------------------------ */
+    /**
+     * set action for the fake uplad button
+     * **/
+    $(`#upload_btn_action`).click((e) => {
+        $(`#fileUploader`).click()
+    });
+
+    /**
+     * set action for the read button on cheange
+     * **/
+    $(`#fileUploader`).change(upload_file_change);
+    var uploaded_file;
+
+    function upload_file_change(e) {
+        /**
+         * store the file after change
+         * **/
+        var file = e.target.files[0];
+        /**
+         * if there any file was uploaded
+         * **/
+
+        if (e.target.files.length > 0) {
+            /**
+             * make uploaded file global var 
+             * **/
+            uploaded_file = file;
+            /**
+             * to display file data section
+             */
+            $("#Uploaded_file_data").css({
+                display: "block"
+            });
+
+            /**
+             * cleare selected file from box
+             * **/
+            var remove_upladed_file_button = $(`<button class='ui button red mini'>`);
+            /**
+             * set icon for the button
+             * **/
+            remove_upladed_file_button.append("<i class='trash icon'></i>");
+
+            remove_upladed_file_button.click((e) => {
+                uploaded_file = null;
+                $(`#fileUploader`).val("");
+                $(`#fileUploader`).change();
+            });
+
+
+            /**
+             * to show file data to user
+             * **/
+            $(`#uploadedFileData`).html(
+                `File Name : ${file.name}<br>File Szie : ${ (file.size / 1024 / 1024).toFixed(2)} MB <br>File Type: ${file.type}<br>`
+            );
+            $(`#uploadedFileData`).append(remove_upladed_file_button);
+            /**
+             * to show the fowloing message to user
+             * **/
+            $(`#uploaded_document_info`).text("Document was selected : " + file.name);
+            /**
+             * to reactive the confirm file
+             * **/
+            $(`#upload_confirm_button`).removeClass("disabled")
+        } else {
+            /**
+             * clear uploaded file global var 
+             * **/
+            uploaded_file = null;
+            /**
+             * to hide the uploaded file data seciton
+             * **/
+            $("#Uploaded_file_data").css({
+                display: "none"
+            });
+            /**
+             * to clear uploaded file infos
+             * **/
+            $(`#uploadedFileData`).html("");
+            /**
+             * to clear the message of the segment
+             * **/
+            $(`#uploaded_document_info`).text("");
+            /**
+             * to deactive the confirm file
+             * **/
+            $(`#upload_confirm_button`).addClass("disabled")
+        }
+    }
+
+    /**
+     * to set confirm button  action 
+     * **/
+    $(`#upload_confirm_button`).click(upload_file_confirm);
+
+    function upload_file_confirm(e) {
+        if (uploaded_file !== null) {} else {
+
+        }
+    }
+</script>

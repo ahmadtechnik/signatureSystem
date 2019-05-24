@@ -28,6 +28,8 @@
     "jquery": "^3.4.1",
     "jquery-ui": "^1.12.1",
     "portscanner": "^2.2.0",
-    "semantic-ui-css": "^2.4.1"
+    "semantic-ui-css": "^2.4.1",
+    "socket.io": "^2.2.0",
+    "socket.io-client": "^2.2.0"
   }
 }
