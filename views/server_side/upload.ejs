@@ -47,6 +47,7 @@
      * **/
     $(`#fileUploader`).change(upload_file_change);
     var uploaded_file;
+    var newFileToUpload;
 
     function upload_file_change(e) {
         uploaded_file = null;
@@ -148,42 +149,66 @@
             /**
             load aboutthefile modal from modal diractiory
             **/
-            $(`#modalContainer`).load("/modules/aboutTheFile.html" , () => {
-            /**
-             * Show input field to enter new name for this file
-             * **/
-            $(`.askUserToEnterFileName`).modal({
-                onApprove: modal => {
-                    /**
-                     * in case user pressed ok, thats mean i have 
-                     * to check if the entered file name is correct
-                     * **/
-                    dataForm.append("uploaded_file", uploaded_file);
-                    $.ajax({
-                        url: "uploaded_file",
-                        cache: false,
-                        contentType: false,
-                        processData: false,
-                        method: "POST",
-                        data: dataForm,
-                        success: (response) => {
-                            console.log(response);
-                            dataForm = null;
-                        },
-                        error: err => {
-                            console.log(err);
+            $(`#modalContainer`).load("/modules/aboutTheFile.html", () => {
+
+
+
+                $(`.askUserToEnterFileName`).modal({
+                    closable: false,
+                    onApprove: modal => {
+                        /**
+                         * store the new entered name
+                         * with the extention of the file
+                         * and the entered number of the signaturies
+                         * 
+                         * **/
+                        var newFileName = $(`#newNameLabel`).val();
+                        var numberOfSignaturies = $(`#signaturies_number`).val();
+                        /** Create ne file to  change the old file name **/
+                        var fileExtention = returnFileExtions(uploaded_file)[0];
+                        newFileToUpload = new File([uploaded_file], newFileName +
+                            fileExtention);
+
+                        if (newFileName === "") {
+                            $(`.newNameField`).addClass("error");
+                            return false;
+                        } else {
+                            $(`.newNameField`).removeClass("error");
                         }
-                    })
+                        if (numberOfSignaturies == 0 || numberOfSignaturies == "") {
+                            $(`.signaturiesNumberField`).addClass("error");
+                            return false;
+                        } else {
+                            $(`.signaturiesNumberField`).removeClass("error");
+                        }
+                        /**
+                         * in case user pressed ok, thats mean i have 
+                         * to check if the entered file name is correct
+                         * **/
+                        dataForm.append("uploaded_file", newFileToUpload);
+                        dataForm.append("", newFileToUpload);
+                        $.ajax({
+                            url: "uploaded_file",
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            method: "POST",
+                            data: dataForm,
+                            success: onUploadFileSuccessed,
+                            error: err => {
+                                console.log(err);
+                            }
+                        })
 
-                },
-                onDeny: modal => {
+                    },
+                    onDeny: modal => {
 
-                },
-                onHidden: modal => {
-                    $(`.askUserToEnterFileName`).remove();
-                },
-               
-            }).modal("show")
+                    },
+                    onHidden: modal => {
+                        $(`.askUserToEnterFileName`).remove();
+                    },
+
+                }).modal("show")
             });
 
 
@@ -191,4 +216,6 @@
 
         }
     }
+
+
 </script>

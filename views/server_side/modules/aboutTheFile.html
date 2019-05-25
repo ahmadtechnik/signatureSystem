@@ -5,24 +5,34 @@
     signaturies.
  -->
 <div class="ui modal askUserToEnterFileName">
-    <i class="close icon"></i>
-    <div class="header">Enter The data</div>
-    <div class="content">
+   
+    <div class="header">
+        Enter Important Data
+    </div>
 
+    <div class="content">
         <div class="ui equal width form">
             <di class="ui fields">
-                <div class="ui field">
+                <div class="field newNameField">
                     <label>New Name for this file:</label>
-                    <input type="text" name="" id="newNameLabel">
+                    <div class="ui right labeled input">
+                        <input type="text" id="newNameLabel" >
+                        <div class="ui basic label" id="fileExtention"></div>
+                    </div>
                 </div>
-                <div class="field">
+                <div class="field signaturiesNumberField">
                     <label for="">Number of the signaturies</label>
-                    <input type="number" name="" id="">
+                    <div class="ui right labeled left icon input">
+                        <i class="sort numeric up icon"></i>
+                        <input type="number" placeholder="Enter number" maxlength="2" max="10" min="0" value="0" id="signaturies_number">
+                        <a class="ui tag label">Signatories</a>
+                    </div>
+                   
                 </div>
             </di>
         </div>
-
     </div>
+
     <div class="actions">
         <div class="ui black deny button">
             Cancle
@@ -34,5 +44,24 @@
     </div>
 </div>
 <script>
-$("#newNameLabel").val(uploaded_file.name);
+    /**
+     * get extention of file
+     * @returns {}
+     * **/
+    function returnFileExtions(file) {
+        /**
+         * this funciton will return the file name but splited 
+         * to 2 parts ; number 1 will be the file name, and the secound 
+         * will be the fle extions
+         * **/
+        return [
+            "." + file.type.split("/")[1],
+            file.name.split(".")[0]
+        ];
+    }
+    /** set the old file name in the input filed **/
+    $("#newNameLabel").attr("placeholder" , returnFileExtions(uploaded_file)[1]);
+    /** change the extions file beside the file name field **/
+    $(`#fileExtention`).text(returnFileExtions(uploaded_file)[0].toUpperCase());
+
 </script>

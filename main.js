@@ -5,10 +5,13 @@ var httpManagment = require("./HTTPs/httpserver");
 //var electronManager = require("./electron/electronManager");
 var socketIOManager = require("./socket.ioManager/socket-io");
 
+var os = require("os")
+
 /**
  * first step, opening the HTTP and HTTPS services
  */
 httpManagment.startListen((started, openPorts) => {
+
   /**
    * in case https and http from modul started
    */
@@ -19,6 +22,9 @@ httpManagment.startListen((started, openPorts) => {
     var http = openPorts.http;
     var https = openPorts.https;
     var expressApp = openPorts.expressApp;
-    
+
+
+    console.log("HOSTNAME : ", os.hostname());
+
   }
 });

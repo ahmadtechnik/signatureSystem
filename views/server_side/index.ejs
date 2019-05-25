@@ -22,8 +22,8 @@
     <div class="ui header"></div>
 
 
-    <a class="item" id="showUploadDocumentForm">Upload new File</a>
-    <a class="item" id="showFilesHistory">show uploaded Files</a>
+    <a class="item" id="showUploadDocumentForm">Upload new file</a>
+    <a class="item" id="showFilesHistory">Show uploaded files</a>
 
 
   </div>
@@ -34,7 +34,7 @@
       </div>
     </div>
     <div class="ui container">
-      <div class="segments piled  ui horizontal">
+      <div class="segments piled ui horizontal">
         <div class="ui segment clearing ">
           <div class="ui button red  left floated" onclick="$('.ui.sidebar').sidebar('toggle');">Show Sidbar Menu</div>
         </div>
@@ -42,6 +42,9 @@
           <div class="ui red ribbon label">Hostname :
           </div>
           <span><%- hostname %> on port : <%- portinuse %> </span>
+        </div>
+        <div class="ui segment">
+          <span>You are in Page : <span class="" id="pageTitle"></span></span>
         </div>
       </div>
 

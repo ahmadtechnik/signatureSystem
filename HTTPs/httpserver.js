@@ -143,9 +143,26 @@ app.post("/uploaded_file", (req, res) => {
     /**
      * start parsing the reqest from client
      */
-    var parserFrom = form.parse(req, () => {
+    var parserFrom = form.parse(req, onParse)
+        .on("field", onField)
+        .on("file", onFile)
+        .on("fileBegin", onFileBegin)
+        .on("progress", onProgress)
+        .on("error", onError)
+        .on("end", onEnd);
+        
+    /**
+     * add listener on onParse for the form
+     */
+    function onParse(err, fields, files) {
 
-    });
+    }
+    /**
+     * to get other params in the passed form data
+     */
+    function onField(name, filed) {
+
+    };
     /**
      * store file's size in varible
      */
@@ -153,20 +170,37 @@ app.post("/uploaded_file", (req, res) => {
     /**
      * set event on fileBegin
      */
-    form.on("fileBegin", (name, file) => {
+    function onFileBegin(name, file) {
         file.path = root_app + '/storage/' + file.name;
-    });
+    };
     /**
      * set event on file moved to Server
      */
-    form.on("file", (name, file) => {
+    function onFile(name, file) {
         console.log('Uploaded ' + file.name);
-    })
+    };
     /**
      * set event on file uploading progrssing
      */
-    form.on('progress', function (bytesReceived, bytesExpected) {
-        console.log(((bytesReceived / fileSizeBytes) * 100).toFixed() + "%");
-    });
-
+    function onProgress(bytesReceived, bytesExpected) {
+        //console.log(((bytesReceived / fileSizeBytes) * 100).toFixed() + "%");
+    };
+    /**
+     * 
+     * on end action
+     */
+    function onEnd() {
+        res.json({
+            status: "DONE"
+        })
+    }
+    /**
+     * on Error action
+     */
+    function onError(err) {
+        res.json({
+            status: "ERR",
+            err: err
+        });
+    }
 })
