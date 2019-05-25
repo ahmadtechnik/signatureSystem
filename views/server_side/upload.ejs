@@ -28,28 +28,12 @@
 
         </div>
     </div>
-    <div class="modalContainer">
-        <div class="ui tiny modal askUserToEnterFileName">
-            <i class="close icon"></i>
-            <div class="header">
-                Change File Name
-            </div>
-            <div class="actions">
-                <div class="ui black deny button">
-                    Cancle
-                </div>
-                <div class="ui positive right labeled icon button">
-                    Ok
-                    <i class="checkmark icon"></i>
-                </div>
-            </div>
-        </div>
+    <div class="modalContainer" id="modalContainer">
     </div>
 </div>
 
 
 <script>
-
     /** -------------------------------------- upload files page actions ------------------------------------ */
     /**
      * set action for the fake uplad button
@@ -149,27 +133,31 @@
     $(`#upload_confirm_button`).click(upload_file_confirm);
 
     function upload_file_confirm(e) {
+
+
+
         /*
-                * init a data form object to store the file
-                * 
-                **/
+         * init a data form object to store the file
+         * 
+         **/
         var dataForm = new FormData();
         /**
          * besure that the file object not equal to null
          * **/
         if (uploaded_file !== null) {
-
+            /**
+            load aboutthefile modal from modal diractiory
+            **/
+            $(`#modalContainer`).load("/modules/aboutTheFile.html" , () => {
             /**
              * Show input field to enter new name for this file
              * **/
             $(`.askUserToEnterFileName`).modal({
                 onApprove: modal => {
-                    console.log("APPROVE")
                     /**
                      * in case user pressed ok, thats mean i have 
                      * to check if the entered file name is correct
                      * **/
-
                     dataForm.append("uploaded_file", uploaded_file);
                     $.ajax({
                         url: "uploaded_file",
@@ -187,12 +175,17 @@
                         }
                     })
 
-                }, onDeny: modal => {
+                },
+                onDeny: modal => {
 
-                }, onHidden: modal => {
-                    
-                }
+                },
+                onHidden: modal => {
+                    $(`.askUserToEnterFileName`).remove();
+                },
+               
             }).modal("show")
+            });
+
 
         } else {
 

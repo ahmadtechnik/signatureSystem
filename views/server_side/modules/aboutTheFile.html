@@ -1,0 +1,38 @@
+<!-- 
+    this modal is only to ask the user to enter 
+    data about the uploaded file, for example 
+    new name of the file, the number of the
+    signaturies.
+ -->
+<div class="ui modal askUserToEnterFileName">
+    <i class="close icon"></i>
+    <div class="header">Enter The data</div>
+    <div class="content">
+
+        <div class="ui equal width form">
+            <di class="ui fields">
+                <div class="ui field">
+                    <label>New Name for this file:</label>
+                    <input type="text" name="" id="newNameLabel">
+                </div>
+                <div class="field">
+                    <label for="">Number of the signaturies</label>
+                    <input type="number" name="" id="">
+                </div>
+            </di>
+        </div>
+
+    </div>
+    <div class="actions">
+        <div class="ui black deny button">
+            Cancle
+        </div>
+        <div class="ui positive right labeled icon button">
+            Ok
+            <i class="checkmark icon"></i>
+        </div>
+    </div>
+</div>
+<script>
+$("#newNameLabel").val(uploaded_file.name);
+</script>

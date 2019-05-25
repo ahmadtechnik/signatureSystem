@@ -48,6 +48,3 @@ function loadUploadDocumentSection(event) {
 
 
 /** ------------------ GENARAL FUNCTIONS --------------------- */
-/**
- * To set ajax on progress action
- */
