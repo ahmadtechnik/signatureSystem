@@ -73,9 +73,5 @@ var onServerSideDeviceDisconnected = () => {
 /** order to convert the pdf file */
 var pdfToPICconverter = (data) => {
     /** call the pdf2pic converter */
-    pdf2pic.convertPDF(
-        root_app + "/storage/" +  data.fileName,
-        fileManger.createFolderIfNotExist(root_app + "/storage/" + data.newFileName),
-        600
-    );
+
 }

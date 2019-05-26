@@ -1,0 +1,124 @@
+<div class="ui modal large longer fullscreen" id="previewModal">
+  <div class="header">Select signaturies places</div>
+  <div class=" scrolling  content" id="previewModalContent">
+
+    <div class="ui celled internally grid  stackable">
+      <div class="four column row orange fileTopInfosContainer">
+        <div class="column four wide ">File name : <span id="fileNameText"></span></div>
+        <div class="column four wide">Signaturies number :<span id="signsNumberText"></span></div>
+        <div class="column four wide">File type : <span id="fileTypeText"></span></div>
+        <div class="column four wide">Pages number : <span id="pagesNumberText"></span></div>
+      </div>
+      <div class="tow column row">
+        <div class="column tow wided"></div>
+        <div class="fourteen wide column  pdfPagesPrevieContainer" style="overflow: scroll; ">
+          <div id="canvasContainer">
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <div class="actions">
+    <div class="ui primary button">Submit</div>
+  </div>
+</div>
+
+<script>
+  /** to shpw the modal after  **/
+  $(`#previewModal`).modal({}).modal("show");
+  /** 
+  First step is to  check eather the file PDF or IMG
+  then i have to show the user the file with adding 
+  action to choose which signaturies will be the next
+   **/
+  newFileToUpload; // uploaded file after changing the name
+  newFileName; // entered file name
+  numberOfSignaturies; // Signaturies number
+  var fileType = newFileToUpload.type;
+  var fileName = newFileToUpload.name;
+  var fileSize = newFileToUpload.size;
+
+  /** show data to user **/
+  $(`#signsNumberText`).html(numberOfSignaturies);
+  $(`#fileNameText`).html(fileName);
+  $(`#fileTypeText`).html(fileType);
+
+
+
+
+  /** check if the file is pdf **/
+  if (fileType.split("/")[1].toLowerCase() === "pdf") {
+    //  get file URL Blob for PDFJS
+    var fileURL = URL.createObjectURL(newFileToUpload);
+
+    /** start to convirt the file to Images **/
+    socket.emit("orderToConverTheFile", {
+      fileName: fileName,
+      fileSize: fileSize,
+      fileType: fileType,
+      newFileName: newFileName
+    });
+
+    var pdfFile = null;
+    var numPages;
+
+    // start handling pdf file
+    PDFJS.getDocument(fileURL).then((doc) => {
+      readPDFfileFromUploadedFile(doc);
+    });
+
+  }
+  /**
+   * in case was the uploaded file image not pdf
+   *  **/
+  else {
+
+  }
+  // handling pdf doc
+  function readPDFfileFromUploadedFile(pdf) {
+    pdfFile = pdf; // the pdf global
+    numPages = pdf.numPages // the pages length 
+    // set page number to user
+    $(`#pagesNumberText`).html(numPages);
+    for (let index = 0; index < numPages; index++) {
+      pdf.getPage(index + 1).then((page) => {
+
+        // append to continer
+
+        handelSinglePage(page);
+      });
+    }
+  }
+  // handeling singe page
+  function handelSinglePage(page) {
+
+    var viewport = page.getViewport(1024 / page.getViewport(1).width );
+
+    var x = document.createElement("CANVAS");
+
+    x.style.display = "block";
+    x.width = 1024;
+    x.height = page.getViewport(1024 / page.getViewport(1).width).height;
+    
+    x.setAttribute("id", `canvos_${page.pageNumber}`);
+    $(`#canvasContainer`).append(x);
+
+
+
+    var context = $(`#canvos_${page.pageNumber}`).get(0).getContext('2d');
+
+    //var sr = $(`#canvos_${page.pageNumber}`).width() / page.getViewport(1).width;
+
+
+    // set canvas sizes from view port of pdf page
+    // start rendaring the page 
+    page.render({
+      canvasContext: context,
+      viewport: viewport
+    });
+
+  }
+</script>

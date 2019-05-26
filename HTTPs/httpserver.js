@@ -89,7 +89,7 @@ app.use("/jquery", express.static("node_modules/jquery/dist/"));
 app.use("/jquery-ui", express.static("node_modules/jquery-ui/"));
 app.use("/semantic-ui", express.static("node_modules/semantic-ui-css/"));
 app.use("/socket.io", express.static("node_modules/socket.io-client/dist/"));
-
+app.use("/assets" , express.static("views/assets/"));
 
 /**
  * use main dir server side
@@ -211,7 +211,5 @@ app.post("/uploaded_file", (req, res) => {
 
 
 app.get("/preview", (req, res) => {
-    res.render("server_side/preview.ejs", {
-
-    });
+    res.sendFile(root_app + "/views/server_side/preview.html");
 })

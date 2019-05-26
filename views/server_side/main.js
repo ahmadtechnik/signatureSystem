@@ -5,6 +5,9 @@ var socket;
  */
 $(document).ready(() => {
 
+ 
+
+
 
     /**
      * Start socket io to 
@@ -80,7 +83,7 @@ function onUploadFileSuccessed(response) {
      * to preview the file in the home page
      * **/
     if (response.status === "DONE") {
-        console.log(socket)
+        
         socket.emit("fileUploaded", {
             "file ": "data "
         })
@@ -98,6 +101,9 @@ function onUploadFileSuccessed(response) {
 
     }
 }
+
+/** ------------------- PDFJS functions , at preview modal -------------------------- */
+
 
 
 /** ------------------ GENARAL FUNCTIONS --------------------- */
