@@ -1,0 +1,33 @@
+
+<div class="ui modal large longer" id="previewModal">
+  <div class="header"></div>
+  <div class="content" id="previewModalContent">
+
+  </div>
+</div>
+
+<script>
+    /** to shpw the modal after  **/
+    $(`#previewModal`).modal({}).modal("show");
+    /** 
+    First step is to  check eather the file PDF or IMG
+    then i have to show the user the file with adding 
+    action to choose which signaturies will be the next
+     **/
+     newFileToUpload ; // uploaded file after changing the name
+     var fileType = newFileToUpload.type ;
+     var fileName = newFileToUpload.name ;
+     var fileSize = newFileToUpload.size ;
+     newFileName ;
+     numberOfSignaturies;
+     /** check if the file is pdf **/
+     if(fileType.split("/")[1].toLowerCase() === "pdf"){
+         /** start to convirt the file to Images **/
+         socket.emit("orderToConverTheFile" , {
+           fileName : fileName,
+           fileSize : fileSize,
+           fileType : fileType,
+           newFileName: newFileName
+         })
+     }
+</script>

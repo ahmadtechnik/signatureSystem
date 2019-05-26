@@ -8,6 +8,7 @@ var root_app = require("app-root-path");
 var os = require("os");
 var formidable = require("formidable");
 var util = require("util");
+var io = require("./../socket.ioManager/socket-io");
 
 /**
  * SSL cert
@@ -38,35 +39,30 @@ module.exports.startListen = function (started) {
      * 
      * Start Check port in range from 20 to 100 to open httpserver
      */
-    portscanner.findAPortNotInUse(3000, 3020, '0.0.0.0', function (error, port_) {
-        console.log('HTTP ON PORT : ' + port_);
-        httpServer.listen(port_, "0.0.0.0", (err) => {
-            /**
-             * in case there is no errors listening to port
-             */
-            if (!err) {
-                /**
-                 * in case there was no error opening http port
-                 * it will start open the https port
-                 * Start Check port in range from 20 to 100 to open httpsserver
-                 */
-                portscanner.findAPortNotInUse(3000, 3020, '0.0.0.0', function (error, port) {
-                    console.log('HTTPS ON PORT : ' + port);
-                    /**
-                     *  start listening to HTTPS port
-                     */
-                    httpsServer.listen(port);
-                    started(true, {
-                        http: httpServer,
-                        https: httpsServer,
-                        expressApp: app
-                    });
 
 
-                })
-            }
+    /**
+     * in case there was no error opening http port
+     * it will start open the https port
+     * Start Check port in range from 20 to 100 to open httpsserver
+     */
+    portscanner.findAPortNotInUse(3000, 3020, '0.0.0.0', function (error, port) {
+        console.log('HTTPS ON PORT : ' + port);
+        /**
+         *  start listening to HTTPS port
+         */
+        httpsServer.listen(port, '0.0.0.0');
+
+        started(true, {
+            https: httpsServer,
+            expressApp: app
         });
+
+
     })
+
+
+
 }
 
 /**
@@ -92,10 +88,14 @@ app.use("/bootstrap", express.static("node_modules/bootstrap/dist/"));
 app.use("/jquery", express.static("node_modules/jquery/dist/"));
 app.use("/jquery-ui", express.static("node_modules/jquery-ui/"));
 app.use("/semantic-ui", express.static("node_modules/semantic-ui-css/"));
+app.use("/socket.io", express.static("node_modules/socket.io-client/dist/"));
+
+
 /**
  * use main dir server side
  */
-app.use("/", express.static("views/server_side/"))
+app.use("/", express.static("views/server_side/"));
+
 
 /**
  * Select the home page for express server.
@@ -105,6 +105,7 @@ app.get("/server_side_home", function (req, res) {
      * store the local port of the server 
      * */
     var localPort = req.socket.localPort;
+
     /**
      * if user send get to get the server side main page
      * i have to send importatnt data to the view
@@ -113,7 +114,9 @@ app.get("/server_side_home", function (req, res) {
     res.render("server_side/index.ejs", {
         hostname: os.hostname(),
         portinuse: localPort,
-        pagetitle: "K1 Computer Signature System"
+        pagetitle: "K1 Computer Signature System",
+        protocol: req.protocol,
+        route: "server_side_home"
     });
 })
 
@@ -143,20 +146,13 @@ app.post("/uploaded_file", (req, res) => {
     /**
      * start parsing the reqest from client
      */
-    var parserFrom = form.parse(req, onParse)
+    var parserFrom = form.parse(req)
         .on("field", onField)
         .on("file", onFile)
         .on("fileBegin", onFileBegin)
         .on("progress", onProgress)
         .on("error", onError)
         .on("end", onEnd);
-        
-    /**
-     * add listener on onParse for the form
-     */
-    function onParse(err, fields, files) {
-
-    }
     /**
      * to get other params in the passed form data
      */
@@ -177,22 +173,28 @@ app.post("/uploaded_file", (req, res) => {
      * set event on file moved to Server
      */
     function onFile(name, file) {
-        console.log('Uploaded ' + file.name);
+        console.log('Uploaded ' + file.name, name);
     };
     /**
      * set event on file uploading progrssing
      */
     function onProgress(bytesReceived, bytesExpected) {
-        //console.log(((bytesReceived / fileSizeBytes) * 100).toFixed() + "%");
+
+        io.socketObjectGetter().emit("fileTransfareProcent", {
+            proc: true,
+            num: ((bytesReceived / fileSizeBytes) * 100).toFixed()
+        });
     };
     /**
      * 
      * on end action
      */
     function onEnd() {
+
         res.json({
-            status: "DONE"
-        })
+            status: "DONE",
+            fileLocation: root_app + '/storage/'
+        });
     }
     /**
      * on Error action
@@ -203,4 +205,13 @@ app.post("/uploaded_file", (req, res) => {
             err: err
         });
     }
+
+
+})
+
+
+app.get("/preview", (req, res) => {
+    res.render("server_side/preview.ejs", {
+
+    });
 })

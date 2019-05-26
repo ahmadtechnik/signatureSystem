@@ -1,6 +1,8 @@
 <!--  -->
 <div class="ui container" id="upload_file_container">
+
     <div class="ui placeholder segment">
+
         <div class="ui icon header">
             <i class="pdf file outline icon"></i>
             <span id="uploaded_document_info"></span>
@@ -30,10 +32,12 @@
     </div>
     <div class="modalContainer" id="modalContainer">
     </div>
+
 </div>
 
 
 <script>
+
     /** -------------------------------------- upload files page actions ------------------------------------ */
     /**
      * set action for the fake uplad button
@@ -132,11 +136,10 @@
      * to set confirm button  action 
      * **/
     $(`#upload_confirm_button`).click(upload_file_confirm);
-
+var newFileName ;
+var numberOfSignaturies;
     function upload_file_confirm(e) {
-
-
-
+console.log("debuging.5")
         /*
          * init a data form object to store the file
          * 
@@ -146,28 +149,28 @@
          * besure that the file object not equal to null
          * **/
         if (uploaded_file !== null) {
+            console.log("debuging.2")
             /**
             load aboutthefile modal from modal diractiory
             **/
             $(`#modalContainer`).load("/modules/aboutTheFile.html", () => {
-
-
-
+                console.log("debuging.0")
                 $(`.askUserToEnterFileName`).modal({
                     closable: false,
                     onApprove: modal => {
+                        console.log("debuging.1")
                         /**
                          * store the new entered name
                          * with the extention of the file
                          * and the entered number of the signaturies
                          * 
                          * **/
-                        var newFileName = $(`#newNameLabel`).val();
-                        var numberOfSignaturies = $(`#signaturies_number`).val();
+                        newFileName = $(`#newNameLabel`).val();
+                        numberOfSignaturies = $(`#signaturies_number`).val();
                         /** Create ne file to  change the old file name **/
                         var fileExtention = returnFileExtions(uploaded_file)[0];
                         newFileToUpload = new File([uploaded_file], newFileName +
-                            fileExtention);
+                            fileExtention , {type :uploaded_file.type });
 
                         if (newFileName === "") {
                             $(`.newNameField`).addClass("error");
@@ -197,7 +200,8 @@
                             success: onUploadFileSuccessed,
                             error: err => {
                                 console.log(err);
-                            }
+                            },
+                            xhr: progressBar
                         })
 
                     },
@@ -213,9 +217,7 @@
 
 
         } else {
-
+console.log("debuging.4")
         }
     }
-
-
 </script>

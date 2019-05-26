@@ -1,10 +1,20 @@
 /** ------------------------------------------ home page actions ------------------------------------- */
-
+var socket;
 /**
  * set document on ready
  */
 $(document).ready(() => {
 
+
+    /**
+     * Start socket io to 
+     */
+    socket = io.connect("/server_side_device" /*`${protocol}://${hostname}:${portinuse}`*/ );
+    socket.on("connect", () => {
+        socket.emit("device_data", {
+
+        })
+    });
 
     /**
      * Set btn Action : to load upload JES page
@@ -18,8 +28,6 @@ $(document).ready(() => {
      */
     $(`#showFilesHistory`).click(showFilesHistoryBtnAction);
 
-
-
 })
 
 function showFilesHistoryBtnAction(event) {
@@ -30,6 +38,11 @@ function showFilesHistoryBtnAction(event) {
     $('.ui.sidebar').sidebar('toggle');
     /** change page title to the requsted page */
     $(`#pageTitle`).text("File history.");
+
+    socket.emit("historyTest", {
+        asdsd: "adasd"
+    })
+
 }
 
 
@@ -67,10 +80,62 @@ function onUploadFileSuccessed(response) {
      * to preview the file in the home page
      * **/
     if (response.status === "DONE") {
+        console.log(socket)
+        socket.emit("fileUploaded", {
+            "file ": "data "
+        })
+        /**
+         * new the next step starts, which is to
+         * select the signature places on the paper
+         */
+        $.ajax({
+            url: "preview",
+            method: "GET",
+            success: (response) => {
+                $(`#loadPagesSection`).html(response);
+            }
+        })
 
     }
-    console.log(response)
 }
 
 
 /** ------------------ GENARAL FUNCTIONS --------------------- */
+
+/**
+ * progress to change the top progress bar
+ */
+function progressBar() {
+    var xhr = $.ajaxSettings.xhr();
+    xhr.onprogress = function e() {
+        // For downloads
+        if (e.lengthComputable) {
+            var proc = (e.loaded / e.total * 100).toFixed();
+            $("#uploadProgress").progress({
+                percent: proc,
+                onSuccess: () => {
+                    $("#uploadProgress").css("display", "none");
+                },
+                onActive: () => {
+                    $("#uploadProgress").css("display", "block");
+                }
+            });
+        }
+    };
+    xhr.upload.onprogress = function (e) {
+        // For uploads
+        if (e.lengthComputable) {
+            var proc = (e.loaded / e.total * 100).toFixed();
+            $("#uploadProgress").progress({
+                percent: proc,
+                onSuccess: () => {
+                    $("#uploadProgress").css("display", "none");
+                },
+                onActive: () => {
+                    $("#uploadProgress").css("display", "block");
+                }
+            });
+        }
+    };
+    return xhr;
+}
