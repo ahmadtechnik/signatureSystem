@@ -22,92 +22,109 @@
 
   </div>
   <div class="actions">
-    <div class="ui primary button">Submit</div>
+    <div class="ui primary button positive">Submit</div>
   </div>
 </div>
 
 <script>
   /** to shpw the modal after  **/
-  $(`#previewModal`).modal({}).modal("show");
-  /** 
-  First step is to  check eather the file PDF or IMG
-  then i have to show the user the file with adding 
-  action to choose which signaturies will be the next
-   **/
-  newFileToUpload; // uploaded file after changing the name
-  newFileName; // entered file name
-  numberOfSignaturies; // Signaturies number
-  var fileType = newFileToUpload.type;
-  var fileName = newFileToUpload.name;
-  var fileSize = newFileToUpload.size;
+  $(`#previewModal`).modal({
+    closable: false,
+    // set on modal show action
+    onShow: (modal) => {
+      console.log("Modal On Show")
+      /** 
+        First step is to  check eather the file PDF or IMG
+        then i have to show the user the file with adding 
+        action to choose which signaturies will be the next
+         **/
+      newFileToUpload; // uploaded file after changing the name
+      newFileName; // entered file name
+      numberOfSignaturies; // Signaturies number
+      var fileType = newFileToUpload.type;
+      var fileName = newFileToUpload.name;
+      var fileSize = newFileToUpload.size;
 
-  /** show data to user **/
-  $(`#signsNumberText`).html(numberOfSignaturies);
-  $(`#fileNameText`).html(fileName);
-  $(`#fileTypeText`).html(fileType);
+      /** show data to user **/
+      $(`#signsNumberText`).html(numberOfSignaturies);
+      $(`#fileNameText`).html(fileName);
+      $(`#fileTypeText`).html(fileType);
 
 
+      /** check if the file is pdf **/
+      if (fileType.split("/")[1].toLowerCase() === "pdf") {
+        //  get file URL Blob for PDFJS
+        var fileURL = URL.createObjectURL(newFileToUpload);
 
+        /** start to convirt the file to Images **/
+        socket.emit("orderToConverTheFile", {
+          fileName: fileName,
+          fileSize: fileSize,
+          fileType: fileType,
+          newFileName: newFileName
+        });
 
-  /** check if the file is pdf **/
-  if (fileType.split("/")[1].toLowerCase() === "pdf") {
-    //  get file URL Blob for PDFJS
-    var fileURL = URL.createObjectURL(newFileToUpload);
+        var pdfFile = null;
+        var numPages;
 
-    /** start to convirt the file to Images **/
-    socket.emit("orderToConverTheFile", {
-      fileName: fileName,
-      fileSize: fileSize,
-      fileType: fileType,
-      newFileName: newFileName
-    });
+        // start handling pdf file
+        PDFJS.getDocument(fileURL).then((doc) => {
+          readPDFfileFromUploadedFile(doc);
+        });
 
-    var pdfFile = null;
-    var numPages;
+      }
+      /**
+       * in case was the uploaded file image not pdf
+       *  **/
+      else {
 
-    // start handling pdf file
-    PDFJS.getDocument(fileURL).then((doc) => {
-      readPDFfileFromUploadedFile(doc);
-    });
+      }
+    },
+    onHidden: () => {
+      $(`#previewModal`).remove();
+    }
 
-  }
-  /**
-   * in case was the uploaded file image not pdf
-   *  **/
-  else {
+  }).modal("show");
 
-  }
   // handling pdf doc
-  function readPDFfileFromUploadedFile(pdf) {
+  function readPDFfileFromUploadedFile(pdf, imMoreThenOne) {
     pdfFile = pdf; // the pdf global
     numPages = pdf.numPages // the pages length 
+    var isMultible = numPages > 1 ? true : false;
     // set page number to user
     $(`#pagesNumberText`).html(numPages);
     for (let index = 0; index < numPages; index++) {
       pdf.getPage(index + 1).then((page) => {
-
         // append to continer
-
-        handelSinglePage(page);
+        handelSinglePage(page, isMultible);
       });
     }
   }
+
+
   // handeling singe page
-  function handelSinglePage(page) {
+  function handelSinglePage(page, isMultible) {
 
-    var viewport = page.getViewport(1024 / page.getViewport(1).width );
-
+    // set pdf page view port scale
+    var viewport = page.getViewport(2480 / page.getViewport(1).width);
+    // create new canvas
     var x = document.createElement("CANVAS");
-
-    x.style.display = "block";
-    x.width = 1024;
-    x.height = page.getViewport(1024 / page.getViewport(1).width).height;
-    
+    // add css attrs to canvas
+    x.style.display = "none";
+    x.width = 2480;
+    // set canvas height
+    x.height = page.getViewport(2480 / page.getViewport(1).width).height;
+    // add id attr to canvas
     x.setAttribute("id", `canvos_${page.pageNumber}`);
+
+
+    // set canvos container width 
+    $(`#canvasContainer`).width(x.width);
+    // append the canvos into canvasContainer element
     $(`#canvasContainer`).append(x);
 
 
-
+    // get canvas context for pdfjs render
     var context = $(`#canvos_${page.pageNumber}`).get(0).getContext('2d');
 
     //var sr = $(`#canvos_${page.pageNumber}`).width() / page.getViewport(1).width;
@@ -115,10 +132,32 @@
 
     // set canvas sizes from view port of pdf page
     // start rendaring the page 
+    // in this section is just to render singe page
     page.render({
       canvasContext: context,
       viewport: viewport
+    }).then(() => {
+      // get data of that image
+      var getCanvasURL = x.toDataURL('image/png').replace("image/png", "image/octet-stream");
+      // create img tag
+      var img = $(`<img id="img_canv_${page.pageNumber}" width="500px" >`);
+      img.attr("src", getCanvasURL);
+      $(`#canvasContainer`).append(img);
+      // to add divider after every page
+      if (isMultible) {
+        //$(`#canvasContainer`).append('<h4 class="ui horizontal divider">ANOTHER</h4>');
+      }
     });
+
+
+    /**
+     * todo : 
+     * 1- create image element
+     * 2- assign the canvas to this image
+     * 3- set image small size to be able to control
+     *    and zoom and so on
+     * **/
+
 
   }
 </script>

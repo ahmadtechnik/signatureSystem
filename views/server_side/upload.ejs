@@ -37,7 +37,6 @@
 
 
 <script>
-
     /** -------------------------------------- upload files page actions ------------------------------------ */
     /**
      * set action for the fake uplad button
@@ -135,11 +134,12 @@
     /**
      * to set confirm button  action 
      * **/
+    var newFileName;
+    var numberOfSignaturies;
     $(`#upload_confirm_button`).click(upload_file_confirm);
-var newFileName ;
-var numberOfSignaturies;
+
     function upload_file_confirm(e) {
-console.log("debuging.5")
+        console.log("debuging.5")
         /*
          * init a data form object to store the file
          * 
@@ -169,8 +169,11 @@ console.log("debuging.5")
                         numberOfSignaturies = $(`#signaturies_number`).val();
                         /** Create ne file to  change the old file name **/
                         var fileExtention = returnFileExtions(uploaded_file)[0];
+                        // create new file object to change old name 
                         newFileToUpload = new File([uploaded_file], newFileName +
-                            fileExtention , {type :uploaded_file.type });
+                            fileExtention, {
+                                type: uploaded_file.type
+                            });
 
                         if (newFileName === "") {
                             $(`.newNameField`).addClass("error");
@@ -189,7 +192,6 @@ console.log("debuging.5")
                          * to check if the entered file name is correct
                          * **/
                         dataForm.append("uploaded_file", newFileToUpload);
-                        dataForm.append("", newFileToUpload);
                         $.ajax({
                             url: "uploaded_file",
                             cache: false,
@@ -217,7 +219,7 @@ console.log("debuging.5")
 
 
         } else {
-console.log("debuging.4")
+            console.log("debuging.4")
         }
     }
 </script>

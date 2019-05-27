@@ -84,9 +84,7 @@ function onUploadFileSuccessed(response) {
      * **/
     if (response.status === "DONE") {
         
-        socket.emit("fileUploaded", {
-            "file ": "data "
-        })
+
         /**
          * new the next step starts, which is to
          * select the signature places on the paper
