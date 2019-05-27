@@ -109,8 +109,7 @@
     var viewport = page.getViewport(2480 / page.getViewport(1).width);
     // create new canvas
     var x = document.createElement("CANVAS");
-    // add css attrs to canvas
-    x.style.display = "none";
+
     x.width = 2480;
     // set canvas height
     x.height = page.getViewport(2480 / page.getViewport(1).width).height;
@@ -119,7 +118,7 @@
 
 
     // set canvos container width 
-    $(`#canvasContainer`).width(x.width);
+    //$(`#canvasContainer`).width(x.width);
     // append the canvos into canvasContainer element
     $(`#canvasContainer`).append(x);
 
@@ -137,16 +136,7 @@
       canvasContext: context,
       viewport: viewport
     }).then(() => {
-      // get data of that image
-      var getCanvasURL = x.toDataURL('image/png').replace("image/png", "image/octet-stream");
-      // create img tag
-      var img = $(`<img id="img_canv_${page.pageNumber}" width="500px" >`);
-      img.attr("src", getCanvasURL);
-      $(`#canvasContainer`).append(img);
-      // to add divider after every page
-      if (isMultible) {
-        //$(`#canvasContainer`).append('<h4 class="ui horizontal divider">ANOTHER</h4>');
-      }
+      createImageElement(x, page)
     });
 
 
@@ -157,7 +147,22 @@
      * 3- set image small size to be able to control
      *    and zoom and so on
      * **/
+  }
 
-
+  //  action after file rendering
+  function createImageElement(x, page) {
+    // add css attrs to canvas
+    x.style.display = "none";
+    // get data of that image
+    var getCanvasURL = x.toDataURL('image/png').replace("image/png", "image/octet-stream");
+    // create img tag
+    var img = $(`<img id="img_canv_${page.pageNumber}" width="${x.width / 4}" height="${x.height / 4}" >`);
+    img.attr("src", getCanvasURL);
+    $(`#canvasContainer`).append(img);
+    // to add divider after every page
+    //if (isMultible) {
+    //$(`#canvasContainer`).append('<h4 class="ui horizontal divider">ANOTHER</h4>');
+    //}
+    $(x).remove();
   }
 </script>
