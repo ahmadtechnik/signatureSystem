@@ -11,9 +11,9 @@
       </div>
       <div class="tow column row">
         <div class="column tow wided"></div>
-        <div class="fourteen wide column  pdfPagesPrevieContainer" style="overflow: scroll; ">
-          <div id="canvasContainer">
-
+        <div class="fourteen wide column ui rail pdfPagesPrevieContainer" style="overflow: scroll; ">
+          <div class="ui segment centered center aligned">
+            <div id="canvasContainer"></div>
           </div>
         </div>
       </div>
@@ -27,6 +27,15 @@
 </div>
 
 <script>
+
+
+  // global vars to use in other scopes
+  var pdfFile = null;
+  var numPages;
+
+  // page origin size
+  var imgSize = 2480;
+  var imgHeight = null;
   /** to shpw the modal after  **/
   $(`#previewModal`).modal({
     closable: false,
@@ -56,7 +65,7 @@
         //  get file URL Blob for PDFJS
         var fileURL = URL.createObjectURL(newFileToUpload);
 
-        /** start to convirt the file to Images **/
+        // emiting to server 
         socket.emit("orderToConverTheFile", {
           fileName: fileName,
           fileSize: fileSize,
@@ -64,22 +73,20 @@
           newFileName: newFileName
         });
 
-        var pdfFile = null;
-        var numPages;
-
         // start handling pdf file
         PDFJS.getDocument(fileURL).then((doc) => {
           readPDFfileFromUploadedFile(doc);
+
+
+
         });
 
       }
-      /**
-       * in case was the uploaded file image not pdf
-       *  **/
-      else {
 
-      }
+      // in case was the uploaded file image not pdf
+      else {}
     },
+    // on modal hidden
     onHidden: () => {
       $(`#previewModal`).remove();
     }
@@ -93,12 +100,15 @@
     var isMultible = numPages > 1 ? true : false;
     // set page number to user
     $(`#pagesNumberText`).html(numPages);
+    // itarate the pages from object
+
     for (let index = 0; index < numPages; index++) {
       pdf.getPage(index + 1).then((page) => {
         // append to continer
         handelSinglePage(page, isMultible);
       });
     }
+
   }
 
 
@@ -106,13 +116,14 @@
   function handelSinglePage(page, isMultible) {
 
     // set pdf page view port scale
-    var viewport = page.getViewport(2480 / page.getViewport(1).width);
+    var viewport = page.getViewport(imgSize / page.getViewport(1).width);
     // create new canvas
     var x = document.createElement("CANVAS");
 
-    x.width = 2480;
+    x.width = imgSize;
     // set canvas height
-    x.height = page.getViewport(2480 / page.getViewport(1).width).height;
+    imgHeight = page.getViewport(imgSize / page.getViewport(1).width).height
+    x.height = imgHeight;
     // add id attr to canvas
     x.setAttribute("id", `canvos_${page.pageNumber}`);
 
@@ -154,15 +165,48 @@
     // add css attrs to canvas
     x.style.display = "none";
     // get data of that image
-    var getCanvasURL = x.toDataURL('image/png').replace("image/png", "image/octet-stream");
+    var getCanvasURL = x.toDataURL('image/png');
     // create img tag
-    var img = $(`<img id="img_canv_${page.pageNumber}" width="${x.width / 4}" height="${x.height / 4}" >`);
+    var img = $(
+      `<img id="img_canv_${page.pageNumber}" width="${x.width / 4}" height="${x.height / 4}" 
+      class="page_img" pageNum="${page.pageNumber}" style="border:1px black solid" >`
+    );
     img.attr("src", getCanvasURL);
+
+
+    // on mouse hover over the image
+    $(img).mousemove((event) => {
+      // start mouseonmove aciton 
+      imagemouseOverAction(event, img);
+    })
+
+    // asign mouseover  action to the image
+    // on mouse on the image 
+    $(img).mouseover((event) => {
+      // resize the image to orginal size
+      // $(img).css("width", imgSize)
+      //  $(img).css("height", imgHeight);
+    })
+
+
+    // append the image into the canvas container
     $(`#canvasContainer`).append(img);
     // to add divider after every page
     //if (isMultible) {
     //$(`#canvasContainer`).append('<h4 class="ui horizontal divider">ANOTHER</h4>');
     //}
     $(x).remove();
+
+  }
+
+
+  // image mouseover action
+  function imagemouseOverAction(event, img) {
+    // store mouse postions
+    var mouseClientX = event.clientX;
+    var mouseClientY = event.clientY;
+    // create circle 
+    console.log("x :" + mouseClientX + " y : " + mouseClientY + "-- <br> --" +
+      " pageX : " + event.pageX + " pageY : " + event.pageY)
   }
 </script>
