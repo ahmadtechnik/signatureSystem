@@ -1,11 +1,16 @@
-.ui.fullscreen.modal{
-        left: auto !important; 
+.ui.fullscreen.modal {
+        left: auto !important;
 }
 
 /**
 
 **/
-.pdfPagesPrevieContainer{
-   
-    
+.pdfPagesPrevieContainer {}
+
+.corser {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        z-index: 100000;
+        color: black
 }

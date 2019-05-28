@@ -1,4 +1,4 @@
-<div class="ui modal large longer fullscreen" id="previewModal">
+<div class="ui modal  fullscreen" id="previewModal">
   <div class="header">Select signaturies places</div>
   <div class=" scrolling  content" id="previewModalContent">
 
@@ -11,9 +11,12 @@
       </div>
       <div class="tow column row">
         <div class="column tow wided"></div>
-        <div class="fourteen wide column ui rail pdfPagesPrevieContainer" style="overflow: scroll; ">
+        <div class="fourteen wide column ui rail pdfPagesPrevieContainer">
           <div class="ui segment centered center aligned">
-            <div id="canvasContainer"></div>
+            <div>
+              <div id="canvasContainer">
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -24,11 +27,10 @@
   <div class="actions">
     <div class="ui primary button positive">Submit</div>
   </div>
+  <div class="corser" id="corser"><span id="textT"></span></div>
 </div>
 
 <script>
-
-
   // global vars to use in other scopes
   var pdfFile = null;
   var numPages;
@@ -166,11 +168,13 @@
     x.style.display = "none";
     // get data of that image
     var getCanvasURL = x.toDataURL('image/png');
+
     // create img tag
     var img = $(
       `<img id="img_canv_${page.pageNumber}" width="${x.width / 4}" height="${x.height / 4}" 
       class="page_img" pageNum="${page.pageNumber}" style="border:1px black solid" >`
     );
+
     img.attr("src", getCanvasURL);
 
 
@@ -187,10 +191,18 @@
       // $(img).css("width", imgSize)
       //  $(img).css("height", imgHeight);
     })
-
-
+    // add click on img action 
+    $(img).click((event) => {
+      // record mouse potions on click
+      ImgOnClickAction(event, img)
+    })
+    // create single image continer to add the sign relativ to it
+    var singlImgeContainer = 
+    $(`<div id="singleImgeContainer" img_num="${page.pageNumber}" stlye="position: relative;"></div>`);
+    singlImgeContainer.append(img);
     // append the image into the canvas container
-    $(`#canvasContainer`).append(img);
+    $(`#canvasContainer`).append(singlImgeContainer);
+    $(`#canvasContainer`).width($(img).width());
     // to add divider after every page
     //if (isMultible) {
     //$(`#canvasContainer`).append('<h4 class="ui horizontal divider">ANOTHER</h4>');
@@ -199,14 +211,59 @@
 
   }
 
-
+  // make cordinations global
+  var cord = {};
   // image mouseover action
   function imagemouseOverAction(event, img) {
+    var bouds = $(img).get(0).getBoundingClientRect()
+
     // store mouse postions
-    var mouseClientX = event.clientX;
-    var mouseClientY = event.clientY;
+    var mouseClientX = event.pageX;
+    var mouseClientY = event.pageY;
     // create circle 
-    console.log("x :" + mouseClientX + " y : " + mouseClientY + "-- <br> --" +
-      " pageX : " + event.pageX + " pageY : " + event.pageY)
+    $(`#corser`).css({
+      top: mouseClientY - $(img).offset().top + bouds.y,
+      left: mouseClientX - $(img).offset().left + bouds.x
+    })
+
+    var x = (event.pageX - $(img).offset().left) + $(window).scrollLeft();
+    var y = (event.pageY - $(img).offset().top) + $(window).scrollTop();
+
+    $(`#textT`).text(
+      "Y : " +
+      (y.toFixed(1)) +
+      "  X : " +
+      (x.toFixed(1)) +
+      " IMG : " + $(img).attr("id")
+    )
+    cord[$(img).attr("id")] = {
+      x: x,
+      y: y
+    }
+
+  }
+
+  // on click on the img action
+  // stor all entered data into object
+  // to be called when i want to marge the
+  // signature with the image
+
+  function ImgOnClickAction(event, img) {
+    var imgID = $(img).attr("id");
+    if (cord[imgID] !== null || cord[imgID] !== undefined) {
+      console.log("x :  ", cord[imgID].x.toFixed(0), " y : ", cord[imgID].y.toFixed(0), "IMG ID : ", imgID)
+
+      var sign = $(`<span>SIGN_HERE</span>`);
+
+      sign.css({
+        position: "absolute",
+        top: cord[imgID].y.toFixed(0) + "px",
+        left: cord[imgID].x.toFixed(0) + "px",
+        color: "red"
+      });
+
+      $(`#${imgID}`).parent().append(sign);
+      console.log($(`#${imgID}`).parent())
+    }
   }
 </script>
