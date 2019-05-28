@@ -1,31 +1,25 @@
 /** ------------------------------------------ home page actions ------------------------------------- */
 var socket;
 /**
+ * Start socket io to 
+ */
+socket = io.connect("/server_side_device" /*`${protocol}://${hostname}:${portinuse}`*/ );
+socket.on("connect", () => {
+    socket.emit("device_data", {
+
+    })
+});
+socket.on("newClintConnected" , (data) => {
+    console.log(data)
+})
+/**
  * set document on ready
  */
 $(document).ready(() => {
-
- 
-
-
-
-    /**
-     * Start socket io to 
-     */
-    socket = io.connect("/server_side_device" /*`${protocol}://${hostname}:${portinuse}`*/ );
-    socket.on("connect", () => {
-        socket.emit("device_data", {
-
-        })
-    });
-
     /**
      * Set btn Action : to load upload JES page
      * **/
     $(`#showUploadDocumentForm`).click(loadUploadDocumentSection);
-
-
-
     /**
      * set hsow files history btn action 
      */
@@ -83,8 +77,6 @@ function onUploadFileSuccessed(response) {
      * to preview the file in the home page
      * **/
     if (response.status === "DONE") {
-        
-
         /**
          * new the next step starts, which is to
          * select the signature places on the paper

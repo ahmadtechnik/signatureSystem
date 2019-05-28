@@ -138,7 +138,9 @@
     var numberOfSignaturies;
     $(`#upload_confirm_button`).click(upload_file_confirm);
 
+
     function upload_file_confirm(e) {
+
         console.log("debuging.5")
         /*
          * init a data form object to store the file
@@ -153,73 +155,74 @@
             /**
             load aboutthefile modal from modal diractiory
             **/
-            $(`#modalContainer`).load("/modules/aboutTheFile.html", () => {
-                console.log("debuging.0")
-                $(`.askUserToEnterFileName`).modal({
-                    closable: false,
-                    onApprove: modal => {
-                        console.log("debuging.1")
-                        /**
-                         * store the new entered name
-                         * with the extention of the file
-                         * and the entered number of the signaturies
-                         * 
-                         * **/
-                        newFileName = $(`#newNameLabel`).val();
-                        numberOfSignaturies = $(`#signaturies_number`).val();
-                        /** Create ne file to  change the old file name **/
-                        var fileExtention = returnFileExtions(uploaded_file)[0];
-                        // create new file object to change old name 
-                        newFileToUpload = new File([uploaded_file], newFileName +
-                            fileExtention, {
-                                type: uploaded_file.type
-                            });
+            $(`#modalContainer`).load("/modules/aboutTheFile.html",
+                () => { // signaturiesNamesFields getSignaturiesNames
+                    var first = false;
 
-                        if (newFileName === "") {
-                            $(`.newNameField`).addClass("error");
-                            return false;
-                        } else {
-                            $(`.newNameField`).removeClass("error");
-                        }
-                        if (numberOfSignaturies == 0 || numberOfSignaturies == "") {
-                            $(`.signaturiesNumberField`).addClass("error");
-                            return false;
-                        } else {
-                            $(`.signaturiesNumberField`).removeClass("error");
-                        }
-                        /**
-                         * in case user pressed ok, thats mean i have 
-                         * to check if the entered file name is correct
-                         * **/
-                        dataForm.append("uploaded_file", newFileToUpload);
-                        $.ajax({
-                            url: "uploaded_file",
-                            cache: false,
-                            contentType: false,
-                            processData: false,
-                            method: "POST",
-                            data: dataForm,
-                            success: onUploadFileSuccessed,
-                            error: err => {
-                                console.log(err);
-                            },
-                            xhr: progressBar
-                        })
+                    $(`.askUserToEnterFileName`).modal({
+                        closable: false,
+                        onApprove: modal => {
+                            // check that this time is not the first
 
-                    },
-                    onDeny: modal => {
 
-                    },
-                    onHidden: modal => {
-                        $(`.askUserToEnterFileName`).remove();
-                    },
+                            /** Create ne file to  change the old file name **/
+                            var fileExtention = returnFileExtions(uploaded_file)[0];
+                            // create new file object to change old name 
+                            newFileToUpload = new File([uploaded_file], newFileName +
+                                fileExtention, {
+                                    type: uploaded_file.type
+                                });
 
-                }).modal("show")
-            });
+                            if (newFileName === "") {
+                                $(`.newNameField`).addClass("error");
+                                return false;
+                            } else {
+                                $(`.newNameField`).removeClass("error");
+                            }
+                            if (numberOfSignaturies == 0 || numberOfSignaturies == "") {
+                                $(`.signaturiesNumberField`).addClass("error");
+                                return false;
+                            } else {
+                                $(`.signaturiesNumberField`).removeClass("error");
+                            }
+
+
+                            /**
+                             * in case user pressed ok, thats mean i have 
+                             * to check if the entered file name is correct
+                             * **/
+                            dataForm.append("uploaded_file", newFileToUpload);
+                            $.ajax({
+                                url: "uploaded_file",
+                                cache: false,
+                                contentType: false,
+                                processData: false,
+                                method: "POST",
+                                data: dataForm,
+                                success: onUploadFileSuccessed,
+                                error: err => {
+                                    console.log(err);
+                                },
+                                xhr: progressBar
+                            })
+
+                            
+                        },
+                        onDeny: modal => {
+
+                        },
+                        onHidden: modal => {
+                            $(`.askUserToEnterFileName`).remove();
+                        },
+
+                    }).modal("show")
+                });
 
 
         } else {
             console.log("debuging.4")
         }
     }
+
+
 </script>

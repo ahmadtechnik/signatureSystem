@@ -5,7 +5,7 @@
     signaturies.
  -->
 <div class="ui modal askUserToEnterFileName">
-   
+
     <div class="header">
         Enter Important Data
     </div>
@@ -16,21 +16,26 @@
                 <div class="field newNameField">
                     <label>New Name for this file:</label>
                     <div class="ui right labeled input">
-                        <input type="text" id="newNameLabel" >
+                        <input type="text" id="newNameLabel">
                         <div class="ui basic label" id="fileExtention"></div>
                     </div>
                 </div>
                 <div class="field signaturiesNumberField">
+
                     <label for="">Number of the signaturies</label>
                     <div class="ui right labeled left icon input">
                         <i class="sort numeric up icon"></i>
-                        <input type="number" placeholder="Enter number"
-                         maxlength="2" max="10" min="0" value="" placeholder="0-10" id="signaturies_number">
+                        <input type="number" placeholder="Enter number" maxlength="2" max="10" min="0" value=""
+                            placeholder="0-10" id="signaturies_number">
                         <a class="ui tag label">Signatories</a>
                     </div>
-                   
                 </div>
             </di>
+            <div class="ui equal width form stackable" id="getSignaturiesNames">
+                <div class="ui fields" id="signaturiesNamesFields">
+
+                </div>
+            </div>
         </div>
     </div>
 
@@ -38,9 +43,12 @@
         <div class="ui black deny button">
             Cancle
         </div>
-        <div class="ui positive right labeled icon button">
+        <div class="ui positive right labeled icon button" id="OKMODALBTN" style="display: none;">
             Ok
             <i class="checkmark icon"></i>
+        </div>
+        <div class="ui button blue" id="nextStepModalBtn">
+            Next
         </div>
     </div>
 </div>
@@ -61,8 +69,57 @@
         ];
     }
     /** set the old file name in the input filed **/
-    $("#newNameLabel").attr("placeholder" , returnFileExtions(uploaded_file)[1]);
+    $("#newNameLabel").attr("placeholder", returnFileExtions(uploaded_file)[1]);
     /** change the extions file beside the file name field **/
     $(`#fileExtention`).text(returnFileExtions(uploaded_file)[0].toUpperCase());
 
+    /**
+     * Add action for nextStepModalBtn 
+     * to print fileds to user
+     * **/
+    $(`#nextStepModalBtn`).click((event) => {
+        $(`#nextStepModalBtn`).off("click");
+        /**
+         * store the new entered name
+         * with the extention of the file
+         * and the entered number of the signaturies
+         * 
+         * **/
+        newFileName = $(`#newNameLabel`).val();
+        numberOfSignaturies = $(`#signaturies_number`).val();
+
+        $(`#nextStepModalBtn`).css("display", "none");
+
+        // create field in amount of the signaturies 
+        for (let index = 0; index < parseInt(numberOfSignaturies); index++) {
+            // create fields to get signaturies names
+            var fieldContainer = $(`<div class="field " ></div>`);
+            var fieldLabed = $(`<label>Name for : ${index +1}</label>`);
+            var fieldInput = $(
+                `<input  id="nameNum_${index +1 }" type="text" placeholder="optional" signName="${index +1}" />`
+            );
+            fieldContainer.append(fieldLabed);
+            fieldContainer.append(fieldInput);
+            $(`#signaturiesNamesFields`).append(fieldContainer);
+        };
+
+        $(`#OKMODALBTN`).css("display", "");
+    })
+
+    /**
+    to get all fields values
+    **/
+   
+
+    function getSignaturiesNamesFields() {
+        var allFields = $(`input[signName]`);
+        var names = {};
+        $.each(allFields, (index, element) => {
+            if ($(element).val() !== "") {
+                names[$(element).attr("signName")] = $(element).val();
+            }
+        });
+        console.log(names);;
+        return names;
+    }
 </script>

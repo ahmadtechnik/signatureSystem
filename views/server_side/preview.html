@@ -40,6 +40,10 @@
 </div>
 
 <script>
+  // names fields 
+  var names = getSignaturiesNamesFields();
+
+
   // global vars to use in other scopes
   var pdfFile = null;
   var numPages;
@@ -145,10 +149,10 @@
         });
 
         // start handling pdf file
-        
+
         var loadingPDF = PDFJS.getDocument(fileURL);
         var pdf = loadingPDF.promise;
-        
+
         pdf.then((pdf) => {
           console.log(pdf)
           readPDFfileFromUploadedFile(pdf);
@@ -168,6 +172,7 @@
       // stop document keyup and keydoun events
       $(document).off("keydown");
       $(document).off("keyup");
+      
     }
 
   }).modal("show");
@@ -224,13 +229,13 @@
     // start rendaring the page 
     // in this section is just to render singe page
     page.render({
-      canvasContext: context,
-      viewport: viewport
-    })
-    // add aciton to after rendering action
-    .then(() => {
-      createImageElement(x, page)
-    });
+        canvasContext: context,
+        viewport: viewport
+      })
+      // add aciton to after rendering action
+      .then(() => {
+        createImageElement(x, page)
+      });
 
 
     /**
@@ -362,12 +367,12 @@
       //console.log("x :  ", cord[imgID].x.toFixed(0), " y : ", cord[imgID].y.toFixed(0), "IMG ID : ", imgID)
 
       // create sagment to show user where he clicked
-      var labelWidth = 50;
+      var labelWidth = 100;
       var labelHeight = 25;
       var sign = $(`<a class="ui red label signPlaceStyle" imgID="${imgID}" 
       cordX="${cord[imgID].x.toFixed(0)}" cordY="${cord[imgID].y.toFixed(0)}" >
-        ${pressedKeyboardKey}</a>`);
-      var closIcon = $(`<i class="delete icon" signID=""></i>`);
+        ${names[pressedKeyboardKey]} : ${pressedKeyboardKey}</a>`);
+      var closIcon = $(`<i class="delete icon"></i>`);
       sign.append(closIcon);
 
       //add remove ation for every single sign place label

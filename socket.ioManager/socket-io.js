@@ -6,21 +6,18 @@ var fileManger = require("../fileManager/fileManager");
  */
 var socketObject = null;
 var socket = null;
-
-
+var clientSide
+var serverside
 exports.socketObjectSetter = (server) => {
-
     /**
      * Add socket io lib
      */
-
     const sockIO = require("socket.io")(server);
     socketObject = sockIO;
-
-
     sockIO.on("connection", onClientConnection);
-    var clientSide = sockIO.of("/client_side_device");
-    var serverside = sockIO.of("/server_side_device");
+    clientSide = sockIO.of("/client_side_device");
+    serverside = sockIO.of("/server_side_device");
+
     /** --------------------------------- cleint side room ---------------------------------- */
     clientSide.on("connection", onClientSideConnected)
     /** --------------------------------- server side room ---------------------------------- */
@@ -48,6 +45,11 @@ var onClientConnection = (client) => {
 var onClientSideConnected = (client) => {
     console.log("client from client side connected ... " + client.id);
     client.on("disconnect", onClientSideDeviceDisconnected);
+    /** inform server side home page, that there is an client connected..  */
+    serverside.emit("newClintConnected", {
+        clientConnected : client.id
+    });
+
 }
 /** on client client-side disconnected */
 var onClientSideDeviceDisconnected = () => {
@@ -64,6 +66,7 @@ var onServerSideConnected = (client) => {
     client.on("disconnect", onServerSideDeviceDisconnected)
     /** on order to convert pdf file by file name */
     client.on("orderToConverTheFile", pdfToPICconverter)
+    /* on Cordinations serverSidePage */
 }
 /** on client server-side disconnected */
 var onServerSideDeviceDisconnected = () => {

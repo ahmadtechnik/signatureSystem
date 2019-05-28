@@ -89,13 +89,15 @@ app.use("/jquery", express.static("node_modules/jquery/dist/"));
 app.use("/jquery-ui", express.static("node_modules/jquery-ui/"));
 app.use("/semantic-ui", express.static("node_modules/semantic-ui-css/"));
 app.use("/socket.io", express.static("node_modules/socket.io-client/dist/"));
-app.use("/assets" , express.static("views/assets/"));
+app.use("/assets", express.static("views/assets/"));
 
 /**
  * use main dir server side
  */
 app.use("/", express.static("views/server_side/"));
 
+/** use main dir client side  */
+app.use("/", express.static("views/client_side/"));
 
 /**
  * Select the home page for express server.
@@ -209,7 +211,16 @@ app.post("/uploaded_file", (req, res) => {
 
 })
 
-
+/** 
+ * on server side 
+ * requst to get preview modal
+ */
 app.get("/preview", (req, res) => {
     res.sendFile(root_app + "/views/server_side/preview.html");
+})
+
+/**  --------------------------- CLIENT SIDE REQEQUSTS ----------------------- */
+// send home page for client side
+app.get("/client_side_home", (req, res) => {
+    res.sendFile(root_app + "/views/client_side/index.html");
 })
