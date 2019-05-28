@@ -38,6 +38,56 @@
   // page origin size
   var imgSize = 2480;
   var imgHeight = null;
+
+  // init document key down, to detect if user pressd any 
+  // nomric key
+  var pressedKeyboardKey = null;
+  var ctrlKey = false;
+  // if only one signaturies it have to be just number one... 
+  if (parseInt(numberOfSignaturies) === 1) {
+    pressedKeyboardKey = 1;
+  }
+
+  // add keydown action for the document:
+  $(document).keydown((e) => {
+    // to ba sure that this action will never take
+    // any other pressed key rether then nomric
+    if (e.keyCode >= 97 && e.keyCode <= 105) {
+      try {
+        var parsedSingaturiesBumber = parseInt(numberOfSignaturies);
+        if (parsedSingaturiesBumber === 1) {
+          pressedKeyboardKey = 1;
+        } else {
+          // alarm the user that other then nomric Numbers are not allowed
+          // in range 97 - 105
+          if (e.keyCode >= 97 && e.keyCode <= 105) {
+            pressedKeyboardKey = e.key;
+            if (e.key > parseInt(numberOfSignaturies)) {
+              alert("YOUR PEOPLE ARE ONLY : " + parseInt(numberOfSignaturies) + "SIGNATURIES.")
+            }
+          } else {
+            alert("PLEASE PRESS ONLIC NUMBERS...")
+          }
+        }
+      } catch (error) {
+        alert("ENTERED SIGNATURIES NUMBER WRONG...");
+      }
+
+    } 
+    // to check any other keyboard
+    else {
+      if (e.ctrlKey) {
+        ctrlKey = true;
+      }
+    }
+
+  });
+  // add keyup action for the document
+  $(document).keyup(() => {
+    pressedKeyboardKey = null;
+    ctrlKey = false;
+  });
+
   /** to shpw the modal after  **/
   $(`#previewModal`).modal({
     closable: false,
@@ -193,16 +243,25 @@
     })
     // add click on img action 
     $(img).click((event) => {
-      // record mouse potions on click
-      ImgOnClickAction(event, img)
+      // check if user pressed any number
+      if (pressedKeyboardKey !== null) {
+        // record mouse potions on click
+        ImgOnClickAction(event, img)
+      }
     })
     // create single image continer to add the sign relativ to it
-    var singlImgeContainer = 
-    $(`<div id="singleImgeContainer" img_num="${page.pageNumber}" stlye="position: relative;"></div>`);
+    var singlImgeContainer =
+      $(`<div id="singleImgeContainer" img_num="${page.pageNumber}" ></div>`);
+    singlImgeContainer.width(x.width / 4)
+    singlImgeContainer.height(x.height / 4);
+    singlImgeContainer.css({
+      position: "relative"
+    })
+
     singlImgeContainer.append(img);
     // append the image into the canvas container
     $(`#canvasContainer`).append(singlImgeContainer);
-    $(`#canvasContainer`).width($(img).width());
+
     // to add divider after every page
     //if (isMultible) {
     //$(`#canvasContainer`).append('<h4 class="ui horizontal divider">ANOTHER</h4>');
@@ -214,6 +273,7 @@
   // make cordinations global
   var cord = {};
   // image mouseover action
+
   function imagemouseOverAction(event, img) {
     var bouds = $(img).get(0).getBoundingClientRect()
 
@@ -226,9 +286,12 @@
       left: mouseClientX - $(img).offset().left + bouds.x
     })
 
+    // get current mouse corser cordination 
+    // relatice to single image
     var x = (event.pageX - $(img).offset().left) + $(window).scrollLeft();
     var y = (event.pageY - $(img).offset().top) + $(window).scrollTop();
 
+    // set postion reviewer postion 
     $(`#textT`).text(
       "Y : " +
       (y.toFixed(1)) +
@@ -236,6 +299,8 @@
       (x.toFixed(1)) +
       " IMG : " + $(img).attr("id")
     )
+    // insert mouse postion into an object
+    // to call them again leter
     cord[$(img).attr("id")] = {
       x: x,
       y: y
@@ -253,17 +318,40 @@
     if (cord[imgID] !== null || cord[imgID] !== undefined) {
       console.log("x :  ", cord[imgID].x.toFixed(0), " y : ", cord[imgID].y.toFixed(0), "IMG ID : ", imgID)
 
-      var sign = $(`<span>SIGN_HERE</span>`);
 
+      var sign = $(`<div class="ui red circular label">${pressedKeyboardKey}</div>`);
+      var removeIcon = $(`<a class="delete icon"></a>`);
+      //add remove ation for every single sign place label
+      sign.click(removeSignPlaceLabel);
+
+
+      var getSignLabelHeight = 25 / 2;
+      var getSignLabelWidth = 100 / 2;
+
+      // asign style to the coming  signature place 
       sign.css({
         position: "absolute",
-        top: cord[imgID].y.toFixed(0) + "px",
-        left: cord[imgID].x.toFixed(0) + "px",
-        color: "red"
+        top: (cord[imgID].y.toFixed(0) - getSignLabelHeight) + "px",
+        left: (cord[imgID].x.toFixed(0) - getSignLabelWidth) + "px",
+        color: "red",
+        width: "100px",
+        height: "25px"
       });
 
-      $(`#${imgID}`).parent().append(sign);
-      console.log($(`#${imgID}`).parent())
+      
+      console.log("height : ", getSignLabelHeight, "width : ", getSignLabelWidth)
+
+      // add the sign place on the image
+      var singleImageContainer = $(`div[img_num='${$(img).attr("pagenum")}']`);
+      singleImageContainer.append(sign);
+    }
+  }
+
+  // if user want to remove sign place label
+  // here is the action that for
+  function removeSignPlaceLabel(event) {
+    if (ctrlKey) {
+      $(this).remove();
     }
   }
 </script>
