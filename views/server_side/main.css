@@ -18,3 +18,10 @@
 #canvasContainer {
         margin: auto;
 }
+
+/* add style for signPlaceStyle */
+.signPlaceStyle {
+        -webkit-box-shadow: 5px 3px 5px 0px rgba(0, 0, 0, 0.75);
+        -moz-box-shadow: 5px 3px 5px 0px rgba(0, 0, 0, 0.75);
+        box-shadow: 5px 5px 3px 0px rgba(0, 0, 0, 0.75);
+}

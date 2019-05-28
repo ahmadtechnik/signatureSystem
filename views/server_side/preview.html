@@ -1,7 +1,7 @@
-<div class="ui modal  fullscreen" id="previewModal">
+<!-- modal -->
+<div class="ui modal " id="previewModal">
   <div class="header">Select signaturies places</div>
   <div class=" scrolling  content" id="previewModalContent">
-
     <div class="ui celled internally grid  stackable">
       <div class="four column row orange fileTopInfosContainer">
         <div class="column four wide ">File name : <span id="fileNameText"></span></div>
@@ -9,8 +9,13 @@
         <div class="column four wide">File type : <span id="fileTypeText"></span></div>
         <div class="column four wide">Pages number : <span id="pagesNumberText"></span></div>
       </div>
+
       <div class="tow column row">
-        <div class="column tow wided"></div>
+
+        <div class="column tow wided" id="">
+
+        </div>
+
         <div class="fourteen wide column ui rail pdfPagesPrevieContainer">
           <div class="ui segment centered center aligned">
             <div>
@@ -19,14 +24,18 @@
             </div>
           </div>
         </div>
+
       </div>
 
     </div>
-
   </div>
+
+
+
   <div class="actions">
     <div class="ui primary button positive">Submit</div>
   </div>
+
   <div class="corser" id="corser"><span id="textT"></span></div>
 </div>
 
@@ -43,16 +52,25 @@
   // nomric key
   var pressedKeyboardKey = null;
   var ctrlKey = false;
+  var onlicOne = false;
+
+  // make cordinations global
+  var cord = {};
+
+
   // if only one signaturies it have to be just number one... 
   if (parseInt(numberOfSignaturies) === 1) {
     pressedKeyboardKey = 1;
+    onlicOne = true;
+  } else {
+    onlicOne = false;
   }
 
   // add keydown action for the document:
   $(document).keydown((e) => {
     // to ba sure that this action will never take
     // any other pressed key rether then nomric
-    if (e.keyCode >= 97 && e.keyCode <= 105) {
+    if ((e.keyCode >= 97 && e.keyCode <= 105) || (e.keyCode >= 49 && e.keyCode <= 57)) {
       try {
         var parsedSingaturiesBumber = parseInt(numberOfSignaturies);
         if (parsedSingaturiesBumber === 1) {
@@ -60,20 +78,18 @@
         } else {
           // alarm the user that other then nomric Numbers are not allowed
           // in range 97 - 105
-          if (e.keyCode >= 97 && e.keyCode <= 105) {
-            pressedKeyboardKey = e.key;
-            if (e.key > parseInt(numberOfSignaturies)) {
-              alert("YOUR PEOPLE ARE ONLY : " + parseInt(numberOfSignaturies) + "SIGNATURIES.")
-            }
+          if (e.key > parseInt(numberOfSignaturies)) {
+            // notifi user that he pressed a number out ofe range....
+            alert("YOUR PEOPLE ARE ONLY : " + parseInt(numberOfSignaturies) + " SIGNATURIES. ")
           } else {
-            alert("PLEASE PRESS ONLIC NUMBERS...")
+            pressedKeyboardKey = e.key;
           }
         }
       } catch (error) {
         alert("ENTERED SIGNATURIES NUMBER WRONG...");
       }
 
-    } 
+    }
     // to check any other keyboard
     else {
       if (e.ctrlKey) {
@@ -82,9 +98,12 @@
     }
 
   });
+
   // add keyup action for the document
   $(document).keyup(() => {
-    pressedKeyboardKey = null;
+    if (!onlicOne) {
+      pressedKeyboardKey = null;
+    }
     ctrlKey = false;
   });
 
@@ -126,12 +145,17 @@
         });
 
         // start handling pdf file
-        PDFJS.getDocument(fileURL).then((doc) => {
-          readPDFfileFromUploadedFile(doc);
+        
+        var loadingPDF = PDFJS.getDocument(fileURL);
+        var pdf = loadingPDF.promise;
+        
+        pdf.then((pdf) => {
+          console.log(pdf)
+          readPDFfileFromUploadedFile(pdf);
+        })
 
 
 
-        });
 
       }
 
@@ -141,6 +165,9 @@
     // on modal hidden
     onHidden: () => {
       $(`#previewModal`).remove();
+      // stop document keyup and keydoun events
+      $(document).off("keydown");
+      $(document).off("keyup");
     }
 
   }).modal("show");
@@ -163,7 +190,8 @@
 
   }
 
-
+  // create sticky elemt to the image.
+  var stickBoxes = $(`<div class="ui sticky"></div>`);
   // handeling singe page
   function handelSinglePage(page, isMultible) {
 
@@ -198,7 +226,9 @@
     page.render({
       canvasContext: context,
       viewport: viewport
-    }).then(() => {
+    })
+    // add aciton to after rendering action
+    .then(() => {
       createImageElement(x, page)
     });
 
@@ -252,11 +282,17 @@
     // create single image continer to add the sign relativ to it
     var singlImgeContainer =
       $(`<div id="singleImgeContainer" img_num="${page.pageNumber}" ></div>`);
+
     singlImgeContainer.width(x.width / 4)
     singlImgeContainer.height(x.height / 4);
     singlImgeContainer.css({
       position: "relative"
     })
+
+
+
+
+
 
     singlImgeContainer.append(img);
     // append the image into the canvas container
@@ -268,30 +304,28 @@
     //}
     $(x).remove();
 
+
+
   }
 
-  // make cordinations global
-  var cord = {};
   // image mouseover action
-
   function imagemouseOverAction(event, img) {
     var bouds = $(img).get(0).getBoundingClientRect()
 
-    // store mouse postions
-    var mouseClientX = event.pageX;
-    var mouseClientY = event.pageY;
-    // create circle 
-    $(`#corser`).css({
-      top: mouseClientY - $(img).offset().top + bouds.y,
-      left: mouseClientX - $(img).offset().left + bouds.x
-    })
 
     // get current mouse corser cordination 
     // relatice to single image
     var x = (event.pageX - $(img).offset().left) + $(window).scrollLeft();
     var y = (event.pageY - $(img).offset().top) + $(window).scrollTop();
 
-    // set postion reviewer postion 
+
+    /**
+    create circle 
+    $(`#corser`).css({
+      top: (event.pageY),
+      left: (event.pageX)
+    })
+    set postion reviewer postion 
     $(`#textT`).text(
       "Y : " +
       (y.toFixed(1)) +
@@ -299,6 +333,10 @@
       (x.toFixed(1)) +
       " IMG : " + $(img).attr("id")
     )
+    **/
+
+
+
     // insert mouse postion into an object
     // to call them again leter
     cord[$(img).attr("id")] = {
@@ -308,25 +346,36 @@
 
   }
 
+
   // on click on the img action
   // stor all entered data into object
   // to be called when i want to marge the
   // signature with the image
+  var storedCorns = [];
 
   function ImgOnClickAction(event, img) {
+
     var imgID = $(img).attr("id");
     if (cord[imgID] !== null || cord[imgID] !== undefined) {
-      console.log("x :  ", cord[imgID].x.toFixed(0), " y : ", cord[imgID].y.toFixed(0), "IMG ID : ", imgID)
 
 
-      var sign = $(`<div class="ui red circular label">${pressedKeyboardKey}</div>`);
-      var removeIcon = $(`<a class="delete icon"></a>`);
+      //console.log("x :  ", cord[imgID].x.toFixed(0), " y : ", cord[imgID].y.toFixed(0), "IMG ID : ", imgID)
+
+      // create sagment to show user where he clicked
+      var labelWidth = 50;
+      var labelHeight = 25;
+      var sign = $(`<a class="ui red label signPlaceStyle" imgID="${imgID}" 
+      cordX="${cord[imgID].x.toFixed(0)}" cordY="${cord[imgID].y.toFixed(0)}" >
+        ${pressedKeyboardKey}</a>`);
+      var closIcon = $(`<i class="delete icon" signID=""></i>`);
+      sign.append(closIcon);
+
       //add remove ation for every single sign place label
-      sign.click(removeSignPlaceLabel);
+      closIcon.click(removeSignPlaceLabel);
 
-
-      var getSignLabelHeight = 25 / 2;
-      var getSignLabelWidth = 100 / 2;
+      // set center postion of the label
+      var getSignLabelHeight = labelHeight / 2;
+      var getSignLabelWidth = labelWidth / 2;
 
       // asign style to the coming  signature place 
       sign.css({
@@ -334,24 +383,45 @@
         top: (cord[imgID].y.toFixed(0) - getSignLabelHeight) + "px",
         left: (cord[imgID].x.toFixed(0) - getSignLabelWidth) + "px",
         color: "red",
-        width: "100px",
-        height: "25px"
+        width: labelWidth + "px",
+        height: labelHeight + "px",
+        background: ""
       });
 
-      
-      console.log("height : ", getSignLabelHeight, "width : ", getSignLabelWidth)
+      //console.log("height : ", getSignLabelHeight, "width : ", getSignLabelWidth)
 
       // add the sign place on the image
       var singleImageContainer = $(`div[img_num='${$(img).attr("pagenum")}']`);
       singleImageContainer.append(sign);
+
+
+      // insert sign cord in the object 
+      var clickCord = {
+        imgID: imgID,
+        X: cord[imgID].x.toFixed(0),
+        Y: cord[imgID].y.toFixed(0),
+        SN: pressedKeyboardKey
+      }
+
+      sign.attr("obIndex", storedCorns.length);
+      storedCorns.push(clickCord);
+
+
+      console.log(storedCorns);
+    } else {
+      // in case the element was not found in the object
     }
   }
 
   // if user want to remove sign place label
   // here is the action that for
   function removeSignPlaceLabel(event) {
-    if (ctrlKey) {
-      $(this).remove();
-    }
+    var imgID = $(this).parent().attr("imgID");
+    var cordX = $(this).parent().attr("cordx");
+    var signNum = $(this).parent().attr("numberOfSignaturies");
+    var signIndex = $(this).parent().attr("obIndex");
+    delete storedCorns[signIndex];
+    console.log(storedCorns);
+    $(this).parent().remove();
   }
 </script>
