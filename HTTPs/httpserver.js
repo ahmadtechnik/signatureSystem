@@ -24,6 +24,7 @@ var credentials = {
 var express = require('express');
 var app = express();
 var router = express.Router();
+var os = require("os");
 
 /**
  * refrence to modul of node app
@@ -46,12 +47,12 @@ module.exports.startListen = function (started) {
      * it will start open the https port
      * Start Check port in range from 20 to 100 to open httpsserver
      */
-    portscanner.findAPortNotInUse(3000, 3020, '0.0.0.0', function (error, port) {
+    portscanner.findAPortNotInUse(3000, 3020, os.hostname(), function (error, port) {
         console.log('HTTPS ON PORT : ' + port);
         /**
          *  start listening to HTTPS port
          */
-        httpsServer.listen(port, '0.0.0.0');
+        httpsServer.listen(port, os.hostname());
 
         started(true, {
             https: httpsServer,
