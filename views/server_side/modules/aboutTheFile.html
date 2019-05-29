@@ -22,7 +22,7 @@
                 </div>
                 <div class="field required signaturiesNumberField">
 
-                    <label >Number of the signaturies</label>
+                    <label>Number of the signaturies</label>
                     <div class="ui right labeled left icon input">
                         <i class="sort numeric up icon"></i>
                         <input type="number" placeholder="Enter number" maxlength="2" max="10" min="0" value=""
@@ -78,7 +78,6 @@
      * to print fileds to user
      * **/
     $(`#nextStepModalBtn`).click((event) => {
-        $(`#nextStepModalBtn`).off("click");
         /**
          * store the new entered name
          * with the extention of the file
@@ -87,29 +86,33 @@
          * **/
         newFileName = $(`#newNameLabel`).val();
         numberOfSignaturies = $(`#signaturies_number`).val();
+        if (checkIfFileNameAndSignaturiesNumbersAreFilled()) {
+            $(`#nextStepModalBtn`).off("click");
 
-        $(`#nextStepModalBtn`).css("display", "none");
+            $(`#nextStepModalBtn`).css("display", "none");
 
-        // create field in amount of the signaturies 
-        for (let index = 0; index < parseInt(numberOfSignaturies); index++) {
-            // create fields to get signaturies names
-            var fieldContainer = $(`<div class="field " ></div>`);
-            var fieldLabed = $(`<label>Name for : ${index +1}</label>`);
-            var fieldInput = $(
-                `<input  id="nameNum_${index +1 }" type="text" placeholder="optional" signName="${index +1}" />`
-            );
-            fieldContainer.append(fieldLabed);
-            fieldContainer.append(fieldInput);
-            $(`#signaturiesNamesFields`).append(fieldContainer);
-        };
 
-        $(`#OKMODALBTN`).css("display", "");
+            // create field in amount of the signaturies 
+            for (let index = 0; index < parseInt(numberOfSignaturies); index++) {
+                // create fields to get signaturies names
+                var fieldContainer = $(`<div class="field " ></div>`);
+                var fieldLabed = $(`<label>Name for : ${index +1}</label>`);
+                var fieldInput = $(
+                    `<input  id="nameNum_${index + 1 }" type="text" placeholder="optional" signName="${index +1}" />`
+                );
+                fieldContainer.append(fieldLabed);
+                fieldContainer.append(fieldInput);
+                $(`#signaturiesNamesFields`).append(fieldContainer);
+            };
+            $(`#OKMODALBTN`).css("display", "");
+        }
+
     })
 
     /**
     to get all fields values
     **/
-   
+
 
     function getSignaturiesNamesFields() {
         var allFields = $(`input[signName]`);

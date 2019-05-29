@@ -176,24 +176,18 @@ app.post("/uploaded_file", (req, res) => {
      * set event on file moved to Server
      */
     function onFile(name, file) {
+        /** print uploaded file name */
         console.log('Uploaded ' + file.name, name);
     };
     /**
      * set event on file uploading progrssing
      */
-    function onProgress(bytesReceived, bytesExpected) {
-
-        io.socketObjectGetter().emit("fileTransfareProcent", {
-            proc: true,
-            num: ((bytesReceived / fileSizeBytes) * 100).toFixed()
-        });
-    };
+    function onProgress(bytesReceived, bytesExpected) {};
     /**
      * 
      * on end action
      */
     function onEnd() {
-
         res.json({
             status: "DONE",
             fileLocation: root_app + '/storage/'
@@ -224,4 +218,9 @@ app.get("/preview", (req, res) => {
 // send home page for client side
 app.get("/client_side_home", (req, res) => {
     res.sendFile(root_app + "/views/client_side/index.html");
+});
+
+// send wait modal to client
+app.get("/getWaitModal", (req, res) => {
+    res.sendFile(root_app + "/views/client_side/modules/waiting.html");
 })

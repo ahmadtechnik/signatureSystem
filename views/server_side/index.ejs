@@ -4,8 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <title>Hello World!</title>
-  <meta name="viewport" content="width=device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable=no">
+  <title>Server Side....</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <script src='jquery/jquery.js'></script>
 
   <!-- <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.css">
@@ -13,17 +15,15 @@
   <!--import semantic lib -->
   <link rel="stylesheet" type="text/css" href="semantic-ui/semantic.css">
   <script src='semantic-ui/semantic.js'></script>
-  
+
+
+  <!-- import pdfjs librery -->
+  <script src="assets/pdfjs/pdf.js"></script>
+  <script src="assets/pdfjs/pdf.worker.js"></script>
   <!-- import socket io  -->
   <script src="socket.io/socket.io.js"></script>
-  <!-- import pdfjs librery -->
-  <script src="assets/pdfjs/pdf.js" ></script>
-  <script src="assets/pdfjs/pdf.worker.js" ></script>
 
-<!-- import main js file -->
-  <script src="main.js"></script>
-  <!-- import main css file  -->
-  <link rel="stylesheet" type="text/css" href="main.css">
+
 </head>
 
 <body>
@@ -45,7 +45,7 @@
         <h1 class="ui header center alinged centered"><%- pagetitle %></h1>
       </div>
 
-           <div class="ui progress bottom attached indicating " id="uploadProgress" style="display: none">
+      <div class="ui progress bottom attached indicating " id="uploadProgress" style="display: none">
         <div class="bar"></div>
       </div>
     </div>
@@ -78,6 +78,10 @@
   var hostname = '<%- hostname %>';
   var protocol = '<%- protocol %>';
   var portinuse = '<%- portinuse %>';
-  </script>
+</script>
+<!-- import main js file -->
+<script src="main.js"></script>
+<!-- import main css file  -->
+<link rel="stylesheet" type="text/css" href="main.css">
 
 </html>

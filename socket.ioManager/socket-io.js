@@ -20,6 +20,7 @@ exports.socketObjectSetter = (server) => {
 
     /** --------------------------------- cleint side room ---------------------------------- */
     clientSide.on("connection", onClientSideConnected)
+
     /** --------------------------------- server side room ---------------------------------- */
     serverside.on("connection", onServerSideConnected);
 
@@ -43,30 +44,38 @@ var onClientConnection = (client) => {
 /** --------------------------------- cleint side room ---------------------------------- */
 /** on client client-side connected  */
 var onClientSideConnected = (client) => {
+
     console.log("client from client side connected ... " + client.id);
     client.on("disconnect", onClientSideDeviceDisconnected);
     /** inform server side home page, that there is an client connected..  */
     serverside.emit("newClintConnected", {
-        clientConnected : client.id
+        clientConnected: client.id
     });
+
 
 }
 /** on client client-side disconnected */
-var onClientSideDeviceDisconnected = () => {
+var onClientSideDeviceDisconnected = (client) => {
     console.log("client-side device disconnected : ");
+    /** emit to server-side device that there an client-client side device is disconnected */
+    serverside.emit("clientDisconnected", {
+        
+    });
 }
-
-
 
 
 /** --------------------------------- server side room ---------------------------------- */
 /** on client server-side connected */
 var onServerSideConnected = (client) => {
+
     console.log("device connected to server side : " + client.id);
     client.on("disconnect", onServerSideDeviceDisconnected)
     /** on order to convert pdf file by file name */
     client.on("orderToConverTheFile", pdfToPICconverter)
     /* on Cordinations serverSidePage */
+
+    /** confirm file button cliecked onserver side */
+    client.on("comingRequestToClient", comingRequestToClient)
 }
 /** on client server-side disconnected */
 var onServerSideDeviceDisconnected = () => {
@@ -76,5 +85,14 @@ var onServerSideDeviceDisconnected = () => {
 /** order to convert the pdf file */
 var pdfToPICconverter = (data) => {
     /** call the pdf2pic converter */
+}
 
+/**
+ * on server side send message to client that 
+ * there is an coming new file need to be signed
+ */
+var comingRequestToClient = (data) => {
+    console.log(data)
+    /** emit notifi  to client side to show wait page */
+    clientSide.emit("comingRequestToClient", data)
 }

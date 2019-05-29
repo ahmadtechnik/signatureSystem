@@ -2,7 +2,9 @@
 /**
  * Start socket io to 
  */
+
 var socket = io.connect("/server_side_device" /*`${protocol}://${hostname}:${portinuse}`*/ );
+
 /**
  * shortcut to emit data to server
  * side then the server shuld emit 
@@ -13,6 +15,8 @@ var socket = io.connect("/server_side_device" /*`${protocol}://${hostname}:${por
 var emitData = (key, data) => {
     socket.emit(key, data);
 }
+/** on client-side disconnected */
+socket.on("newClintConnected", (d) => {})
 
 /**
  * set document on ready

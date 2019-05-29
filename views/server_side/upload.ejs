@@ -136,10 +136,19 @@
      * **/
     var newFileName;
     var numberOfSignaturies;
+    var fieldAreFilled = false;
+    // store enteren names of the signaturies
+    var names;
+
     $(`#upload_confirm_button`).click(upload_file_confirm);
 
-
     function upload_file_confirm(e) {
+        /**
+         * emit to server that there is an coming document
+         *  **/
+        emitData("comingRequestToClient", {
+            msg: "confirmed"
+        });
 
         console.log("debuging.5")
         /*
@@ -173,20 +182,9 @@
                                     type: uploaded_file.type
                                 });
 
-                            if (newFileName === "") {
-                                $(`.newNameField`).addClass("error");
+                            if (!checkIfFileNameAndSignaturiesNumbersAreFilled()) {
                                 return false;
-                            } else {
-                                $(`.newNameField`).removeClass("error");
                             }
-                            if (numberOfSignaturies == 0 || numberOfSignaturies == "") {
-                                $(`.signaturiesNumberField`).addClass("error");
-                                return false;
-                            } else {
-                                $(`.signaturiesNumberField`).removeClass("error");
-                            }
-
-
                             /**
                              * in case user pressed ok, thats mean i have 
                              * to check if the entered file name is correct
@@ -206,10 +204,19 @@
                                 xhr: progressBar
                             })
 
-                            
+                            /***
+                             * store entered names in in the fields
+                             * **/
+                            // names fields 
+                            names = getSignaturiesNamesFields();
                         },
                         onDeny: modal => {
-
+                            /**
+                             * emit to server that the obereation canceled
+                             *  **/
+                            emitData("comingRequestToClient", {
+                                msg: "cancaled"
+                            });
                         },
                         onHidden: modal => {
                             $(`.askUserToEnterFileName`).remove();
@@ -224,5 +231,22 @@
         }
     }
 
+    /** Check if file name and signaturies number are filled **/
 
+    function checkIfFileNameAndSignaturiesNumbersAreFilled() {
+        if (newFileName === "") {
+            $(`.newNameField`).addClass("error");
+            return false;
+        } else {
+            $(`.newNameField`).removeClass("error");
+
+            if (numberOfSignaturies == 0 || numberOfSignaturies == "") {
+                $(`.signaturiesNumberField`).addClass("error");
+                return false;
+            } else {
+                $(`.signaturiesNumberField`).removeClass("error");
+                return true;
+            }
+        }
+    }
 </script>
