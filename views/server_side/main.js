@@ -1,17 +1,19 @@
 /** ------------------------------------------ home page actions ------------------------------------- */
-var socket;
 /**
  * Start socket io to 
  */
-socket = io.connect("/server_side_device" /*`${protocol}://${hostname}:${portinuse}`*/ );
-socket.on("connect", () => {
-    socket.emit("device_data", {
+var socket = io.connect("/server_side_device" /*`${protocol}://${hostname}:${portinuse}`*/ );
+/**
+ * shortcut to emit data to server
+ * side then the server shuld emit 
+ * the data to client-side page
+ * @param {String} key 
+ * @param {object} data 
+ */
+var emitData = (key, data) => {
+    socket.emit(key, data);
+}
 
-    })
-});
-socket.on("newClintConnected" , (data) => {
-    console.log(data)
-})
 /**
  * set document on ready
  */
