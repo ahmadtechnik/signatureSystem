@@ -30,8 +30,6 @@
     </div>
   </div>
 
-
-
   <div class="actions">
     <div class="ui primary button positive">Submit</div>
   </div>
@@ -40,8 +38,6 @@
 </div>
 
 <script>
- 
-
   // global vars to use in other scopes
   var pdfFile = null;
   var numPages;
@@ -58,6 +54,10 @@
 
   // make cordinations global
   var cord = {};
+
+  // store canvas in this object to
+  // to pass them to other device..
+  var xCanvases = [];
 
 
   // if only one signaturies it have to be just number one... 
@@ -164,45 +164,54 @@
       // in case was the uploaded file image not pdf
       else {}
     },
+    // on modal submited
+    // here will start send the data 
+    // the file name and so on to client 
+    // side 
+    onApprove: modal => {
+      if (!onModalApprove(modal)) {
+        return false;
+      }
+    },
     // on modal hidden
     onHidden: () => {
       $(`#previewModal`).remove();
       // stop document keyup and keydoun events
       $(document).off("keydown");
       $(document).off("keyup");
-      
+
     }
 
   }).modal("show");
+
 
   // handling pdf doc
   function readPDFfileFromUploadedFile(pdf, imMoreThenOne) {
     pdfFile = pdf; // the pdf global
     numPages = pdf.numPages // the pages length 
     var isMultible = numPages > 1 ? true : false;
+
     // set page number to user
     $(`#pagesNumberText`).html(numPages);
     // itarate the pages from object
 
     for (let index = 0; index < numPages; index++) {
-      pdf.getPage(index + 1).then((page) => {
+      pdf.getPage(index + 1).then(async (page) => {
         // append to continer
-        handelSinglePage(page, isMultible);
+        await handelSinglePage(page, isMultible);
       });
     }
-
   }
 
-  // create sticky elemt to the image.
-  var stickBoxes = $(`<div class="ui sticky"></div>`);
   // handeling singe page
-  function handelSinglePage(page, isMultible) {
+  async function handelSinglePage(page, isMultible) {
 
     // set pdf page view port scale
     var viewport = page.getViewport(imgSize / page.getViewport(1).width);
+    
     // create new canvas
     var x = document.createElement("CANVAS");
-
+    x.style.display = "none";
     x.width = imgSize;
     // set canvas height
     imgHeight = page.getViewport(imgSize / page.getViewport(1).width).height
@@ -218,7 +227,7 @@
 
 
     // get canvas context for pdfjs render
-    var context = $(`#canvos_${page.pageNumber}`).get(0).getContext('2d');
+    var context = x.getContext('2d');
 
     //var sr = $(`#canvos_${page.pageNumber}`).width() / page.getViewport(1).width;
 
@@ -232,7 +241,7 @@
       })
       // add aciton to after rendering action
       .then(() => {
-        createImageElement(x, page)
+        createImageElement(x, page);
       });
 
 
@@ -246,6 +255,7 @@
   }
 
   //  action after file rendering
+
   function createImageElement(x, page) {
     // add css attrs to canvas
     x.style.display = "none";
@@ -279,7 +289,7 @@
       // check if user pressed any number
       if (pressedKeyboardKey !== null) {
         // record mouse potions on click
-        ImgOnClickAction(event, img)
+        ImgOnClickAction(event, img, page.pageNumber);
       }
     })
     // create single image continer to add the sign relativ to it
@@ -305,9 +315,11 @@
     //if (isMultible) {
     //$(`#canvasContainer`).append('<h4 class="ui horizontal divider">ANOTHER</h4>');
     //}
+    xCanvases.push(x);
     $(x).remove();
 
-
+    // to show the element again
+    img.css("display", "block");
 
   }
 
@@ -356,9 +368,10 @@
   // signature with the image
   var storedCorns = [];
 
-  function ImgOnClickAction(event, img) {
+  function ImgOnClickAction(event, img, pageNum) {
 
     var imgID = $(img).attr("id");
+    console.log(cord);
     if (cord[imgID] !== null || cord[imgID] !== undefined) {
 
 
@@ -367,26 +380,25 @@
       // create sagment to show user where he clicked
       var labelWidth = 100;
       var labelHeight = 25;
-      var sign = $(`<a class="ui red label signPlaceStyle" imgID="${imgID}" 
+      var sign = $(`<a class="ui tag red label signPlaceStyle" imgID="${imgID}" 
       cordX="${cord[imgID].x.toFixed(0)}" cordY="${cord[imgID].y.toFixed(0)}" >
-        ${names[pressedKeyboardKey]} : ${pressedKeyboardKey}</a>`);
+        <span style="font-size : 10px;" >${names[pressedKeyboardKey]}</span> : ${pressedKeyboardKey}</a>`);
       var closIcon = $(`<i class="delete icon"></i>`);
       sign.append(closIcon);
 
       //add remove ation for every single sign place label
       closIcon.click(removeSignPlaceLabel);
 
+
       // set center postion of the label
       var getSignLabelHeight = labelHeight / 2;
-      var getSignLabelWidth = labelWidth / 2;
-
+      var getSignLabelWidth = sign.width() / 2;
       // asign style to the coming  signature place 
       sign.css({
         position: "absolute",
         top: (cord[imgID].y.toFixed(0) - getSignLabelHeight) + "px",
         left: (cord[imgID].x.toFixed(0) - getSignLabelWidth) + "px",
         color: "red",
-        width: labelWidth + "px",
         height: labelHeight + "px",
         background: ""
       });
@@ -397,20 +409,25 @@
       var singleImageContainer = $(`div[img_num='${$(img).attr("pagenum")}']`);
       singleImageContainer.append(sign);
 
-
       // insert sign cord in the object 
       var clickCord = {
         imgID: imgID,
         X: cord[imgID].x.toFixed(0),
         Y: cord[imgID].y.toFixed(0),
-        SN: pressedKeyboardKey
+        SN: pressedKeyboardKey,
+        pageNum: pageNum
+      }
+
+      // check if name of signature was entered..
+      if (names[pressedKeyboardKey] !== "" && names[pressedKeyboardKey] !== undefined) {
+        clickCord["signName"] = names[pressedKeyboardKey];
       }
 
       sign.attr("obIndex", storedCorns.length);
       storedCorns.push(clickCord);
 
 
-      console.log(storedCorns);
+      // console.log(storedCorns);
     } else {
       // in case the element was not found in the object
     }
@@ -426,5 +443,22 @@
     delete storedCorns[signIndex];
     console.log(storedCorns);
     $(this).parent().remove();
+  }
+
+  // add action to the modal, on modal submit button clicked
+  function onModalApprove(modal) {
+    // here i have to send data to client side 
+    // X : postions and file name and pages
+    var requested_file_name = newFileToUpload.name;
+    var postions_data = storedCorns;
+    emitData("comingRequestToClient", {
+      msg: "_signature_data",
+      data: {
+        requested_file_name: requested_file_name,
+        postions_data: postions_data ,
+        extention : newFileToUpload.type
+      }
+    });
+    return false;
   }
 </script>

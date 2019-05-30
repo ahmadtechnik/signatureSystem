@@ -58,9 +58,7 @@ var onClientSideConnected = (client) => {
 var onClientSideDeviceDisconnected = (client) => {
     console.log("client-side device disconnected : ");
     /** emit to server-side device that there an client-client side device is disconnected */
-    serverside.emit("clientDisconnected", {
-        
-    });
+    serverside.emit("clientDisconnected", {});
 }
 
 
@@ -76,6 +74,10 @@ var onServerSideConnected = (client) => {
 
     /** confirm file button cliecked onserver side */
     client.on("comingRequestToClient", comingRequestToClient)
+    /** send to clint to reload the page */
+    clientSide.emit("comingRequestToClient", {
+        msg: "serverDis"
+    })
 }
 /** on client server-side disconnected */
 var onServerSideDeviceDisconnected = () => {
@@ -92,7 +94,7 @@ var pdfToPICconverter = (data) => {
  * there is an coming new file need to be signed
  */
 var comingRequestToClient = (data) => {
-    console.log(data)
+
     /** emit notifi  to client side to show wait page */
     clientSide.emit("comingRequestToClient", data)
 }

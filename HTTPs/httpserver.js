@@ -47,12 +47,12 @@ module.exports.startListen = function (started) {
      * it will start open the https port
      * Start Check port in range from 20 to 100 to open httpsserver
      */
-    portscanner.findAPortNotInUse(3000, 3020, os.hostname(), function (error, port) {
+    portscanner.findAPortNotInUse(3000, 3020, "0.0.0.0", function (error, port) {
         console.log('HTTPS ON PORT : ' + port);
         /**
          *  start listening to HTTPS port
          */
-        httpsServer.listen(port, os.hostname());
+        httpsServer.listen(port, "0.0.0.0");
 
         started(true, {
             https: httpsServer,
@@ -92,6 +92,7 @@ app.use("/semantic-ui", express.static("node_modules/semantic-ui-css/"));
 app.use("/socket.io", express.static("node_modules/socket.io-client/dist/"));
 app.use("/assets", express.static("views/assets/"));
 
+app.use("/storage", express.static("storage/"));
 /**
  * use main dir server side
  */
@@ -223,4 +224,16 @@ app.get("/client_side_home", (req, res) => {
 // send wait modal to client
 app.get("/getWaitModal", (req, res) => {
     res.sendFile(root_app + "/views/client_side/modules/waiting.html");
+})
+
+// send pdf file by name
+app.get("/get_pdf_dile_by_name", (response, request) => {
+    var fileName = response.query.fileName;
+    var fileType = response.query.fileType;
+    var filePath = root_app + '/storage/' + fileName;
+    request.writeHead(200, {
+        'Content-Type': fileName,
+        'Content-Disposition': `attachment; filename="${fileName}"`
+      });
+    request.end(new Buffer(fs.readFileSync(filePath), "base64"));
 })

@@ -1,0 +1,54 @@
+/* 
+set background to seciotn
+and enable scrolling 
+*/
+.filePreviewSeciton {
+    background: blue;
+    overflow: auto;
+    width: 100%;
+}
+
+/* 
+set backgrount for the bottom seciotn
+
+*/
+.signatureTakerSection {
+    background: coral;
+    width: 100%;
+}
+
+/* 
+*/
+.signDrowSeciton {
+    height: 4cm;
+    width: 10cm;
+    background: yellow;
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    -webkit-box-shadow: 6px 8px 15px -6px rgba(0, 0, 0, 0.9);
+    -moz-box-shadow: 6px 8px 15px -6px rgba(0, 0, 0, 0.9);
+    box-shadow: 6px 8px 15px -6px rgba(0, 0, 0, 0.9);
+}
+
+/* 
+ */
+.signaturiesInfoSeciton {
+    padding: 20px;
+}
+
+/* 
+ */
+.clearSignaturBtn {
+    position: absolute;
+    right: 2px;
+    top: 2px;
+    margin: 0px !important;
+}
+/*  */
+.submitSignatureBtn{
+    position: absolute;
+    bottom: 2px;
+    right: 2px;;
+    margin: 0px !important;
+}
