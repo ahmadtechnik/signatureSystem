@@ -3,6 +3,20 @@ var _PDF_FILE_DOC = null;
 var _NUM_PAGES = null;
 var _PDF_PAGES_AS_CANVAS = null;
 var _PAGER = 1;
+
+var _POS_DATA_ = null;
+var _SENT_FILE_NAME = null;
+var _SENT_FILE_TYPE = null;
+
+
+var _SIGNATURE_CANVAS = null;
+var _SIGNATURE_CANVAS_CONTEXT = null;
+
+var _MOUSE_POSTION_TO_CANVOS = {
+    y: 0,
+    x: 0
+};
+
 // start geting display dimantions
 var dHeight, dWidth;
 document.addEventListener('contextmenu', event => event.preventDefault());
@@ -24,7 +38,23 @@ $(document).ready(() => {
     $(window).resize(() => {
         elementsSizing();
         setNewSignatureTakerPace()
-    })
+    });
+
+    _SIGNATURE_CANVAS = $("#signDrowSecitonCanvas");
+    _SIGNATURE_CANVAS.width(_SIGNATURE_CANVAS.parent().width());
+    _SIGNATURE_CANVAS.height(_SIGNATURE_CANVAS.parent().height())
+    _SIGNATURE_CANVAS_CONTEXT = $(_SIGNATURE_CANVAS).get(0).getContext("2d");
+
+
+    _SIGNATURE_CANVAS_CONTEXT.lineWidth = 5;
+    _SIGNATURE_CANVAS_CONTEXT.lineJoin = '0ound';
+    _SIGNATURE_CANVAS_CONTEXT.lineCap = 'r9und';
+    _SIGNATURE_CANVAS_CONTEXT.strokeStyle = '#00CC99';
+
+
+    _SIGNATURE_CANVAS.mousemove(signaturePaintingEvents.onMouseMove);
+    _SIGNATURE_CANVAS.mousedown(signaturePaintingEvents.onMouseDown);
+    _SIGNATURE_CANVAS.mouseup(signaturePaintingEvents.onMouseUp);
 });
 
 /********************************************************* */
@@ -122,9 +152,10 @@ function setNewSignatureTakerPace() {
 
 function renderCurrentSentFile(data) {
     $(`#filePreviewSeciton`).html("");
-    var file_name = data.requested_file_name;
-    var posetions_data = data.postions_data;
-    var file_extention = data.extention;
+
+    _SENT_FILE_NAME = data.requested_file_name;;
+    _POS_DATA_ = data.postions_data;
+    _SENT_FILE_TYPE = data.extention;
 
     console.log(data)
 
@@ -133,37 +164,24 @@ function renderCurrentSentFile(data) {
         method: "GET",
         contentType: "application/json",
         data: {
-            fileName: file_name,
-            fileType: file_extention
+            fileName: _SENT_FILE_NAME,
+            fileType: _SENT_FILE_TYPE
         },
 
+        // after geting binary PDF from Server .
         success: (data) => {
+            // read pdf document
             PDFJS.getDocument({
                 data: data
             }).then((pdf) => {
+                // make document global
                 _PDF_FILE_DOC = pdf;
                 _NUM_PAGES = pdf.numPages;
                 pdf.getPage(_PAGER).then(singlePageHandling)
-
             })
         }
     })
 
-
-    /**
-     * 
-     *             // send the comming file to pdf render
-            PDFJS.getDocument(window.URL.createObjectURL(new File([data] ,file_name ))).then((pdf) => {
-                _PDF_FILE_DOC = pdf;
-                _NUM_PAGES = pdf.numPages;
-                for (let index = 0; index < _NUM_PAGES; index++) {
-                    pdf.getPage(index + 1).then(page => {
-
-                        singlePageHandling(page, index + 1);
-                    })
-                }
-            })
-     */
 
 }
 /**
@@ -216,3 +234,71 @@ function singlePageHandling(page) {
     })
 
 }
+
+/**
+ * painting on canvas
+ */
+
+
+var signaturePaintingEvents = {
+    onMouseMove: (e) => {
+        _MOUSE_POSTION_TO_CANVOS.x = e.pageX - $(_SIGNATURE_CANVAS).offset().left;
+        _MOUSE_POSTION_TO_CANVOS.y = e.pageY - $(_SIGNATURE_CANVAS).offset().top;
+    },
+    onMouseDown: (e) => {
+        _SIGNATURE_CANVAS_CONTEXT.beginPath();
+        _SIGNATURE_CANVAS_CONTEXT.moveTo(
+            _MOUSE_POSTION_TO_CANVOS.x,
+            _MOUSE_POSTION_TO_CANVOS.y);
+
+        _SIGNATURE_CANVAS.mousemove(signaturePaintingEvents.onPaint);
+        console.log(_MOUSE_POSTION_TO_CANVOS)
+    },
+    onMouseUp: (e) => {
+        $(_SIGNATURE_CANVAS).off("mousemove" ,signaturePaintingEvents.onPaint );
+    },
+    onPaint: (e) => {
+        _SIGNATURE_CANVAS_CONTEXT.lineTo(_MOUSE_POSTION_TO_CANVOS.x, _MOUSE_POSTION_TO_CANVOS.y);
+        _SIGNATURE_CANVAS_CONTEXT.stroke();
+    }
+}
+
+/*
+var canvas = document.getElementById('myCanvas');
+var ctx = canvas.getContext('2d');
+var painting = document.getElementById('paint');
+var paint_style = getComputedStyle(painting);
+canvas.width = parseInt(paint_style.getPropertyValue('width'));
+canvas.height = parseInt(paint_style.getPropertyValue('height'));
+
+var mouse = {
+    x: 0,
+    y: 0
+};
+
+canvas.addEventListener('mousemove', function (e) {
+    mouse.x = e.pageX - this.offsetLeft;
+    mouse.y = e.pageY - this.offsetTop;
+}, false);
+
+ctx.lineWidth = 0;
+ctx.lineJoin = '0ound';
+ctx.lineCap = 'r9und';
+ctx.strokeStyle = '#00CC99';
+
+canvas.addEventListener('mousedown', function (e) {
+    ctx.beginPath();
+    ctx.moveTo(mouse.x, mouse.y);
+    canvas.addEventListener('mousemove', onPaint, false);
+}, false);
+
+canvas.addEventListener('mouseup', function () {
+    canvas.removeEventListener('mousemove', onPaint, false);
+}, false);
+
+var onPaint = function () {
+    ctx.lineTo(mouse.x, mouse.y);
+    ctx.stroke();
+};
+
+*/

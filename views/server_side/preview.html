@@ -40,7 +40,7 @@
 <script>
   // global vars to use in other scopes
   var pdfFile = null;
-  var numPages;
+
 
   // page origin size
   var imgSize = 2480;
@@ -110,8 +110,9 @@
   });
 
   var _PDF_DOC = null;
-  var _PDF_DOC_PAGES_NUM = null;
+  var _PDF_DOC_PAGES_NUM = 0;
   var _PDF_PAGER = 1;
+
   /** to shpw the modal after  **/
   $(`#previewModal`).modal({
     closable: false,
@@ -154,10 +155,7 @@
         var loadingPDF = PDFJS.getDocument(fileURL);
         var pdf = loadingPDF.promise;
 
-        pdf.then((pdf) => {
-          _PDF_DOC = pdf;
-          readPDFfileFromUploadedFile(pdf);
-        })
+        pdf.then(readPDFfileFromUploadedFile)
 
 
 
@@ -187,16 +185,18 @@
 
   }).modal("show");
 
+
   // handling pdf doc
-  function readPDFfileFromUploadedFile(pdf, imMoreThenOne) {
+  function readPDFfileFromUploadedFile(pdf) {
+    _PDF_DOC = pdf;
+
     pdfFile = pdf; // the pdf global
-    numPages = pdf.numPages // the pages length 
-    _PDF_DOC_PAGES_NUM = pdf.numPages;
+    _PDF_DOC_PAGES_NUM = pdf.numPages; // length of pages 
 
     // set page number to user
-    $(`#pagesNumberText`).html(numPages);
-    // itarate the pages from object
+    $(`#pagesNumberText`).html(_PDF_DOC_PAGES_NUM);
 
+    // itarate  the pages from object
     pdf.getPage(_PDF_PAGER).then(handelSinglePage);
 
   }
@@ -240,13 +240,80 @@
       // add aciton to after rendering action
       .then(() => {
 
-        if (_PDF_PAGER <= _PDF_DOC_PAGES_NUM) {
-          _PDF_DOC.getPage(_PDF_PAGER).then(handelSinglePage);
-          createImageElement(x, page);
+        if (_PDF_PAGER !== _PDF_DOC_PAGES_NUM) {
           _PDF_PAGER++;
+          _PDF_DOC.getPage(_PDF_PAGER).then(handelSinglePage);
         }
+        
+        // add css attrs to canvas
+        x.style.display = "none";
+        // get data of that image
+        var getCanvasURL = x.toDataURL('image/png');
+
+        // create img tag
+        var img = $(
+          `<img id="img_canv_${page.pageNumber}" width="${x.width / 4}" height="${x.height / 4}" 
+      class="page_img" pageNum="${page.pageNumber}" style="border:1px black solid" >`
+        );
+
+        img.attr("src", getCanvasURL);
+
+
+        // on mouse hover over the image
+        $(img).mousemove((event) => {
+          // start mouseonmove aciton 
+          imagemouseOverAction(event, img);
+        })
+
+        // asign mouseover  action to the image
+        // on mouse on the image 
+        $(img).mouseover((event) => {
+          // resize the image to orginal size
+          // $(img).css("width", imgSize)
+          //  $(img).css("height", imgHeight);
+        })
+        // add click on img action 
+        $(img).click((event) => {
+          // check if user pressed any number
+          if (pressedKeyboardKey !== null) {
+            // record mouse potions on click
+            ImgOnClickAction(event, img, page.pageNumber);
+          }
+        })
+        // create single image continer to add the sign relativ to it
+        var singlImgeContainer =
+          $(`<div id="singleImgeContainer" img_num="${page.pageNumber}" ></div>`);
+
+        singlImgeContainer.width(x.width / 4)
+        singlImgeContainer.height(x.height / 4);
+        singlImgeContainer.css({
+          position: "relative"
+        })
+
+
+
+
+
+
+        singlImgeContainer.append(img);
+        // append the image into the canvas container
+        $(`#canvasContainer`).append(singlImgeContainer);
+
+
+        xCanvases.push(x);
+        $(x).remove();
+
+        // to show the element again
+        img.css("display", "block");
+
+
+
+
+
+
 
       });
+
 
     /**
      * todo : 
@@ -260,66 +327,7 @@
   //  action after file rendering
 
   function createImageElement(x, page) {
-    // add css attrs to canvas
-    x.style.display = "none";
-    // get data of that image
-    var getCanvasURL = x.toDataURL('image/png');
 
-    // create img tag
-    var img = $(
-      `<img id="img_canv_${page.pageNumber}" width="${x.width / 4}" height="${x.height / 4}" 
-      class="page_img" pageNum="${page.pageNumber}" style="border:1px black solid" >`
-    );
-
-    img.attr("src", getCanvasURL);
-
-
-    // on mouse hover over the image
-    $(img).mousemove((event) => {
-      // start mouseonmove aciton 
-      imagemouseOverAction(event, img);
-    })
-
-    // asign mouseover  action to the image
-    // on mouse on the image 
-    $(img).mouseover((event) => {
-      // resize the image to orginal size
-      // $(img).css("width", imgSize)
-      //  $(img).css("height", imgHeight);
-    })
-    // add click on img action 
-    $(img).click((event) => {
-      // check if user pressed any number
-      if (pressedKeyboardKey !== null) {
-        // record mouse potions on click
-        ImgOnClickAction(event, img, page.pageNumber);
-      }
-    })
-    // create single image continer to add the sign relativ to it
-    var singlImgeContainer =
-      $(`<div id="singleImgeContainer" img_num="${page.pageNumber}" ></div>`);
-
-    singlImgeContainer.width(x.width / 4)
-    singlImgeContainer.height(x.height / 4);
-    singlImgeContainer.css({
-      position: "relative"
-    })
-
-
-
-
-
-
-    singlImgeContainer.append(img);
-    // append the image into the canvas container
-    $(`#canvasContainer`).append(singlImgeContainer);
-
-
-    xCanvases.push(x);
-    $(x).remove();
-
-    // to show the element again
-    img.css("display", "block");
 
   }
 
