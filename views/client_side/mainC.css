@@ -3,7 +3,7 @@ set background to seciotn
 and enable scrolling 
 */
 .filePreviewSeciton {
-    background: blue;
+
     overflow: auto;
     width: 100%;
 }
@@ -13,7 +13,7 @@ set backgrount for the bottom seciotn
 
 */
 .signatureTakerSection {
-    background: coral;
+
     width: 100%;
 }
 
@@ -45,10 +45,20 @@ set backgrount for the bottom seciotn
     top: 2px;
     margin: 0px !important;
 }
+
 /*  */
-.submitSignatureBtn{
+.submitSignatureBtn {
     position: absolute;
     bottom: 2px;
-    right: 2px;;
+    right: 2px;
+    ;
     margin: 0px !important;
 }
+
+/* 
+ */
+ .pageAmountContainer{
+     position: fixed;
+     top: 20px;
+     left: 20px;;
+ }

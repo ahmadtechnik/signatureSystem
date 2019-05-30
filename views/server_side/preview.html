@@ -109,6 +109,9 @@
     ctrlKey = false;
   });
 
+  var _PDF_DOC = null;
+  var _PDF_DOC_PAGES_NUM = null;
+  var _PDF_PAGER = 1;
   /** to shpw the modal after  **/
   $(`#previewModal`).modal({
     closable: false,
@@ -152,7 +155,7 @@
         var pdf = loadingPDF.promise;
 
         pdf.then((pdf) => {
-          console.log(pdf)
+          _PDF_DOC = pdf;
           readPDFfileFromUploadedFile(pdf);
         })
 
@@ -184,31 +187,26 @@
 
   }).modal("show");
 
-
   // handling pdf doc
   function readPDFfileFromUploadedFile(pdf, imMoreThenOne) {
     pdfFile = pdf; // the pdf global
     numPages = pdf.numPages // the pages length 
-    var isMultible = numPages > 1 ? true : false;
+    _PDF_DOC_PAGES_NUM = pdf.numPages;
 
     // set page number to user
     $(`#pagesNumberText`).html(numPages);
     // itarate the pages from object
 
-    for (let index = 0; index < numPages; index++) {
-      pdf.getPage(index + 1).then(async (page) => {
-        // append to continer
-        await handelSinglePage(page, isMultible);
-      });
-    }
+    pdf.getPage(_PDF_PAGER).then(handelSinglePage);
+
   }
 
   // handeling singe page
-  async function handelSinglePage(page, isMultible) {
+  function handelSinglePage(page) {
 
     // set pdf page view port scale
     var viewport = page.getViewport(imgSize / page.getViewport(1).width);
-    
+
     // create new canvas
     var x = document.createElement("CANVAS");
     x.style.display = "none";
@@ -241,9 +239,14 @@
       })
       // add aciton to after rendering action
       .then(() => {
-        createImageElement(x, page);
-      });
 
+        if (_PDF_PAGER <= _PDF_DOC_PAGES_NUM) {
+          _PDF_DOC.getPage(_PDF_PAGER).then(handelSinglePage);
+          createImageElement(x, page);
+          _PDF_PAGER++;
+        }
+
+      });
 
     /**
      * todo : 
@@ -311,10 +314,7 @@
     // append the image into the canvas container
     $(`#canvasContainer`).append(singlImgeContainer);
 
-    // to add divider after every page
-    //if (isMultible) {
-    //$(`#canvasContainer`).append('<h4 class="ui horizontal divider">ANOTHER</h4>');
-    //}
+
     xCanvases.push(x);
     $(x).remove();
 
@@ -455,8 +455,8 @@
       msg: "_signature_data",
       data: {
         requested_file_name: requested_file_name,
-        postions_data: postions_data ,
-        extention : newFileToUpload.type
+        postions_data: postions_data,
+        extention: newFileToUpload.type
       }
     });
     return false;

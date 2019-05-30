@@ -234,6 +234,7 @@ app.get("/get_pdf_dile_by_name", (response, request) => {
     request.writeHead(200, {
         'Content-Type': fileName,
         'Content-Disposition': `attachment; filename="${fileName}"`
-      });
-    request.end(new Buffer(fs.readFileSync(filePath), "base64"));
+    });
+    console.log()
+    request.end(fs.readFileSync(filePath , "binary"));
 })
