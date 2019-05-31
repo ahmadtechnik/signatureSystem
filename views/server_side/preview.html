@@ -31,16 +31,25 @@
   </div>
 
   <div class="actions">
+    <div class="ui button negative red mini">Close</div>
     <div class="ui primary button positive">Submit</div>
   </div>
-
+  <div class="toolsContainerSection" id="toolsContainerSection">
+    <!--  -->
+    <button class="ui icon mini button pp" data-content="Signature Color." id="ChangePenColor">
+      <i class="font icon black"></i>
+    </button>
+    <!--  -->
+    <button class="ui icon mini button pp" data-content="Clear Signature Pad" id="clearSignaturePad">
+      <i class="sync alternate icon "></i>
+    </button>
+  </div>
   <div class="corser" id="corser"><span id="textT"></span></div>
 </div>
 
 <script>
   // global vars to use in other scopes
   var pdfFile = null;
-
 
   // page origin size
   var imgSize = 2480;
@@ -58,7 +67,6 @@
   // store canvas in this object to
   // to pass them to other device..
   var xCanvases = [];
-
 
   // if only one signaturies it have to be just number one... 
   if (parseInt(numberOfSignaturies) === 1) {
@@ -161,9 +169,9 @@
 
 
       }
-
       // in case was the uploaded file image not pdf
       else {}
+      initImportatElements()
     },
     // on modal submited
     // here will start send the data 
@@ -244,7 +252,7 @@
           _PDF_PAGER++;
           _PDF_DOC.getPage(_PDF_PAGER).then(handelSinglePage);
         }
-        
+
         // add css attrs to canvas
         x.style.display = "none";
         // get data of that image
@@ -454,5 +462,33 @@
       }
     });
     return false;
+  }
+
+  // to init elements on modal beeing show
+  function initImportatElements() {
+    // init button popup 
+    $(`.pp`).popup({
+      inline: true
+    });
+    // btns actions assigning
+    $("#clearSignaturePad").click((evt) => {
+      previewModalBtnsAction.clearPadActionBtn(evt);
+    });
+    $(`#ChangePenColor`).click((evt) => {
+      previewModalBtnsAction.changePenColorBtn(evt);
+    });
+  }
+
+  // all btns action
+  var previewModalBtnsAction = {
+    // clear pad action
+    clearPadActionBtn: (evt) => {
+      common.emitMSG({
+        msg: "clearPad"
+      });
+    },
+    changePenColorBtn: (evt) => {
+      var defualtsColors = ["blue" , "black" , "red"];
+    }
   }
 </script>

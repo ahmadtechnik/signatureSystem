@@ -8,6 +8,7 @@ var socketObject = null;
 var socket = null;
 var clientSide
 var serverside
+
 exports.socketObjectSetter = (server) => {
     /**
      * Add socket io lib
@@ -44,7 +45,6 @@ var onClientConnection = (client) => {
 /** --------------------------------- cleint side room ---------------------------------- */
 /** on client client-side connected  */
 var onClientSideConnected = (client) => {
-
     console.log("client from client side connected ... " + client.id);
     client.on("disconnect", onClientSideDeviceDisconnected);
     /** inform server side home page, that there is an client connected..  */
@@ -52,15 +52,19 @@ var onClientSideConnected = (client) => {
         clientConnected: client.id
     });
 
-
+    /** on receiving message from client to server */
+    client.on("comingRequestToServer", onComingRequestToServer)
 }
 /** on client client-side disconnected */
-var onClientSideDeviceDisconnected = (client) => {
-    console.log("client-side device disconnected : ");
+var onClientSideDeviceDisconnected = () => {
+    console.log("client-side device disconnected");
     /** emit to server-side device that there an client-client side device is disconnected */
     serverside.emit("clientDisconnected", {});
 }
 
+var onComingRequestToServer = (data) => {
+    serverside.emit("comingRequestToServer", data);
+}
 
 /** --------------------------------- server side room ---------------------------------- */
 /** on client server-side connected */
@@ -68,33 +72,23 @@ var onServerSideConnected = (client) => {
 
     console.log("device connected to server side : " + client.id);
     client.on("disconnect", onServerSideDeviceDisconnected)
-    /** on order to convert pdf file by file name */
-    client.on("orderToConverTheFile", pdfToPICconverter)
+
     /* on Cordinations serverSidePage */
 
     /** confirm file button cliecked onserver side */
     client.on("comingRequestToClient", comingRequestToClient)
-    /** send to clint to reload the page */
-    clientSide.emit("comingRequestToClient", {
-        msg: "serverDis"
-    })
 }
 /** on client server-side disconnected */
 var onServerSideDeviceDisconnected = () => {
     console.log("server-side device disconnected : ");
 }
 
-/** order to convert the pdf file */
-var pdfToPICconverter = (data) => {
-    /** call the pdf2pic converter */
-}
 
 /**
  * on server side send message to client that 
  * there is an coming new file need to be signed
  */
 var comingRequestToClient = (data) => {
-
     /** emit notifi  to client side to show wait page */
     clientSide.emit("comingRequestToClient", data)
 }

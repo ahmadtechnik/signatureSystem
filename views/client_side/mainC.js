@@ -46,15 +46,12 @@ $(document).ready(() => {
     _SIGNATURE_PAD_OBJECT = new SignaturePad(_SIGNATURE_CANVAS, {
         onBegin: padSignatureEvent.onBegin,
         onEnd: padSignatureEvent.onEnd,
-        minWidth : 0.5,
-        maxWidth : 2.5,
-        throttle : 30,
-        backgroundColor  :"black",
-        penColor : "white",
-        velocityFilterWeight : 0.7
+        backgroundColor: "black",
+        penColor: "white",
+
     });
 
- 
+
 
 
     /** set control buttons aciton */
@@ -90,7 +87,14 @@ var comun = {
             case "_signature_data":
                 renderCurrentSentFile(data.data);
                 break;
+            case "clearPad":
+                _SIGNATURE_PAD_OBJECT.clear();
+                break;
         }
+    },
+    // shortcut to emit message to server-side device
+    emitMSG: (data) => {
+        socket.emit("comingRequestToServer", data)
     }
 }
 
@@ -112,6 +116,9 @@ var dimmerControler = {
 var btnsActions = {
     clearPadBtnAction: (evt) => {
         _SIGNATURE_PAD_OBJECT.clear();
+        comun.emitMSG({
+            msg: "padCleared"
+        });
     },
     SubmitPadBtnAction: (evt) => {
         // check if the pad not empty before submiting the file
@@ -130,7 +137,7 @@ var padSignatureEvent = {
     onEnd: (data) => {
         // to do , send the data after end first section to server 
         // to show preview of the signature
-
+        comun.emitMSG(_SIGNATURE_PAD_OBJECT.toDataURL());
     }
 }
 

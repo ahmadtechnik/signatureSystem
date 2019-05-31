@@ -25,3 +25,21 @@
         -moz-box-shadow: 5px 3px 5px 0px rgba(0, 0, 0, 0.75);
         box-shadow: 5px 5px 3px 0px rgba(0, 0, 0, 0.75);
 }
+
+/* qr code place */
+.qr_client_link_path {
+        position: absolute;
+        z-index: 10000;
+        right: 10px;
+        bottom: 10px;
+        height: 150px;
+        width: 150px;
+}
+
+/* 
+ */
+.toolsContainerSection {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+}

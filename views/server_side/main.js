@@ -4,6 +4,23 @@
  */
 
 var socket = io.connect("/server_side_device" /*`${protocol}://${hostname}:${portinuse}`*/ );
+socket.on("connect", () => {
+    common.onServerConnected()
+})
+socket.on("comingRequestToServer", (data) => {
+    common.onClientRequested(data);
+})
+// global vars .
+var _QR_CODE_PLACE = null;
+
+var _LOCATION_URL_DATA = {
+    PROTOCOL: window.location.protocol,
+    HOSTNAME: window.location.hostname,
+    PORT: window.location.port,
+    CLIENT: "client_side_home"
+}
+var _QR_CODE_CONTAINER = document.getElementById("qr_client_link_path");
+
 
 /**
  * shortcut to emit data to server
@@ -31,10 +48,22 @@ $(document).ready(() => {
      */
     $(`#showFilesHistory`).click(showFilesHistoryBtnAction);
 
+    // generate qr code for client side
+    new QRCode(_QR_CODE_CONTAINER, {
+        text: `${_LOCATION_URL_DATA.PROTOCOL}//${_LOCATION_URL_DATA.HOSTNAME}:${_LOCATION_URL_DATA.PORT}/${_LOCATION_URL_DATA.CLIENT}`,
+
+        width: 150,
+        height: 150,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+   
 })
 
 function showFilesHistoryBtnAction(event) {
-
+    common.emitMSG({msg : "clearPad"});
     /**
      * to close the sidebare menu after loading the page
      */
@@ -98,15 +127,12 @@ function onUploadFileSuccessed(response) {
     }
 }
 
-/** ------------------- PDFJS functions , at preview modal -------------------------- */
-
-
-
 /** ------------------ GENARAL FUNCTIONS --------------------- */
 
 /**
  * progress to change the top progress bar
  */
+
 function progressBar() {
     var xhr = $.ajaxSettings.xhr();
     xhr.onprogress = function e() {
@@ -140,4 +166,30 @@ function progressBar() {
         }
     };
     return xhr;
+}
+
+
+/** requests from client  */
+var common = {
+    // shortcut to emit data to client-side device
+    emitMSG: (msg) => {
+        socket.emit("comingRequestToClient", msg);
+    },
+    // the first step after server connected to socket
+    onServerConnected: () => {
+
+    },
+    // on client request to server 
+    onClientRequested: (data) => {
+        console.log(data)
+        switch (data.msg) {
+            case "padCleared":
+                console.log("PAD CLEARED ...")
+                break;
+
+            default:
+                break;
+        }
+    },
+
 }
