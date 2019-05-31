@@ -10,16 +10,13 @@ var _SENT_FILE_TYPE = null;
 
 
 var _SIGNATURE_CANVAS = null;
-var _SIGNATURE_CANVAS_CONTEXT = null;
+var _SIGNATURE_PAD_OBJECT;
 
-var _MOUSE_POSTION_TO_CANVOS = {
-    y: 0,
-    x: 0
-};
+
 
 // start geting display dimantions
 var dHeight, dWidth;
-document.addEventListener('contextmenu', event => event.preventDefault());
+//document.addEventListener('contextmenu', event => event.preventDefault());
 
 // init socket connection... 
 var socket = io.connect("/client_side_device");
@@ -33,6 +30,7 @@ socket.on("comingRequestToClient", (data) => {
 })
 
 $(document).ready(() => {
+    /** to change elements sizes if the display resized */
     elementsSizing();
     setNewSignatureTakerPace()
     $(window).resize(() => {
@@ -40,21 +38,28 @@ $(document).ready(() => {
         setNewSignatureTakerPace()
     });
 
-    _SIGNATURE_CANVAS = $("#signDrowSecitonCanvas");
-    _SIGNATURE_CANVAS.width(_SIGNATURE_CANVAS.parent().width());
-    _SIGNATURE_CANVAS.height(_SIGNATURE_CANVAS.parent().height())
-    _SIGNATURE_CANVAS_CONTEXT = $(_SIGNATURE_CANVAS).get(0).getContext("2d");
+    _SIGNATURE_CANVAS = document.getElementById("signDrowSecitonCanvas");
+    _SIGNATURE_CANVAS.width = $(`#signDrowSeciton`).width();
+    _SIGNATURE_CANVAS.height = $(`#signDrowSeciton`).height();
+
+    // declare signature pad object
+    _SIGNATURE_PAD_OBJECT = new SignaturePad(_SIGNATURE_CANVAS, {
+        onBegin: padSignatureEvent.onBegin,
+        onEnd: padSignatureEvent.onEnd,
+        minWidth : 0.5,
+        maxWidth : 2.5,
+        throttle : 30,
+        backgroundColor  :"black",
+        penColor : "white",
+        velocityFilterWeight : 0.7
+    });
+
+ 
 
 
-    _SIGNATURE_CANVAS_CONTEXT.lineWidth = 5;
-    _SIGNATURE_CANVAS_CONTEXT.lineJoin = '0ound';
-    _SIGNATURE_CANVAS_CONTEXT.lineCap = 'r9und';
-    _SIGNATURE_CANVAS_CONTEXT.strokeStyle = '#00CC99';
-
-
-    _SIGNATURE_CANVAS.mousemove(signaturePaintingEvents.onMouseMove);
-    _SIGNATURE_CANVAS.mousedown(signaturePaintingEvents.onMouseDown);
-    _SIGNATURE_CANVAS.mouseup(signaturePaintingEvents.onMouseUp);
+    /** set control buttons aciton */
+    $(`#clearSignaturBtn`).click(btnsActions.clearPadBtnAction)
+    $(`#submitSignatureBtn`).click(btnsActions.SubmitPadBtnAction)
 });
 
 /********************************************************* */
@@ -74,7 +79,7 @@ var comun = {
                 dimmerControler.showDimmer();
                 break;
             case "cancaled":
-                dimmerControler.hideDimmer()
+                dimmerControler.hideDimmer();
                 break;
             case "serverDis":
                 window.location.reload();
@@ -103,25 +108,32 @@ var dimmerControler = {
     }
 }
 
-/** on waint modal  */
-function showWaitModal() {
-    $.ajax({
-        url: "getWaitModal",
-        method: "GET",
-        success: (data) => {
-            $("body").append(data);
-            $("#waitModal").modal(waitModalOptions).modal("show");
+// buttons Actions
+var btnsActions = {
+    clearPadBtnAction: (evt) => {
+        _SIGNATURE_PAD_OBJECT.clear();
+    },
+    SubmitPadBtnAction: (evt) => {
+        // check if the pad not empty before submiting the file
+        if (!_SIGNATURE_PAD_OBJECT.isEmpty()) {
+            console.log(_SIGNATURE_PAD_OBJECT.toDataURL("image/svg+xml"));
+        } else {
+            alert("PLEASE SIGN THERE")
         }
-    });
-}
-
-// declare wait modal options
-var waitModalOptions = {
-    closable: false,
-    onHidden: () => {
-        $("#waitModal").remove();
     }
 }
+
+// signature pad aevents
+// and controler
+var padSignatureEvent = {
+    onBegin: (data) => {},
+    onEnd: (data) => {
+        // to do , send the data after end first section to server 
+        // to show preview of the signature
+
+    }
+}
+
 
 /**
  * 
@@ -184,11 +196,11 @@ function renderCurrentSentFile(data) {
 
 
 }
+
 /**
  * handling single page
  * _PDF_PAGES_AS_CANVAS
  */
-
 function singlePageHandling(page) {
     // get orginal view port of the page
     // sotre basic dimantion of port view
@@ -199,8 +211,6 @@ function singlePageHandling(page) {
 
     // store width of the new scaled sizes
     var viewPort = page.getViewport(cWidth / oWidth);
-
-
 
     // create new canvas to drow the page
     var xCanvas = document.createElement("canvas");
@@ -232,73 +242,4 @@ function singlePageHandling(page) {
         }
         $(`#pageAmountContainer`).text(_PAGER);
     })
-
 }
-
-/**
- * painting on canvas
- */
-
-
-var signaturePaintingEvents = {
-    onMouseMove: (e) => {
-        _MOUSE_POSTION_TO_CANVOS.x = e.pageX - $(_SIGNATURE_CANVAS).offset().left;
-        _MOUSE_POSTION_TO_CANVOS.y = e.pageY - $(_SIGNATURE_CANVAS).offset().top;
-    },
-    onMouseDown: (e) => {
-        _SIGNATURE_CANVAS_CONTEXT.beginPath();
-        _SIGNATURE_CANVAS_CONTEXT.moveTo(
-            _MOUSE_POSTION_TO_CANVOS.x,
-            _MOUSE_POSTION_TO_CANVOS.y);
-
-        _SIGNATURE_CANVAS.mousemove(signaturePaintingEvents.onPaint);
-        console.log(_MOUSE_POSTION_TO_CANVOS)
-    },
-    onMouseUp: (e) => {
-        $(_SIGNATURE_CANVAS).off("mousemove" ,signaturePaintingEvents.onPaint );
-    },
-    onPaint: (e) => {
-        _SIGNATURE_CANVAS_CONTEXT.lineTo(_MOUSE_POSTION_TO_CANVOS.x, _MOUSE_POSTION_TO_CANVOS.y);
-        _SIGNATURE_CANVAS_CONTEXT.stroke();
-    }
-}
-
-/*
-var canvas = document.getElementById('myCanvas');
-var ctx = canvas.getContext('2d');
-var painting = document.getElementById('paint');
-var paint_style = getComputedStyle(painting);
-canvas.width = parseInt(paint_style.getPropertyValue('width'));
-canvas.height = parseInt(paint_style.getPropertyValue('height'));
-
-var mouse = {
-    x: 0,
-    y: 0
-};
-
-canvas.addEventListener('mousemove', function (e) {
-    mouse.x = e.pageX - this.offsetLeft;
-    mouse.y = e.pageY - this.offsetTop;
-}, false);
-
-ctx.lineWidth = 0;
-ctx.lineJoin = '0ound';
-ctx.lineCap = 'r9und';
-ctx.strokeStyle = '#00CC99';
-
-canvas.addEventListener('mousedown', function (e) {
-    ctx.beginPath();
-    ctx.moveTo(mouse.x, mouse.y);
-    canvas.addEventListener('mousemove', onPaint, false);
-}, false);
-
-canvas.addEventListener('mouseup', function () {
-    canvas.removeEventListener('mousemove', onPaint, false);
-}, false);
-
-var onPaint = function () {
-    ctx.lineTo(mouse.x, mouse.y);
-    ctx.stroke();
-};
-
-*/
