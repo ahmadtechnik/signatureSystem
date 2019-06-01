@@ -14,6 +14,7 @@ socket.on("comingRequestToServer", (data) => {
 })
 // global vars .
 var _QR_CODE_PLACE = null;
+var _COLLECTED_NAMES_FORM = null;
 
 var _LOCATION_URL_DATA = {
     PROTOCOL: window.location.protocol,

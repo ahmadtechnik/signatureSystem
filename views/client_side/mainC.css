@@ -82,3 +82,9 @@ set backgrount for the bottom seciotn
     -moz-border-radius: 0px 0px 25px 25px;
     -webkit-border-radius: 0px 0px 25px 25px;
 }
+/* 
+ */
+ .signaturiesNum , .signaturiesName{
+     font-size: 25px;
+
+ }

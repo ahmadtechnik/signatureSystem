@@ -49,6 +49,7 @@
             Next
         </div>
     </div>
+
 </div>
 <script>
     /**
@@ -84,30 +85,30 @@
          * **/
         newFileName = $(`#newNameLabel`).val();
         numberOfSignaturies = $(`#signaturies_number`).val();
-        if (checkIfFileNameAndSignaturiesNumbersAreFilled()) {
-            $(`#nextStepModalBtn`).off("click");
-            $(`#nextStepModalBtn`).css("display", "none");
-            // create field in amount of the signaturies 
-            for (let index = 0; index < parseInt(numberOfSignaturies); index++) {
-                // create fields to get signaturies names
-                var fieldContainer = $(`<div class="field " ></div>`);
-                var fieldLabed = $(`<label>Name for : ${index +1}</label>`);
-                var fieldInput = $(
-                    `<input  id="nameNum_${index + 1 }" type="text" placeholder="optional" signName="${index +1}" />`
-                );
-                fieldContainer.append(fieldLabed);
-                fieldContainer.append(fieldInput);
-                $(`#signaturiesNamesFields`).append(fieldContainer);
-            };
-            $(`#OKMODALBTN`).css("display", "");
-        }
+
+        $(`#nextStepModalBtn`).off("click");
+        $(`#nextStepModalBtn`).css("display", "none");
+        // create field in amount of the signaturies 
+        for (let index = 0; index < parseInt(numberOfSignaturies); index++) {
+            // create fields to get signaturies names
+            var fieldContainer = $(`<div class="field " ></div>`);
+            var fieldLabed = $(`<label>Name for : ${index +1}</label>`);
+            var fieldInput = $(
+                `<input  id="nameNum_${index + 1 }" type="text" placeholder="optional" signName="${index +1}" />`
+            );
+            fieldContainer.append(fieldLabed);
+            fieldContainer.append(fieldInput);
+            $(`#signaturiesNamesFields`).append(fieldContainer);
+        };
+
+        $(`#OKMODALBTN`).css("display", "");
+    
 
     })
 
     /**
     to get all fields values
     **/
-
 
     function getSignaturiesNamesFields() {
         var allFields = $(`input[signName]`);

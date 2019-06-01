@@ -137,8 +137,9 @@
     var newFileName;
     var numberOfSignaturies;
     var fieldAreFilled = false;
-    // store enteren names of the signaturies
-    var names;
+
+
+    
 
     $(`#upload_confirm_button`).click(upload_file_confirm);
 
@@ -208,7 +209,7 @@
                              * store entered names in in the fields
                              * **/
                             // names fields 
-                            names = getSignaturiesNamesFields();
+                            _COLLECTED_NAMES_FORM = getSignaturiesNamesFields();
                         },
                         onDeny: modal => {
                             /**

@@ -69,7 +69,7 @@ var comun = {
     },
     /** on comingRequestToClient */
     comingRequestToClient: (data) => {
-        console.log(data);
+console.log(data)
         var msg = data.msg;
         switch (msg) {
             case "confirmed":
@@ -85,8 +85,12 @@ var comun = {
                 console.log(data);
                 break;
             case "_signature_data":
-                renderCurrentSentFile(data.data);
-                signaturiesFilter(data.data);
+                    _SIGNATURIES_DATA = data.data;
+
+                renderCurrentSentFile(_SIGNATURIES_DATA);
+
+                signaturiesFilter(_SIGNATURIES_DATA);
+
                 break;
             case "clearPad":
                 _SIGNATURE_PAD_OBJECT.clear();
@@ -119,6 +123,7 @@ var dimmerControler = {
     }
 }
 
+var _SIGNS_DATA = [];
 // buttons Actions
 var btnsActions = {
     clearPadBtnAction: (evt) => {
@@ -136,6 +141,9 @@ var btnsActions = {
         if (!_SIGNATURE_PAD_OBJECT.isEmpty()) {
             // 
             _SIGNATURE_PAD_OBJECT.toDataURL();
+            // check if there more signature and not only one
+
+            signaturiesFilter(_SIGNATURIES_DATA);
         } else {
             alert("PLEASE SIGN THERE")
         }
@@ -224,18 +232,23 @@ function renderCurrentSentFile(data) {
 
 }
 
+var _CURRENT_SIGNATURIE = 1;
+var _SIGNS_ARE_MULTIBLE = false;
 /**  */
 function signaturiesFilter(data) {
+
     var signsNum = parseInt(data.signaturiesNum);
     var signatoriesNamesForm = data.signatoriesNamesForm;
-    console.log(signsNum, signatoriesNamesForm[1]);
     // in case was signaturies number more then 1 
     if (signsNum > 1) {
-
+        _SIGNS_ARE_MULTIBLE = true;
+        $(`#signaturiesName`).text(signatoriesNamesForm[_CURRENT_SIGNATURIE]);
+        $(`#signaturiesNum`).text(_CURRENT_SIGNATURIE);
     } else {
-        $(`#signaturiesName`).text(signatoriesNamesForm[1]);
-        $(`#signaturiesNum`).text(1)
+        $(`#signaturiesName`).text(signatoriesNamesForm[_CURRENT_SIGNATURIE]);
+        $(`#signaturiesNum`).text(_CURRENT_SIGNATURIE);
     }
+
 }
 /**
  * handling single page
