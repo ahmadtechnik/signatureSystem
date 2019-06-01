@@ -35,16 +35,30 @@
     <div class="ui primary button positive">Submit</div>
   </div>
   <div class="toolsContainerSection" id="toolsContainerSection">
+
     <!--  -->
-    <button class="ui icon mini button pp" data-content="Signature Color." id="ChangePenColor">
-      <i class="font icon black"></i>
+    <button class="ui icon mini button ppp" id="ChangePenColor">
+      <i class="font icon"></i>
     </button>
+    <div class="ui fluid popup bottom left transition hidden colorsSecetor"
+      style="top: 553px; left: 1px; bottom: auto; right: auto; width: 960px;">
+      <div class="ui menu">
+        <div class="ui item">
+          <div class="ui button blue mini changeColor" color="blue">Blue</div>
+        </div>
+        <div class="ui item">
+          <div class="ui button black mini changeColor" color="black">Black</div>
+        </div>
+        <div class="ui item">
+          <div class="ui button red mini changeColor" color="red">Red</div>
+        </div>
+      </div>
+    </div>
     <!--  -->
-    <button class="ui icon mini button pp" data-content="Clear Signature Pad" id="clearSignaturePad">
+    <button class="ui icon mini button pp" id="clearSignaturePad" data-content="Clear Signature Pad.">
       <i class="sync alternate icon "></i>
     </button>
   </div>
-  <div class="corser" id="corser"><span id="textT"></span></div>
 </div>
 
 <script>
@@ -116,11 +130,9 @@
     }
     ctrlKey = false;
   });
-
   var _PDF_DOC = null;
   var _PDF_DOC_PAGES_NUM = 0;
   var _PDF_PAGER = 1;
-
   /** to shpw the modal after  **/
   $(`#previewModal`).modal({
     closable: false,
@@ -189,8 +201,11 @@
       $(document).off("keydown");
       $(document).off("keyup");
 
+    },
+    // on modal deny
+    onDeny: (modal) => {
+      previewModalBtnsAction.modalOnDeny(modal);
     }
-
   }).modal("show");
 
 
@@ -470,6 +485,16 @@
     $(`.pp`).popup({
       inline: true
     });
+    $(`.ppp`).popup({
+      inline: true,
+      hoverable: true,
+      position: 'bottom left',
+      delay: {
+        show: 300,
+        hide: 800
+      },
+      popup: "#colorsSecetor"
+    });
     // btns actions assigning
     $("#clearSignaturePad").click((evt) => {
       previewModalBtnsAction.clearPadActionBtn(evt);
@@ -477,6 +502,10 @@
     $(`#ChangePenColor`).click((evt) => {
       previewModalBtnsAction.changePenColorBtn(evt);
     });
+    // assigning color buttons actions 
+    $(`.changeColor`).click((evt) => {
+      previewModalBtnsAction.setColorBtnsAction(evt);
+    })
   }
 
   // all btns action
@@ -487,8 +516,24 @@
         msg: "clearPad"
       });
     },
+    //
     changePenColorBtn: (evt) => {
-      var defualtsColors = ["blue" , "black" , "red"];
+      var defualtsColors = ["blue", "black", "red"];
+    },
+    //
+    setColorBtnsAction: (evt) => {
+      var selectedColor = $(evt.target).attr("color");
+      common.emitMSG({
+        msg: "changePenColor",
+        newColor: selectedColor
+      });
+      $(`#ChangePenColor`).find(".icon").css("color", selectedColor);
+    },
+    // on modal deny
+    modalOnDeny: (modal) => {
+      common.emitMSG({
+        msg: "refresh"
+      })
     }
   }
 </script>

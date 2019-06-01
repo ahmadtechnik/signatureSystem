@@ -90,11 +90,17 @@ var comun = {
             case "clearPad":
                 _SIGNATURE_PAD_OBJECT.clear();
                 break;
+            case "changePenColor":
+                _SIGNATURE_PAD_OBJECT.penColor = data.newColor;
+                break
+            case "refresh":
+                window.location.reload();
+                break;
         }
     },
     // shortcut to emit message to server-side device
     emitMSG: (data) => {
-        socket.emit("comingRequestToServer", data)
+        socket.emit("comingRequestToServer", data);
     }
 }
 
@@ -123,7 +129,7 @@ var btnsActions = {
     SubmitPadBtnAction: (evt) => {
         // check if the pad not empty before submiting the file
         if (!_SIGNATURE_PAD_OBJECT.isEmpty()) {
-            console.log(_SIGNATURE_PAD_OBJECT.toDataURL("image/svg+xml"));
+            _SIGNATURE_PAD_OBJECT.toDataURL("image/svg+xml");
         } else {
             alert("PLEASE SIGN THERE")
         }
