@@ -21,9 +21,9 @@ set backgrount for the bottom seciotn
 */
 .signDrowSeciton {
     height: 4cm;
-    width: 50%;
-
-
+    width: 8cm;
+    max-width: 8cm;
+    max-height: 4cm;
     border-bottom: 2px solid #000000;
     border-radius: 0px 0px 25px 25px;
     -moz-border-radius: 0px 0px 25px 25px;

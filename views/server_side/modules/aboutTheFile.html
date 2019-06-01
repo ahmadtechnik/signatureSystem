@@ -32,9 +32,7 @@
                 </div>
             </di>
             <div class="ui equal width form stackable" id="getSignaturiesNames">
-                <div class="ui fields" id="signaturiesNamesFields">
-
-                </div>
+                <div class="ui fields" id="signaturiesNamesFields"></div>
             </div>
         </div>
     </div>
@@ -88,10 +86,7 @@
         numberOfSignaturies = $(`#signaturies_number`).val();
         if (checkIfFileNameAndSignaturiesNumbersAreFilled()) {
             $(`#nextStepModalBtn`).off("click");
-
             $(`#nextStepModalBtn`).css("display", "none");
-
-
             // create field in amount of the signaturies 
             for (let index = 0; index < parseInt(numberOfSignaturies); index++) {
                 // create fields to get signaturies names

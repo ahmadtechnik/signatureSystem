@@ -13,6 +13,9 @@ var _SIGNATURE_CANVAS = null;
 var _SIGNATURE_PAD_OBJECT;
 
 
+var _A4_ORIGINAL_WIDTH = 2480;
+
+var _SIGNATURIES_DATA = null;
 
 // start geting display dimantions
 var dHeight, dWidth;
@@ -46,20 +49,16 @@ $(document).ready(() => {
     _SIGNATURE_PAD_OBJECT = new SignaturePad(_SIGNATURE_CANVAS, {
         onBegin: padSignatureEvent.onBegin,
         onEnd: padSignatureEvent.onEnd,
-        backgroundColor: "black",
-        penColor: "white",
-
     });
-
-
 
 
     /** set control buttons aciton */
     $(`#clearSignaturBtn`).click(btnsActions.clearPadBtnAction)
     $(`#submitSignatureBtn`).click(btnsActions.SubmitPadBtnAction)
+
 });
 
-/********************************************************* */
+/**********************************************************/
 
 
 
@@ -70,6 +69,7 @@ var comun = {
     },
     /** on comingRequestToClient */
     comingRequestToClient: (data) => {
+        console.log(data);
         var msg = data.msg;
         switch (msg) {
             case "confirmed":
@@ -86,6 +86,7 @@ var comun = {
                 break;
             case "_signature_data":
                 renderCurrentSentFile(data.data);
+                signaturiesFilter(data.data);
                 break;
             case "clearPad":
                 _SIGNATURE_PAD_OBJECT.clear();
@@ -125,11 +126,16 @@ var btnsActions = {
         comun.emitMSG({
             msg: "padCleared"
         });
+        comun.emitMSG({
+            msg: "signPreview",
+            data: _SIGNATURE_PAD_OBJECT.toDataURL()
+        });
     },
     SubmitPadBtnAction: (evt) => {
         // check if the pad not empty before submiting the file
         if (!_SIGNATURE_PAD_OBJECT.isEmpty()) {
-            _SIGNATURE_PAD_OBJECT.toDataURL("image/svg+xml");
+            // 
+            _SIGNATURE_PAD_OBJECT.toDataURL();
         } else {
             alert("PLEASE SIGN THERE")
         }
@@ -143,7 +149,10 @@ var padSignatureEvent = {
     onEnd: (data) => {
         // to do , send the data after end first section to server 
         // to show preview of the signature
-        comun.emitMSG(_SIGNATURE_PAD_OBJECT.toDataURL());
+        comun.emitMSG({
+            msg: "signPreview",
+            data: _SIGNATURE_PAD_OBJECT.toDataURL()
+        });
     }
 }
 
@@ -160,6 +169,7 @@ function elementsSizing() {
     // set size of signature section
     $("#signatureTakerSection").height(dHeight * 20 / 100);
     $("#signatureTakerSection").width(dWidth);
+
 }
 /**
  * 
@@ -177,13 +187,17 @@ function setNewSignatureTakerPace() {
 
 function renderCurrentSentFile(data) {
     $(`#filePreviewSeciton`).html("");
+    // reset vars to avoid problems
+
+    _PAGER = 1;
+    _PDF_FILE_DOC = null;
+    _NUM_PAGES = null;
+
 
     _SENT_FILE_NAME = data.requested_file_name;;
     _POS_DATA_ = data.postions_data;
     _SENT_FILE_TYPE = data.extention;
-
-    console.log(data)
-
+    // get wanted file
     $.ajax({
         url: "get_pdf_dile_by_name",
         method: "GET",
@@ -192,9 +206,9 @@ function renderCurrentSentFile(data) {
             fileName: _SENT_FILE_NAME,
             fileType: _SENT_FILE_TYPE
         },
-
         // after geting binary PDF from Server .
         success: (data) => {
+
             // read pdf document
             PDFJS.getDocument({
                 data: data
@@ -210,6 +224,19 @@ function renderCurrentSentFile(data) {
 
 }
 
+/**  */
+function signaturiesFilter(data) {
+    var signsNum = parseInt(data.signaturiesNum);
+    var signatoriesNamesForm = data.signatoriesNamesForm;
+    console.log(signsNum, signatoriesNamesForm[1]);
+    // in case was signaturies number more then 1 
+    if (signsNum > 1) {
+
+    } else {
+        $(`#signaturiesName`).text(signatoriesNamesForm[1]);
+        $(`#signaturiesNum`).text(1)
+    }
+}
 /**
  * handling single page
  * _PDF_PAGES_AS_CANVAS
@@ -223,7 +250,7 @@ function singlePageHandling(page) {
     var cHeight = $(`#filePreviewSeciton`).height();
 
     // store width of the new scaled sizes
-    var viewPort = page.getViewport(cWidth / oWidth);
+    var viewPort = page.getViewport(_A4_ORIGINAL_WIDTH / oWidth);
 
     // create new canvas to drow the page
     var xCanvas = document.createElement("canvas");

@@ -59,14 +59,15 @@
       <i class="sync alternate icon "></i>
     </button>
   </div>
-</div>
 
+</div>
+<div class="signaturePreviewSection" id="signaturePreviewSection"><img id="signaturePreviewImg" src=""></div>
 <script>
   // global vars to use in other scopes
   var pdfFile = null;
 
   // page origin size
-  var imgSize = 2480;
+  var _A4_ORIGINAL_WIDTH = 2480;
   var imgHeight = null;
 
   // init document key down, to detect if user pressd any 
@@ -130,9 +131,13 @@
     }
     ctrlKey = false;
   });
+
   var _PDF_DOC = null;
   var _PDF_DOC_PAGES_NUM = 0;
   var _PDF_PAGER = 1;
+
+  var _COLLECTED_NAMES_FORM = getSignaturiesNamesFields();
+
   /** to shpw the modal after  **/
   $(`#previewModal`).modal({
     closable: false,
@@ -228,14 +233,14 @@
   function handelSinglePage(page) {
 
     // set pdf page view port scale
-    var viewport = page.getViewport(imgSize / page.getViewport(1).width);
+    var viewport = page.getViewport(_A4_ORIGINAL_WIDTH / page.getViewport(1).width);
 
     // create new canvas
     var x = document.createElement("CANVAS");
     x.style.display = "none";
-    x.width = imgSize;
+    x.width = _A4_ORIGINAL_WIDTH;
     // set canvas height
-    imgHeight = page.getViewport(imgSize / page.getViewport(1).width).height
+    imgHeight = page.getViewport(_A4_ORIGINAL_WIDTH / page.getViewport(1).width).height
     x.height = imgHeight;
     // add id attr to canvas
     x.setAttribute("id", `canvos_${page.pageNumber}`);
@@ -292,7 +297,7 @@
         // on mouse on the image 
         $(img).mouseover((event) => {
           // resize the image to orginal size
-          // $(img).css("width", imgSize)
+          // $(img).css("width", _A4_ORIGINAL_WIDTH)
           //  $(img).css("height", imgHeight);
         })
         // add click on img action 
@@ -473,7 +478,9 @@
       data: {
         requested_file_name: requested_file_name,
         postions_data: postions_data,
-        extention: newFileToUpload.type
+        extention: newFileToUpload.type,
+        signaturiesNum: numberOfSignaturies,
+        signatoriesNamesForm: _COLLECTED_NAMES_FORM
       }
     });
     return false;

@@ -4,9 +4,11 @@
  */
 
 var socket = io.connect("/server_side_device" /*`${protocol}://${hostname}:${portinuse}`*/ );
+
 socket.on("connect", () => {
     common.onServerConnected()
 })
+
 socket.on("comingRequestToServer", (data) => {
     common.onClientRequested(data);
 })
@@ -20,7 +22,7 @@ var _LOCATION_URL_DATA = {
     CLIENT: "client_side_home"
 }
 var _QR_CODE_CONTAINER = document.getElementById("qr_client_link_path");
-
+console.log(_LOCATION_URL_DATA);
 
 /**
  * shortcut to emit data to server
@@ -32,8 +34,7 @@ var _QR_CODE_CONTAINER = document.getElementById("qr_client_link_path");
 var emitData = (key, data) => {
     socket.emit(key, data);
 }
-/** on client-side disconnected */
-socket.on("newClintConnected", (d) => {})
+
 
 /**
  * set document on ready
@@ -51,7 +52,6 @@ $(document).ready(() => {
     // generate qr code for client side
     new QRCode(_QR_CODE_CONTAINER, {
         text: `${_LOCATION_URL_DATA.PROTOCOL}//${_LOCATION_URL_DATA.HOSTNAME}:${_LOCATION_URL_DATA.PORT}/${_LOCATION_URL_DATA.CLIENT}`,
-
         width: 150,
         height: 150,
         colorDark: "#000000",
@@ -59,11 +59,13 @@ $(document).ready(() => {
         correctLevel: QRCode.CorrectLevel.H
     });
 
-   
+
 })
 
 function showFilesHistoryBtnAction(event) {
-    common.emitMSG({msg : "clearPad"});
+    common.emitMSG({
+        msg: "clearPad"
+    });
     /**
      * to close the sidebare menu after loading the page
      */
@@ -181,12 +183,14 @@ var common = {
     },
     // on client request to server 
     onClientRequested: (data) => {
-        console.log(data)
         switch (data.msg) {
             case "padCleared":
                 console.log("PAD CLEARED ...")
                 break;
-
+            case "signPreview":
+                var sign = data.data;
+                $(`#signaturePreviewImg`).attr("src", sign);
+                break;
             default:
                 break;
         }

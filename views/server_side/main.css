@@ -43,3 +43,11 @@
         bottom: 10px;
         left: 10px;
 }
+
+/*  */
+.signaturePreviewSection {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        z-index: 999999;
+}
