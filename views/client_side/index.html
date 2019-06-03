@@ -43,25 +43,33 @@
     </div>
     <hr style="margin: 0px">
     <!--  -->
-    <div class="signatureTakerSection" id="signatureTakerSection">
+    <div class="signatureTakerSection startSigningAction" id="signatureTakerSection">
         <!--  -->
         <div class="signDrowSeciton " id="signDrowSeciton">
             <!--  -->
-            <canvas class="signDrowSecitonCanvas" id="signDrowSecitonCanvas"></canvas>
+            <canvas class="signDrowSecitonCanvas" id="signDrowSecitonCanvas" ></canvas>
             <!--  -->
-            <div class="submitSignatureBtn  ui icon button green large" id="submitSignatureBtn">
+            <div class="submitSignatureBtn  ui icon button green large disabled" id="submitSignatureBtn">
                 <i class="check icon"></i>
             </div>
             <!--  -->
             <div class="clearSignaturBtn ui icon button red" id="clearSignaturBtn">
                 <i class="trash alternate icon"></i>
             </div>
-
         </div>
         <!--  -->
         <div class="signaturiesInfoSeciton" id="signaturiesInfoSeciton">
             <div class="signaturiesName" id="signaturiesName"></div>
             <div class="signaturiesNum" id="signaturiesNum"></div>
+        </div>
+        
+        <div class="ui dimmer">
+            <div class="content">
+                <h2 class="ui inverted icon header">
+                    <i class="icon"></i>
+                    Click Here to start
+                </h2>
+            </div>
         </div>
     </div>
     <div class="pageAmountContainer ui red label" id="pageAmountContainer"></div>

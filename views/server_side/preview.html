@@ -1,8 +1,9 @@
 <!-- modal -->
 <div class="ui modal " id="previewModal">
   <div class="header">Select signaturies places</div>
+
   <div class=" scrolling  content" id="previewModalContent">
-    <div class="ui celled internally grid  stackable">
+    <div class="ui celled internally grid  stackable" id="lockableModalContainer">
       <div class="four column row orange fileTopInfosContainer">
         <div class="column four wide ">File name : <span id="fileNameText"></span></div>
         <div class="column four wide">Signaturies number :<span id="signsNumberText"></span></div>
@@ -17,14 +18,23 @@
         </div>
 
         <div class="fourteen wide column ui rail pdfPagesPrevieContainer">
+
           <div class="ui segment centered center aligned">
-            <div>
-              <div id="canvasContainer">
-              </div>
+            <div id="canvasContainer">
             </div>
           </div>
         </div>
 
+      </div>
+      <!--  -->
+      <div class="ui dimmer">
+        <div class="content">
+          <h2 class="ui inverted icon header">
+            <i class="huge notched circle loading icon"></i>
+            WORKING ON SIGNATURE DEVICE...
+          </h2>
+          Please wait until the signatories finishing..
+        </div>
       </div>
 
     </div>
@@ -35,9 +45,8 @@
     <div class="ui primary button positive">Submit</div>
   </div>
   <div class="toolsContainerSection" id="toolsContainerSection">
-
     <!--  -->
-    <button class="ui icon mini button ppp" id="ChangePenColor">
+    <button class="ui icon mini button ppp black" id="ChangePenColor">
       <i class="font icon"></i>
     </button>
     <div class="ui fluid popup bottom left transition hidden colorsSecetor"
@@ -58,10 +67,22 @@
     <button class="ui icon mini button pp" id="clearSignaturePad" data-content="Clear Signature Pad.">
       <i class="sync alternate icon "></i>
     </button>
+    <!--  -->
+    <div class="ui icon button blue mini afterToolBtn" id="downloadPDF">
+      <i class="icon download"></i>
+    </div>
+    <!--  -->
+    <div class="ui icon button green mini afterToolBtn" id="printPages">
+      <i class="icon print"></i>
+    </div>
+    <!--  -->
+    <div class="ui icon button orange mini afterToolBtn" id="downloadAsPNG">
+      <i class="file image icon"></i>
+    </div>
+
   </div>
 
 </div>
-<div class="signaturePreviewSection" id="signaturePreviewSection"><img id="signaturePreviewImg" src=""></div>
 <script>
   // global vars to use in other scopes
   var pdfFile = null;
@@ -136,7 +157,7 @@
   var _PDF_DOC_PAGES_NUM = 0;
   var _PDF_PAGER = 1;
 
- 
+
 
   /** to shpw the modal after  **/
   $(`#previewModal`).modal({
@@ -244,7 +265,7 @@
     x.height = imgHeight;
     // add id attr to canvas
     x.setAttribute("id", `canvos_${page.pageNumber}`);
-
+    x.setAttribute("page_num", page.pageNumber);
 
     // set canvos container width 
     //$(`#canvasContainer`).width(x.width);
@@ -322,12 +343,13 @@
         singlImgeContainer.append(img);
         // append the image into the canvas container
         $(`#canvasContainer`).append(singlImgeContainer);
+
+        // pushing canvas to global object
         xCanvases.push(x);
-        $(x).remove();
+
         // to show the element again
         img.css("display", "block");
       });
-
 
     /**
      * todo : 
@@ -389,22 +411,24 @@
   // to be called when i want to marge the
   // signature with the image
   var storedCorns = [];
+  var labelsCounter = 0;
 
   function ImgOnClickAction(event, img, pageNum) {
 
     var imgID = $(img).attr("id");
-    console.log(cord);
-    if (cord[imgID] !== null || cord[imgID] !== undefined) {
 
+    if (cord[imgID] !== null || cord[imgID] !== undefined) {
 
       //console.log("x :  ", cord[imgID].x.toFixed(0), " y : ", cord[imgID].y.toFixed(0), "IMG ID : ", imgID)
 
       // create sagment to show user where he clicked
       var labelWidth = 100;
       var labelHeight = 25;
-      var sign = $(`<a class="ui tag red label signPlaceStyle" imgID="${imgID}" 
+      var sign = $(
+        `<a class="ui tag red label signPlaceStyle" imgID="${imgID}" 
       cordX="${cord[imgID].x.toFixed(0)}" cordY="${cord[imgID].y.toFixed(0)}" >
-        <span style="font-size : 10px;" >${names[pressedKeyboardKey]}</span> : ${pressedKeyboardKey}</a>`);
+        <span style="font-size : 10px;" >${_COLLECTED_NAMES_FORM[pressedKeyboardKey]}</span> : ${pressedKeyboardKey}</a>`
+      );
       var closIcon = $(`<i class="delete icon"></i>`);
       sign.append(closIcon);
 
@@ -437,22 +461,26 @@
         X: cord[imgID].x.toFixed(0),
         Y: cord[imgID].y.toFixed(0),
         SN: pressedKeyboardKey,
-        pageNum: pageNum
+        pageNum: pageNum,
+        removed: false
       }
 
       // check if name of signature was entered..
-      if (names[pressedKeyboardKey] !== "" && names[pressedKeyboardKey] !== undefined) {
-        clickCord["signName"] = names[pressedKeyboardKey];
+      if (_COLLECTED_NAMES_FORM[pressedKeyboardKey] !== "" && _COLLECTED_NAMES_FORM[pressedKeyboardKey] !==
+        undefined) {
+        clickCord["signName"] = _COLLECTED_NAMES_FORM[pressedKeyboardKey];
       }
 
       sign.attr("obIndex", storedCorns.length);
       storedCorns.push(clickCord);
-
+      labelsCounter++;
 
       // console.log(storedCorns);
     } else {
       // in case the element was not found in the object
     }
+    // hide after tool btns
+    $(`.afterToolBtn`).css("display", "none");
   }
 
   // if user want to remove sign place label
@@ -462,29 +490,61 @@
     var cordX = $(this).parent().attr("cordx");
     var signNum = $(this).parent().attr("numberOfSignaturies");
     var signIndex = $(this).parent().attr("obIndex");
-    delete storedCorns[signIndex];
-    console.log(storedCorns);
+    storedCorns[signIndex]["removed"] = true;
+
+    labelsCounter--;
+
     $(this).parent().remove();
+
+    if (labelsCounter === 0) {
+      storedCorns = [];
+    }
+    // hide after tool btns
+    $(`.afterToolBtn`).css("display", "none");
   }
 
   // add action to the modal, on modal submit button clicked
   function onModalApprove(modal) {
-    // here i have to send data to client side 
-    // X : postions and file name and pages
-    var requested_file_name = newFileToUpload.name;
-    var postions_data = storedCorns;
-    emitData("comingRequestToClient", {
-      msg: "_signature_data",
-      data: {
-        requested_file_name: requested_file_name,
-        postions_data: postions_data,
-        extention: newFileToUpload.type,
-        signaturiesNum: numberOfSignaturies,
-        signatoriesNamesForm: _COLLECTED_NAMES_FORM
-      }
-    });
-    return false;
+    // check that places are selected correctly
+    if (storedCorns.length > 0 && labelsCounter !== 0) {
+      // here i have to send data to client side 
+      // X : postions and file name and pages
+      var requested_file_name = newFileToUpload.name;
+      var postions_data = storedCorns;
+      emitData("comingRequestToClient", {
+        msg: "_signature_data",
+        data: {
+          requested_file_name: requested_file_name,
+          postions_data: postions_data,
+          extention: newFileToUpload.type,
+          signaturiesNum: numberOfSignaturies,
+          signatoriesNamesForm: _COLLECTED_NAMES_FORM
+        }
+      });
+      // remove all labels from the review seciotn
+      $(`.signPlaceStyle`).remove();
+
+      // lock the display until client send responce .... 
+      $(`#lockableModalContainer`).dimmer({
+        closable: false
+      }).dimmer("show");
+
+      return false;
+    } else {
+      alert("NO PLACES SELECTED TO PUT THE SIGNATURE INSIDE... M2 ")
+    }
+
   }
+
+  // declare paper sizes to call them later.
+  var landscapeA4Sizes = {
+    width: "29.7cm",
+    height: "21cm",
+  };
+  var portraitA4Sizes = {
+    width: "21cm",
+    height: "29.7cm"
+  };
 
   // to init elements on modal beeing show
   function initImportatElements() {
@@ -509,10 +569,21 @@
     $(`#ChangePenColor`).click((evt) => {
       previewModalBtnsAction.changePenColorBtn(evt);
     });
+    $(`#downloadPDF`).click((eve) => {
+      previewModalBtnsAction.onDownloadPDFbtnAction(eve);
+    })
+    $(`#printPages`).click((evt) => {
+      previewModalBtnsAction.onPrintPagesBtnAction(evt);
+    })
+    $(`#downloadAsPNG`).click((evt) => {
+      previewModalBtnsAction.onDownloadPNGBtnAciton(evt);
+    })
     // assigning color buttons actions 
     $(`.changeColor`).click((evt) => {
       previewModalBtnsAction.setColorBtnsAction(evt);
-    })
+    });
+    // hide after tool btns
+    $(`.afterToolBtn`).css("display", "none");
   }
 
   // all btns action
@@ -530,10 +601,12 @@
     //
     setColorBtnsAction: (evt) => {
       var selectedColor = $(evt.target).attr("color");
+      // emit new color to device
       common.emitMSG({
         msg: "changePenColor",
         newColor: selectedColor
       });
+
       $(`#ChangePenColor`).find(".icon").css("color", selectedColor);
     },
     // on modal deny
@@ -541,6 +614,44 @@
       common.emitMSG({
         msg: "refresh"
       })
+    },
+    // on download pages btn aciton
+    onDownloadPDFbtnAction: () => {
+      // first check that the object of canves is not empry
+      if (canvasesAfterEditing !== null) {
+        // start eaching the canvass object
+        var imgsContainer = document.createElement("div");
+
+        // assign sizes to container of  popup window 
+        imgsContainer.width = portraitA4Sizes.width  ;
+        imgsContainer.height = portraitA4Sizes.height ;
+
+        $.each(canvasesAfterEditing, (index, canvas) => {
+          var canvasDataURL = canvas.toDataURL(); // png img
+          var imgObj = document.createElement("img");
+          // asign sizes to img object
+          imgObj.style.width = portraitA4Sizes.width ;
+          imgObj.style.height = portraitA4Sizes.height ;
+          imgObj.src = canvasDataURL;
+
+          imgsContainer.append(imgObj);
+        });
+
+        window.open("", "blanck").document.write(imgsContainer.innerHTML);
+
+
+
+        // var windowObject = window.open();
+        //windowObject.document.write(imgsContainer);
+      }
+    },
+    // on print pages btn aciton 
+    onPrintPagesBtnAction: () => {
+
+    },
+    // on download as png btn Action 
+    onDownloadPNGBtnAciton: () => {
+
     }
   }
 </script>

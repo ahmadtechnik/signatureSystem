@@ -49,5 +49,16 @@
         position: fixed;
         bottom: 10px;
         left: 10px;
-        z-index: 999999;
+        z-index: 100000;
+        display: none;
+}
+
+/*  */
+#signaturePreviewImg {
+        width: 5cm;
+}
+
+/*  */
+.afterToolBtn {
+        display: none;
 }

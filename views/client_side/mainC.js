@@ -10,6 +10,7 @@ var _SENT_FILE_TYPE = null;
 
 
 var _SIGNATURE_CANVAS = null;
+var _SIGNATURE_PAD_CONTAINER = null;
 var _SIGNATURE_PAD_OBJECT;
 
 
@@ -26,6 +27,9 @@ var socket = io.connect("/client_side_device");
 socket.on("connect", () => {
     // call onClientConnectedToSocket
     comun.onClientConnectedToSocket();
+    comun.emitMSG({
+        msg: "clientConnected"
+    });
 })
 // on new message to client-side device 
 socket.on("comingRequestToClient", (data) => {
@@ -39,24 +43,40 @@ $(document).ready(() => {
     $(window).resize(() => {
         elementsSizing();
         setNewSignatureTakerPace()
+
     });
 
     _SIGNATURE_CANVAS = document.getElementById("signDrowSecitonCanvas");
-    _SIGNATURE_CANVAS.width = $(`#signDrowSeciton`).width();
-    _SIGNATURE_CANVAS.height = $(`#signDrowSeciton`).height();
+    _SIGNATURE_PAD_CONTAINER = document.getElementById("signDrowSeciton");
+
+    _SIGNATURE_CANVAS.width = 500 //$(`#signDrowSeciton`).width();
+    _SIGNATURE_CANVAS.height = 200 //$(`#signDrowSeciton`).height();
+    _SIGNATURE_PAD_CONTAINER.width = 500 //$(`#signDrowSeciton`).width();
+    _SIGNATURE_PAD_CONTAINER.height = 200 //$(`#signDrowSeciton`).height();
 
     // declare signature pad object
     _SIGNATURE_PAD_OBJECT = new SignaturePad(_SIGNATURE_CANVAS, {
         onBegin: padSignatureEvent.onBegin,
         onEnd: padSignatureEvent.onEnd,
+        minWidth : 2,
+        maxWidth : 4,
+        throttle : 10,
+        velocityFilterWeight : 0.7,
+        minDistance : 0,
+        dotSize : 1
     });
 
 
     /** set control buttons aciton */
     $(`#clearSignaturBtn`).click(btnsActions.clearPadBtnAction)
-    $(`#submitSignatureBtn`).click(btnsActions.SubmitPadBtnAction)
+    $(`#submitSignatureBtn`).click((evt) => {
+        btnsActions.SubmitPadBtnAction(evt)
+    })
+
 
 });
+
+
 
 /**********************************************************/
 
@@ -69,7 +89,7 @@ var comun = {
     },
     /** on comingRequestToClient */
     comingRequestToClient: (data) => {
-console.log(data)
+        console.log(data)
         var msg = data.msg;
         switch (msg) {
             case "confirmed":
@@ -85,12 +105,14 @@ console.log(data)
                 console.log(data);
                 break;
             case "_signature_data":
-                    _SIGNATURIES_DATA = data.data;
-
+                _OBJ_FIRST = 1;
+                _SIGNATURIES_DATA = data.data;
                 renderCurrentSentFile(_SIGNATURIES_DATA);
-
-                signaturiesFilter(_SIGNATURIES_DATA);
-
+                // init first signature name
+                signaturiesFilter(_SIGNATURIES_DATA, _OBJ_FIRST);
+                $(`#submitSignatureBtn`).removeClass("disabled");
+                _SIGNATURE_PAD_OBJECT.clear();
+                _SIGNS_DATA = [];
                 break;
             case "clearPad":
                 _SIGNATURE_PAD_OBJECT.clear();
@@ -124,6 +146,8 @@ var dimmerControler = {
 }
 
 var _SIGNS_DATA = [];
+var _OBJ_FIRST = 1;
+
 // buttons Actions
 var btnsActions = {
     clearPadBtnAction: (evt) => {
@@ -136,16 +160,62 @@ var btnsActions = {
             data: _SIGNATURE_PAD_OBJECT.toDataURL()
         });
     },
+    // pad signature area submit btn
     SubmitPadBtnAction: (evt) => {
         // check if the pad not empty before submiting the file
         if (!_SIGNATURE_PAD_OBJECT.isEmpty()) {
-            // 
-            _SIGNATURE_PAD_OBJECT.toDataURL();
-            // check if there more signature and not only one
+            // create new canvas to trim blanck pixels
+            // before send the signature
+            var oldWidth = _SIGNATURE_CANVAS.width;
+            var oldHeight = _SIGNATURE_CANVAS.height;
 
-            signaturiesFilter(_SIGNATURIES_DATA);
+
+            cropImageFromCanvas(_SIGNATURE_CANVAS.getContext("2d"), _SIGNATURE_CANVAS);
+
+            // check if the object of the imges still lass then signaturies number .
+
+            // add the new signature to object
+            _SIGNS_DATA.push({
+                signImg: _SIGNATURE_PAD_OBJECT.toDataURL("image/svg+xml"),
+                signName: _SIGNATURIES_DATA.signatoriesNamesForm[_OBJ_FIRST],
+                pngData: _SIGNATURE_PAD_OBJECT.toDataURL(),
+                numData: _SIGNATURE_PAD_OBJECT.toData(),
+                signerNum: _OBJ_FIRST
+            });
+
+            _SIGNATURE_CANVAS.width = oldWidth;
+            _SIGNATURE_CANVAS.height = oldHeight;
+
+            _OBJ_FIRST++;
+
+            var tname = _SIGNATURIES_DATA.signatoriesNamesForm[_OBJ_FIRST];
+            if (tname === "") {
+                $(`#signaturiesNum`).html(`<label class="ui header">Signer number : ${_OBJ_FIRST}</label>`);
+            } else {
+                $(`#signaturiesName`).html(`<label class="ui header">MR/MISS : ${tname}<sup>${_OBJ_FIRST}</sup></label>`);
+            }
+
+            // that's mean all parties was signed 
+            // i have to re send data to server side
+            if (_OBJ_FIRST - 1 === parseInt(_SIGNATURIES_DATA.signaturiesNum)) {
+                // start transmition the data to server side device,
+                // to start proccessing the images to download them as PDF
+                comun.emitMSG({
+                    msg: "finishedSigning",
+                    data: _SIGNS_DATA,
+                })
+
+                $(`#submitSignatureBtn`).addClass("disabled");
+
+                $(`#signaturiesNum`).html("");
+                $(`#signaturiesName`).html("");
+
+                dimmerControler.showDimmer();
+            }
+
+            _SIGNATURE_PAD_OBJECT.clear();
         } else {
-            alert("PLEASE SIGN THERE")
+            // start btn to start signaturies 
         }
     }
 }
@@ -153,14 +223,41 @@ var btnsActions = {
 // signature pad aevents
 // and controler
 var padSignatureEvent = {
-    onBegin: (data) => {},
-    onEnd: (data) => {
-        // to do , send the data after end first section to server 
-        // to show preview of the signature
+    onBegin: (data) => {
         comun.emitMSG({
-            msg: "signPreview",
-            data: _SIGNATURE_PAD_OBJECT.toDataURL()
-        });
+            msg: "clintStartsSigning"
+        })
+    },
+    onEnd: (data) => {
+        // create new canvas to trim blanck pixels
+        // before send the signature
+        if (!_SIGNATURE_PAD_OBJECT.isEmpty()) {
+
+            // create new canvas to avoid resize old one
+            var nC = document.createElement("canvas");
+            nC.style.display = "none";
+            var nCC = nC.getContext("2d");
+            nC.width = _SIGNATURE_CANVAS.width * 4;
+            nC.height = _SIGNATURE_CANVAS.height * 4;
+            nCC.drawImage(_SIGNATURE_CANVAS, 0, 0);
+
+            //append the new canvas to body document
+            document.getElementsByTagName("body")[0].appendChild(nC);
+            // trim the canvas before pass the data to server-side device
+            cropImageFromCanvas(nCC, nC);
+
+            // to do , send the data after end first section to server 
+            // to show preview of the signature
+            comun.emitMSG({
+                msg: "signPreview",
+                data: _SIGNATURE_PAD_OBJECT.toData(),
+                asImg: nC.toDataURL(),
+            });
+
+            nC.remove();
+        } else {
+            console.log("PLEASE PUT SOMTHING..")
+        }
     }
 }
 
@@ -177,7 +274,6 @@ function elementsSizing() {
     // set size of signature section
     $("#signatureTakerSection").height(dHeight * 20 / 100);
     $("#signatureTakerSection").width(dWidth);
-
 }
 /**
  * 
@@ -200,7 +296,6 @@ function renderCurrentSentFile(data) {
     _PAGER = 1;
     _PDF_FILE_DOC = null;
     _NUM_PAGES = null;
-
 
     _SENT_FILE_NAME = data.requested_file_name;;
     _POS_DATA_ = data.postions_data;
@@ -232,22 +327,23 @@ function renderCurrentSentFile(data) {
 
 }
 
-var _CURRENT_SIGNATURIE = 1;
-var _SIGNS_ARE_MULTIBLE = false;
 /**  */
-function signaturiesFilter(data) {
-
-    var signsNum = parseInt(data.signaturiesNum);
+function signaturiesFilter(data, nameIndex) {
+    console.log(nameIndex);
     var signatoriesNamesForm = data.signatoriesNamesForm;
+
     // in case was signaturies number more then 1 
-    if (signsNum > 1) {
-        _SIGNS_ARE_MULTIBLE = true;
-        $(`#signaturiesName`).text(signatoriesNamesForm[_CURRENT_SIGNATURIE]);
-        $(`#signaturiesNum`).text(_CURRENT_SIGNATURIE);
+
+    var tname = signatoriesNamesForm[nameIndex];
+    var index = nameIndex
+    if (tname === "") {
+        $(`#signaturiesNum`).html(`<label class="ui header">Signer number : ${index}</label>`);
     } else {
-        $(`#signaturiesName`).text(signatoriesNamesForm[_CURRENT_SIGNATURIE]);
-        $(`#signaturiesNum`).text(_CURRENT_SIGNATURIE);
+        $(`#signaturiesName`).html(`<label class="ui header">MR/MISS : ${tname}<sup>${index}</sup></label>`);
     }
+
+
+    $(`#submitSignatureBtn`).removeClass("disabled");
 
 }
 /**
@@ -295,4 +391,48 @@ function singlePageHandling(page) {
         }
         $(`#pageAmountContainer`).text(_PAGER);
     })
+}
+
+/**
+ * to trim canvos 
+ * @param {canvasContext} ctx 
+ * @param {canvas} canvas 
+ */
+function cropImageFromCanvas(ctx, canvas) {
+
+    var w = canvas.width,
+        h = canvas.height,
+        pix = {
+            x: [],
+            y: []
+        },
+        imageData = ctx.getImageData(0, 0, canvas.width, canvas.height),
+        x, y, index;
+
+    for (y = 0; y < h; y++) {
+        for (x = 0; x < w; x++) {
+            index = (y * w + x) * 4;
+            if (imageData.data[index + 3] > 0) {
+
+                pix.x.push(x);
+                pix.y.push(y);
+
+            }
+        }
+    }
+    pix.x.sort(function (a, b) {
+        return a - b
+    });
+    pix.y.sort(function (a, b) {
+        return a - b
+    });
+    var n = pix.x.length - 1;
+
+    w = pix.x[n] - pix.x[0];
+    h = pix.y[n] - pix.y[0];
+    var cut = ctx.getImageData(pix.x[0], pix.y[0], w, h);
+
+    canvas.width = w;
+    canvas.height = h;
+    ctx.putImageData(cut, 0, 0);
 }
