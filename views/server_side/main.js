@@ -56,7 +56,7 @@ $(document).ready(() => {
 
     // generate qr code for client side
     new QRCode(_QR_CODE_CONTAINER, {
-        text: `${_LOCATION_URL_DATA.PROTOCOL}//${_LOCATION_URL_DATA.HOSTNAME}:${_LOCATION_URL_DATA.PORT}/${_LOCATION_URL_DATA.CLIENT}`,
+        text: `${protocol}://${ipv4}:${portinuse}/${_LOCATION_URL_DATA.CLIENT}`,
         width: 150,
         height: 150,
         colorDark: "#000000",
@@ -239,7 +239,6 @@ var common = {
  * var _PDF_PAGER = 1;
  * var storedCorns = [];
  * */
-
 
 function processSignaturies(comingData) {
     // clear old canvases stored into object 

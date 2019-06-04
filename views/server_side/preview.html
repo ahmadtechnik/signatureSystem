@@ -69,7 +69,7 @@
     </button>
     <!--  -->
     <div class="ui icon button blue mini afterToolBtn" id="downloadPDF">
-      <i class="icon download"></i>
+      <i class="icon file pdf"></i>
     </div>
     <!--  -->
     <div class="ui icon button green mini afterToolBtn" id="printPages">
@@ -79,7 +79,14 @@
     <div class="ui icon button orange mini afterToolBtn" id="downloadAsPNG">
       <i class="file image icon"></i>
     </div>
-
+    <!--  -->
+    <div class="ui icon button teal mini  afterToolBtn" id="sendFileFax">
+      <i class="icon fax"></i>
+    </div>
+    <!--  -->
+    <div class="ui icon button purple mini afterToolBtn" id="sendEmailBtn">
+      <i class="icon paperclip"></i>
+    </div>
   </div>
 
 </div>
@@ -161,6 +168,7 @@
 
   /** to shpw the modal after  **/
   $(`#previewModal`).modal({
+    allowMultiple: true,
     closable: false,
     // set on modal show action
     onShow: (modal) => {
@@ -480,7 +488,7 @@
       // in case the element was not found in the object
     }
     // hide after tool btns
-    $(`.afterToolBtn`).css("display", "none");
+    // $(`.afterToolBtn`).css("display", "none");
   }
 
   // if user want to remove sign place label
@@ -582,8 +590,17 @@
     $(`.changeColor`).click((evt) => {
       previewModalBtnsAction.setColorBtnsAction(evt);
     });
+    //
+    $("#sendFileFax").click((evt) => {
+      previewModalBtnsAction.onSendFAXBtnAction(evt);
+    });
+    //
+    $(`#sendEmailBtn`).click((evt) => {
+      previewModalBtnsAction.onSendEmailBtnAction(evt)
+    });
+
     // hide after tool btns
-    $(`.afterToolBtn`).css("display", "none");
+    // $(`.afterToolBtn`).css("display", "none");
   }
 
   // all btns action
@@ -618,32 +635,16 @@
     // on download pages btn aciton
     onDownloadPDFbtnAction: () => {
       // first check that the object of canves is not empry
-      if (canvasesAfterEditing !== null) {
-        // start eaching the canvass object
-        var imgsContainer = document.createElement("div");
-
-        // assign sizes to container of  popup window 
-        imgsContainer.width = portraitA4Sizes.width  ;
-        imgsContainer.height = portraitA4Sizes.height ;
-
-        $.each(canvasesAfterEditing, (index, canvas) => {
-          var canvasDataURL = canvas.toDataURL(); // png img
-          var imgObj = document.createElement("img");
-          // asign sizes to img object
-          imgObj.style.width = portraitA4Sizes.width ;
-          imgObj.style.height = portraitA4Sizes.height ;
-          imgObj.src = canvasDataURL;
-
-          imgsContainer.append(imgObj);
-        });
-
-        window.open("", "blanck").document.write(imgsContainer.innerHTML);
-
-
-
-        // var windowObject = window.open();
-        //windowObject.document.write(imgsContainer);
-      }
+      // if (canvasesAfterEditing !== null) {
+      // ask user which pages he need
+      $.ajax({
+        url: "getPagesSelectorModal",
+        method: "GET",
+        success: (data) => {
+          $("body").append(data);
+        }
+      })
+      // }
     },
     // on print pages btn aciton 
     onPrintPagesBtnAction: () => {
@@ -651,6 +652,13 @@
     },
     // on download as png btn Action 
     onDownloadPNGBtnAciton: () => {
+
+    },
+    //
+    onSendFAXBtnAction: () => {
+
+    },
+    onSendEmailBtnAction: () => {
 
     }
   }

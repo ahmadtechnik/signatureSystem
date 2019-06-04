@@ -26,7 +26,7 @@ module.exports.initElectronApp = {
             webPreferences: {
                 nodeIntegration: false
             },
-            show: true
+            show: false
         });
     },
     mainWinLoadURL: (URL) => {

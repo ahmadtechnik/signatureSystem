@@ -59,7 +59,7 @@ module.exports.startListen = function (started) {
             expressApp: app
         });
 
-        
+
     })
 
 
@@ -114,13 +114,20 @@ app.get("/server_side_home", function (req, res) {
      * i have to send importatnt data to the view
      * pass data (hostname, port, page tilte)
      */
-    res.render("server_side/index.ejs", {
-        hostname: os.hostname(),
-        portinuse: localPort,
-        pagetitle: "K1 Computer Signature System",
-        protocol: req.protocol,
-        route: "server_side_home"
-    });
+    getIPv4((ipv4) => {
+        if (ipv4 !== false) {
+            res.render("server_side/index.ejs", {
+                hostname: os.hostname(),
+                portinuse: localPort,
+                pagetitle: "K1 Computer Signature System",
+                protocol: req.protocol,
+                route: "server_side_home",
+                ipv4: ipv4
+            });
+        } else {
+            console.log("in this device exist more then one ethernet device");
+        }
+    })
 })
 
 /**
@@ -213,7 +220,13 @@ app.post("/uploaded_file", (req, res) => {
 app.get("/preview", (req, res) => {
     res.sendFile(root_app + "/views/server_side/preview.html");
 })
-
+/**
+ * on request to get pagesSelectorModal
+ * 
+ */
+app.get(`/getPagesSelectorModal`, (req, res) => {
+    res.sendFile(root_app + "/views/server_side/modules/pagesSelectorModal.html");
+})
 /**  --------------------------- CLIENT SIDE REQEQUSTS ----------------------- */
 // send home page for client side
 app.get("/client_side_home", (req, res) => {
@@ -237,3 +250,29 @@ app.get("/get_pdf_dile_by_name", (response, request) => {
     console.log()
     request.end(fs.readFileSync(filePath, "binary"));
 })
+
+
+
+// extra 
+// to get IPv4 
+function getIPv4(ipGetter) {
+    var ifaces = os.networkInterfaces();
+    Object.keys(ifaces).forEach(function (ifname) {
+        var alias = 0;
+        ifaces[ifname].forEach(function (iface) {
+            if ('IPv4' !== iface.family || iface.internal !== false) {
+                // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+                return;
+            }
+            if (alias >= 1) {
+                ipGetter(false);
+            } else {
+                // this interface has only one ipv4 adress
+                if (ifname === "Ethernet") {
+                    ipGetter(iface.address);
+                }
+            }
+            ++alias;
+        });
+    });
+}

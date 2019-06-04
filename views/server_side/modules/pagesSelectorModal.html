@@ -1,0 +1,143 @@
+ <div class="ui small modal" id="pagesSelectorModal">
+     <div class=" header">Pages Selector</div>
+
+     <div class="content">
+         <label for="">Plase write which pages would you like to download..</label>
+         <div class="ui label red right floated orange">
+             <h1 class="ui header inverted " id="pagesNumber"></h1>
+         </div>
+         <div class="ui segment inverted black">
+             <div class="ui form tiny inverted black">
+                 <div class="equal width fields">
+                     <div class="field">
+                         <label>From</label>
+                         <input inpType="from" class="fromToOnChange" id="fromNumInput">
+                     </div>
+                     <div class="field">
+                         <label>To</label>
+                         <input inpType="to" class="fromToOnChange" id="toNumInput">
+                     </div>
+                 </div>
+                 <div class="small field">
+                     <label for="pagesNumbersArray">Write pages numbers</label>
+                     <select multiple class="ui fluid search multiple dropdown" id="pagesNumbersArray"></select>
+                     <label for="pagesNumbersArray">this seciton try to type (1 , 2 , 3 )</label>
+                 </div>
+             </div>
+         </div>
+
+     </div>
+     <div class="actions">
+         <div class="ui red inverted button" id="pagesSelectorCloseBtn">
+             <i class="remove icon"></i>
+             Close
+         </div>
+         <div class="ui  green inverted button" id="pagesSelectorOkBtn">
+             <i class="download icon"></i>
+             Save
+         </div>
+     </div>
+ </div>
+
+ <script id="scripteToRemove">
+     /**
+      * _PDF_DOC_PAGES_NUM global pages count
+      * **/
+
+     // in case was range it should be 1 , if specific pages should be 2
+     var _SELECTED_METHOD = 0;
+     //
+     $(`#pagesSelectorModal`).modal({
+         closable: false,
+         allowMultiple: true,
+         onHidden: () => {
+             // show previos modal    
+
+             // to remove this modal after hidden it
+             $(`#pagesSelectorModal`).remove();
+             $(`#scripteToRemove`).remove();
+
+         },
+         // on modal show, init events 
+         onShow: () => {
+             $(`#pagesNumber`).text("Total Pages are : " + _PDF_DOC_PAGES_NUM);
+             //
+             var spin = $(".fromToOnChange").spinner({
+                 spin: (event, ui) => {
+                     drop.dropdown("clear");
+                     var currentValue = $(event.target).attr("inpType");
+
+                     switch (currentValue) {
+                         case "from":
+                             if (ui.value <= 0 || ui.value > _PDF_DOC_PAGES_NUM) {
+                                 return false;
+                             }
+                             break;
+                         case "to":
+                             if (ui.value <= 0 || ui.value > _PDF_DOC_PAGES_NUM) {
+                                 return false;
+                             }
+                             break;
+                     }
+                     _SELECTED_METHOD = 1
+
+                 }
+             })
+             // 
+             var drop = $(`#pagesNumbersArray`).dropdown({
+                 allowAdditions: true,
+                 values: toReturnPagesAsArray(),
+                 onAdd: (addedValue, addedText, $addedChoice) => {
+                     spin.spinner("value", "");
+                     _SELECTED_METHOD = 2
+                 }
+             });
+
+         }
+     }).modal(`show`);
+
+
+     // on ok btn aciton
+     $(`#pagesSelectorOkBtn`).click((evt) => {
+
+         elementsActions.okBtnAction(evt);
+
+         // to hide modal after submition
+         $(`#pagesSelectorModal`).modal("hide");
+     });
+
+
+     // 
+     $(`#pagesSelectorCloseBtn`).click((evt) => {
+         elementsActions.closeBtnAction(evt)
+
+
+         // to hide modal after submition
+         $(`#pagesSelectorModal`).modal("hide");
+     });
+
+     //
+     var elementsActions = {
+         okBtnAction: (evt) => {
+
+         },
+         closeBtnAction: (evt) => {
+
+         }
+     }
+
+     // to add all pages numbers
+     function toReturnPagesAsArray() {
+
+         var pager = [];
+         for (let index = 1; index <= _PDF_DOC_PAGES_NUM; index++) {
+
+             pager.push({
+                 name: "PAGE : " + index,
+                 value: "page_" + index,
+             });
+
+         }
+         return pager;
+     }
+ </script>
