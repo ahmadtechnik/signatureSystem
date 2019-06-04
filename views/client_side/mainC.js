@@ -58,8 +58,8 @@ $(document).ready(() => {
     _SIGNATURE_PAD_OBJECT = new SignaturePad(_SIGNATURE_CANVAS, {
         onBegin: padSignatureEvent.onBegin,
         onEnd: padSignatureEvent.onEnd,
-        minWidth : 2,
-        maxWidth : 4,
+        minWidth : 0.5,
+        maxWidth : 2.5,
         throttle : 10,
         velocityFilterWeight : 0.7,
         minDistance : 0,

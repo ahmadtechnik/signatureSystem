@@ -6,49 +6,36 @@ const {
     Menu,
 } = require('electron')
 
+// to disable https untrust sites 
+app.commandLine.appendSwitch('ignore-certificate-errors', 'true');
 
-let mainWindow
+let mainWindow;
 
-function createWindow() {
+module.exports.initElectronApp = {
+    //
+    initAppOnReady: () => {
 
-    mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
-        webPreferences: {
-            nodeIntegration: true
-        }
-    })
+        app.on("ready", this.initElectronApp.initMainWin);
+        return app;
+    },
+    /** to get main window in case user need to call it again */
+    initMainWin: () => {
+        mainWindow = new BrowserWindow({
+            width: 1200,
+            height: 800,
+            webPreferences: {
+                nodeIntegration: false
+            },
+            show: true
+        });
+    },
+    mainWinLoadURL: (URL) => {
+        mainWindow.loadURL(URL)
+    },
+    //
+    getMainWin: () => {
+        return mainWindow;
+    },
+    // on main on show
 
-
-    mainWindow.loadFile('./views/server_side/index.html')
-
-    serverOption.startServerListening((arrayIndexNumber) => {
-        console.log(arrayIndexNumber)
-    });
-
-    mainWindow.on('closed', function () {
-        mainWindow = null
-    })
 }
-
-/**
- * on app reader
- */
-app.on('ready', createWindow)
-
-/**
- * on windows close all
- */
-app.on('window-all-closed', function () {
-
-    if (process.platform !== 'darwin') app.quit()
-})
-
-/**
- * on active
- * if the app was active
- */
-app.on('activate', function () {
-
-    if (mainWindow === null) createWindow()
-})

@@ -245,7 +245,7 @@ function processSignaturies(comingData) {
     // clear old canvases stored into object 
     canvasesAfterEditing = [];
 
-    var signImgWidth = 500;
+    var signImgWidth = 300;
     // each the exits canvass
     $.each(xCanvases, (index, canvas) => {
         // create new canves
@@ -289,7 +289,13 @@ function processSignaturies(comingData) {
                                 document.getElementsByTagName("body")[0].append(img);
 
                                 // start draw the sign on the canvas 
-                                nCanvasContext.drawImage(img, (X * 4) - (signImgWidth / 2), (Y * 4) - (img.height / 2));
+                                nCanvasContext.drawImage(
+                                    img,
+                                    X * 4 - (signImgWidth / 2),
+                                    Y * 4 - (img.height / 2),
+                                    signImgWidth,
+                                    img.height
+                                );
                                 console.log(`sign Name : ${signName} was drawed on the canvas num : `, pageNum)
                                 // remove img
                                 img.remove();

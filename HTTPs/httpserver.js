@@ -59,9 +59,8 @@ module.exports.startListen = function (started) {
             expressApp: app
         });
 
-
+        
     })
-
 
 
 }
@@ -236,5 +235,5 @@ app.get("/get_pdf_dile_by_name", (response, request) => {
         'Content-Disposition': `attachment; filename="${fileName}"`
     });
     console.log()
-    request.end(fs.readFileSync(filePath , "binary"));
+    request.end(fs.readFileSync(filePath, "binary"));
 })
