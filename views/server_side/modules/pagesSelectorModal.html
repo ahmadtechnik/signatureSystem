@@ -23,7 +23,14 @@
                      <select multiple class="ui fluid search multiple dropdown" id="pagesNumbersArray"></select>
                      <label for="pagesNumbersArray">this seciton try to type (1 , 2 , 3 )</label>
                  </div>
+                 <div class="ui field">
+                     <label>Please select quality  <span id="qualityValue" style="font-size: 20px;">100%</span>  </label>
+                     <div id="slider">
+                         <div id="resolotionSelector" class="ui-slider-handle"></div>
+                     </div>
+                 </div>
              </div>
+
          </div>
 
      </div>
@@ -42,9 +49,11 @@
  <script id="scripteToRemove">
      var spin = $(".fromToOnChange").spinner();
      var drop = $(`#pagesNumbersArray`).dropdown();
+     var slider = $(`#resolotionSelector`).slider()
      var _CHOOSED_PAGES_ = [];
      // in case was range it should be 1 , if specific pages should be 2
      var _SELECTED_METHOD = 1;
+     var _SLIDER_VALUE = 100;
      //
      $(`#pagesSelectorModal`).modal({
          closable: false,
@@ -94,7 +103,18 @@
              // show secound modal dimmer
              $(`#previewModal`).dimmer({
                  closable: false
-             }).dimmer("show")
+             }).dimmer("show");
+             //
+             slider.slider({
+                 max: 200,
+                 min: 50,
+                 step: 50,
+                 value : 100,
+                 slide: (event , ui) => {
+                     
+                    $(`#qualityValue`).text(ui.value + "%")
+                 }
+             })
          }
      }).modal(`show`);
 
@@ -152,17 +172,27 @@
                      break;
              }
              // start process images to save them in the hard disk
-             switch (_SELECTED_METHOD.method) {
+             var choosedCanvas = [];
+             switch (_CHOOSED_PAGES_.method) {
                  case "range":
+                     var from = parseInt(_CHOOSED_PAGES_.data.from);
+                     var to = parseInt(_CHOOSED_PAGES_.data.to);
+                     // start collecting the selected canvas
+                     for (let index = from; index <= to; index++) {
+                         // add the selected range numbers
 
-                     var from = _SELECTED_METHOD.data.from;
-                     var to = _SELECTED_METHOD.data.to;
-                     console.log(from , to );
+                     }
                      break;
+                     // to get selected pages specifics 
                  case "specific":
+                     var pagesNumbers = _CHOOSED_PAGES_.data;
+                     for (let index = 0; index < pagesNumbers.length; index++) {
+                         var canvIndexToGet = parseInt(pagesNumbers[index]) - 1;
+                     }
                      break;
              }
          },
+         // on close btn aciton
          closeBtnAction: (evt) => {
 
          }
