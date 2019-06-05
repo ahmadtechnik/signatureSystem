@@ -11,11 +11,11 @@
                  <div class="equal width fields">
                      <div class="field">
                          <label>From</label>
-                         <input inpType="from" class="fromToOnChange" id="fromNumInput">
+                         <input inpType="from" class="fromToOnChange" id="fromNumInput" readonly>
                      </div>
                      <div class="field">
                          <label>To</label>
-                         <input inpType="to" class="fromToOnChange" id="toNumInput">
+                         <input inpType="to" class="fromToOnChange" id="toNumInput" readonly>
                      </div>
                  </div>
                  <div class="small field">
@@ -40,33 +40,33 @@
  </div>
 
  <script id="scripteToRemove">
-     /**
-      * _PDF_DOC_PAGES_NUM global pages count
-      * **/
-
+     var spin = $(".fromToOnChange").spinner();
+     var drop = $(`#pagesNumbersArray`).dropdown();
+     var _CHOOSED_PAGES_ = [];
      // in case was range it should be 1 , if specific pages should be 2
-     var _SELECTED_METHOD = 0;
+     var _SELECTED_METHOD = 1;
      //
      $(`#pagesSelectorModal`).modal({
          closable: false,
          allowMultiple: true,
          onHidden: () => {
              // show previos modal    
-
              // to remove this modal after hidden it
              $(`#pagesSelectorModal`).remove();
              $(`#scripteToRemove`).remove();
+             // to hide secound dimmer modal
+             $(`#previewModal`).dimmer("hide");
 
          },
          // on modal show, init events 
          onShow: () => {
+
              $(`#pagesNumber`).text("Total Pages are : " + _PDF_DOC_PAGES_NUM);
              //
-             var spin = $(".fromToOnChange").spinner({
+             spin.spinner({
                  spin: (event, ui) => {
                      drop.dropdown("clear");
                      var currentValue = $(event.target).attr("inpType");
-
                      switch (currentValue) {
                          case "from":
                              if (ui.value <= 0 || ui.value > _PDF_DOC_PAGES_NUM) {
@@ -80,11 +80,10 @@
                              break;
                      }
                      _SELECTED_METHOD = 1
-
                  }
              })
              // 
-             var drop = $(`#pagesNumbersArray`).dropdown({
+             drop.dropdown({
                  allowAdditions: true,
                  values: toReturnPagesAsArray(),
                  onAdd: (addedValue, addedText, $addedChoice) => {
@@ -92,7 +91,10 @@
                      _SELECTED_METHOD = 2
                  }
              });
-
+             // show secound modal dimmer
+             $(`#previewModal`).dimmer({
+                 closable: false
+             }).dimmer("show")
          }
      }).modal(`show`);
 
@@ -103,14 +105,13 @@
          elementsActions.okBtnAction(evt);
 
          // to hide modal after submition
-         $(`#pagesSelectorModal`).modal("hide");
+         //$(`#pagesSelectorModal`).modal("hide");
      });
 
 
      // 
      $(`#pagesSelectorCloseBtn`).click((evt) => {
          elementsActions.closeBtnAction(evt)
-
 
          // to hide modal after submition
          $(`#pagesSelectorModal`).modal("hide");
@@ -119,7 +120,48 @@
      //
      var elementsActions = {
          okBtnAction: (evt) => {
+             switch (_SELECTED_METHOD) {
+                 // in case was pages range, to get selected values
+                 case 1:
+                     var fromVal = $(spin.get(0)).spinner("value");
+                     var toVal = $(spin.get(1)).spinner("value");
+                     if (fromVal === null || toVal === null) {
+                         alert("PLEASE TYPE RENAGE NUMBER ")
+                     }
+                     // in case was all input fine and there is no mistake
+                     else {
+                         _CHOOSED_PAGES_ = {
+                             method: "range",
+                             data: {
+                                 from: fromVal,
+                                 to: toVal
+                             }
+                         }
+                     }
+                     break;
+                 case 2:
+                     var selectedValues = drop.dropdown("get value");
+                     if (selectedValues.length > 0) {
+                         _CHOOSED_PAGES_ = {
+                             method: "specific",
+                             data: selectedValues
+                         }
+                     } else {
+                         alert("PLEASE TYPE RENAGE NUMBER ")
+                     }
+                     break;
+             }
+             // start process images to save them in the hard disk
+             switch (_SELECTED_METHOD.method) {
+                 case "range":
 
+                     var from = _SELECTED_METHOD.data.from;
+                     var to = _SELECTED_METHOD.data.to;
+                     console.log(from , to );
+                     break;
+                 case "specific":
+                     break;
+             }
          },
          closeBtnAction: (evt) => {
 
@@ -128,16 +170,17 @@
 
      // to add all pages numbers
      function toReturnPagesAsArray() {
-
          var pager = [];
-         for (let index = 1; index <= _PDF_DOC_PAGES_NUM; index++) {
 
+         for (let index = 1; index <= _PDF_DOC_PAGES_NUM; index++) {
              pager.push({
                  name: "PAGE : " + index,
-                 value: "page_" + index,
+                 value: index,
              });
 
          }
+         $(spin.get(0)).spinner("value", 1)
+         $(spin.get(1)).spinner("value", _PDF_DOC_PAGES_NUM)
          return pager;
      }
  </script>
