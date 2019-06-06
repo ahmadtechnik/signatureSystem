@@ -24,10 +24,13 @@
                      <label for="pagesNumbersArray">this seciton try to type (1 , 2 , 3 )</label>
                  </div>
                  <div class="ui field">
-                     <label>Please select quality  <span id="qualityValue" style="font-size: 20px;">100%</span>  </label>
+                     <label>Please select quality <span id="qualityValue" style="font-size: 20px;">2</span> </label>
                      <div id="slider">
                          <div id="resolotionSelector" class="ui-slider-handle"></div>
                      </div>
+                     <p>Number (1) means that the single page will be 2480px width
+                         <br>Number (2) means that the single page will be 2480px / 2 width</p>
+
                  </div>
              </div>
 
@@ -106,13 +109,12 @@
              }).dimmer("show");
              //
              slider.slider({
-                 max: 200,
-                 min: 50,
-                 step: 50,
-                 value : 100,
-                 slide: (event , ui) => {
-                     
-                    $(`#qualityValue`).text(ui.value + "%")
+                 max: 2,
+                 min: 1,
+                 step: 1,
+                 value: 2,
+                 slide: (event, ui) => {
+                     $(`#qualityValue`).text(ui.value)
                  }
              })
          }
@@ -137,7 +139,11 @@
          $(`#pagesSelectorModal`).modal("hide");
      });
 
-     //
+     // ok btn action, 
+     // to start transfare the canvas to server side 
+     // then save them inro server as images 
+     // after creating new dir and return dir name
+     // 
      var elementsActions = {
          okBtnAction: (evt) => {
              switch (_SELECTED_METHOD) {
@@ -173,6 +179,8 @@
              }
              // start process images to save them in the hard disk
              var choosedCanvas = [];
+             // to get all choosen canvass 
+             // then pass them to server as object base64
              switch (_CHOOSED_PAGES_.method) {
                  case "range":
                      var from = parseInt(_CHOOSED_PAGES_.data.from);
@@ -180,7 +188,7 @@
                      // start collecting the selected canvas
                      for (let index = from; index <= to; index++) {
                          // add the selected range numbers
-
+                         choosedCanvas.push(canvasesAfterEditing[index - 1]);
                      }
                      break;
                      // to get selected pages specifics 
@@ -188,8 +196,38 @@
                      var pagesNumbers = _CHOOSED_PAGES_.data;
                      for (let index = 0; index < pagesNumbers.length; index++) {
                          var canvIndexToGet = parseInt(pagesNumbers[index]) - 1;
+                         choosedCanvas.push(canvasesAfterEditing[canvIndexToGet]);
                      }
                      break;
+             }
+             if (choosedCanvas !== null) {
+                 // _A4_ORIGINAL_WIDTH 
+                 // start creating scaled canvas 
+                 var selectedQulity = slider.slider("value");
+                 choosedCanvas.forEach((canvas, canvasIndex) => {
+                     //
+                     var newImgElement = document.createElement("img");
+                     newImgElement.height = canvas.height / selectedQulity;
+                     newImgElement.width = canvas.width / selectedQulity;
+                     //
+                     newImgElement.src = canvas.toDataURL();
+                     document.getElementById("previewModalContent").append(newImgElement);
+                     //
+                     var newCanvas = document.createElement("canvas");
+                     newCanvas.height = canvas.height / selectedQulity
+                     newCanvas.width = canvas.width / selectedQulity
+                     document.getElementById("previewModalContent").append(newCanvas);
+                     //
+                     var contax = newCanvas.getContext("2d");
+                     contax.drawImage(newImgElement, 0, 0, canvas.width / selectedQulity, canvas
+                         .height / selectedQulity);
+                     // push the canves into array 
+                     choosedCanvas[canvasIndex] = newCanvas.toDataURL();
+
+                     newCanvas.remove();
+                     newImgElement.remove();
+                 });
+                 
              }
          },
          // on close btn aciton

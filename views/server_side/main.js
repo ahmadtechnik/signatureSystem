@@ -266,6 +266,7 @@ function processSignaturies(comingData) {
                 // be sure that the element wasent removes
                 if (!obj.removed) {
                     var imgID = obj.imgID;
+                    
                     var X = obj.X;
                     var Y = obj.Y;
                     var cord_page_num = obj.pageNum;
