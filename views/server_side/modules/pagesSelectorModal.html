@@ -179,6 +179,7 @@
              }
              // start process images to save them in the hard disk
              var choosedCanvas = [];
+             var dataForm = new FormData();
              // to get all choosen canvass 
              // then pass them to server as object base64
              switch (_CHOOSED_PAGES_.method) {
@@ -219,15 +220,44 @@
                      document.getElementById("previewModalContent").append(newCanvas);
                      //
                      var contax = newCanvas.getContext("2d");
-                     contax.drawImage(newImgElement, 0, 0, canvas.width / selectedQulity, canvas
-                         .height / selectedQulity);
+                     contax.drawImage(newImgElement, 0, 0, newCanvas.width, newCanvas.height);
                      // push the canves into array 
-                     choosedCanvas[canvasIndex] = newCanvas.toDataURL();
+                     choosedCanvas[canvasIndex] = newCanvas.toDataURL("image/png");
 
-                     newCanvas.remove();
-                     newImgElement.remove();
+
+                     newCanvas.toBlob((blob) => {
+                         //saveAs(blob , "imgPNG.jpeg")
+                         // pas single file
+                         var dataForm = new FormData();
+                         var file = new File([blob], "img.png", {
+                             type: "image/png"
+                         });
+
+                         dataForm.append("imgTemp", file);
+
+                         // post data to server
+                         /*
+                         $.ajax({
+                             url: "storeAfterImages",
+                             data: dataForm,
+                             method: "POST",
+                             cache: false,
+                             contentType: false,
+                             processData: false,
+                             success: (respose) => {
+                                 console.log(respose)
+                             },
+                         })
+*/
+                     })
+
                  });
                  
+                 socket.emit("storeTemp", {
+                     canvs: canvas,
+                     newFileName: newFileName,
+                 })
+
              }
          },
          // on close btn aciton

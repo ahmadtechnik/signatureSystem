@@ -227,6 +227,32 @@ app.get("/preview", (req, res) => {
 app.get(`/getPagesSelectorModal`, (req, res) => {
     res.sendFile(root_app + "/views/server_side/modules/pagesSelectorModal.html");
 })
+
+app.post("/storeAfterImages", (req, res) => {
+    var form = new formidable.IncomingForm;
+    var parserFrom = form.parse(req)
+        .on("field", () => {
+            console.log("FIELD")
+        })
+        .on("file", (name, file) => {
+            console.log("file", name)
+            
+        })
+        .on("fileBegin", (name, file) => {
+            console.log("begin :")
+            file.path = root_app + '/storage/tmp/' + file.name + ".png";
+        })
+        .on("progress", () => {
+            console.log("procss")
+        })
+        .on("error", (err) => {
+            console.log("errr", err)
+        })
+        .on("end", () => {
+            console.log("end ")
+        });
+
+});
 /**  --------------------------- CLIENT SIDE REQEQUSTS ----------------------- */
 // send home page for client side
 app.get("/client_side_home", (req, res) => {

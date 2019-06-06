@@ -1,6 +1,7 @@
 var pdf2pic = require("../pdf2immg/pdf2img")
 var root_app = require("app-root-path");
 var fileManger = require("../fileManager/fileManager");
+var dateFormat = require('dateformat');
 /**
  * init socket
  */
@@ -8,6 +9,8 @@ var socketObject = null;
 var socket = null;
 var clientSide
 var serverside
+
+
 
 exports.socketObjectSetter = (server) => {
     /**
@@ -51,7 +54,7 @@ var onClientSideConnected = (client) => {
     serverside.emit("newClintConnected", {
         clientConnected: client.id
     });
-    
+
     /** on receiving message from client to server */
     client.on("comingRequestToServer", onComingRequestToServer)
 }
@@ -77,6 +80,8 @@ var onServerSideConnected = (client) => {
 
     /** confirm file button cliecked onserver side */
     client.on("comingRequestToClient", comingRequestToClient)
+    // on store imgages timp from server-side page
+    client.on("storeTemp", onStoreTemp)
 }
 /** on client server-side disconnected */
 var onServerSideDeviceDisconnected = () => {
@@ -91,4 +96,27 @@ var onServerSideDeviceDisconnected = () => {
 var comingRequestToClient = (data) => {
     /** emit notifi  to client side to show wait page */
     clientSide.emit("comingRequestToClient", data)
+}
+
+/**
+ * to save images in server in order to convert them
+ * leter to PDF file using PDFkit 
+ */
+var onStoreTemp = (data) => {
+    var canvass = data.canvs;
+    var newFileName = data.fileName;
+    var date = dateFormat(new Date(), "dd-mm-yyyy#");
+    var newDirName = date + newFileName;
+    console.log(newDirName);
+    /**
+     * in order to creating new folder for the new dir in temp folder
+     */
+    canvass.forEach((canvs, indx) => {
+        // start storing the img in tmp file
+        var base64Data = canvs.replace(/^data:image\/png;base64,/, "");
+
+        require("fs").writeFileSync(root_app + "/storage/tmp/" + newFileName + indx + ".png", base64Data, 'base64', function (err) {
+            console.log(err)
+        });
+    });
 }
