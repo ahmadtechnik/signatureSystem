@@ -2,6 +2,7 @@ var pdf2pic = require("../pdf2immg/pdf2img")
 var root_app = require("app-root-path");
 var fileManger = require("../fileManager/fileManager");
 var dateFormat = require('dateformat');
+
 /**
  * init socket
  */
@@ -106,16 +107,19 @@ var onStoreTemp = (data) => {
     var canvass = data.canvs;
     var newFileName = data.fileName;
     var date = dateFormat(new Date(), "dd-mm-yyyy#");
+
     var newDirName = date + newFileName;
     console.log(newDirName);
     /**
      * in order to creating new folder for the new dir in temp folder
      */
+    // to create new folder for the coming data
+    var path = fileManger.createFolderIfNotExist(root_app + "/storage/tmp/" + newDirName);
     canvass.forEach((canvs, indx) => {
         // start storing the img in tmp file
         var base64Data = canvs.replace(/^data:image\/png;base64,/, "");
 
-        require("fs").writeFileSync(root_app + "/storage/tmp/" + newFileName + indx + ".png", base64Data, 'base64', function (err) {
+        require("fs").writeFileSync(path + "/" + newFileName + indx + ".png", base64Data, 'base64', function (err) {
             console.log(err)
         });
     });

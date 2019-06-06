@@ -4,6 +4,7 @@
  */
 
 var socket = io.connect("/server_side_device" /*`${protocol}://${hostname}:${portinuse}`*/ );
+
 var _CLIENTS_COUNTR = 0;
 socket.on("connect", () => {
     common.onServerConnected()
@@ -266,7 +267,7 @@ function processSignaturies(comingData) {
                 // be sure that the element wasent removes
                 if (!obj.removed) {
                     var imgID = obj.imgID;
-                    
+
                     var X = obj.X;
                     var Y = obj.Y;
                     var cord_page_num = obj.pageNum;
@@ -330,4 +331,19 @@ function processSignaturies(comingData) {
      * - then i need to hide submit action btns 
      * - show download pdf file or print btns
      */
+}
+
+
+// to observe any element added to other element
+var onAppend = function (elem, f) {
+    var observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (m) {
+            if (m.addedNodes.length) {
+                f(m.addedNodes)
+            }
+        })
+    })
+    observer.observe(elem, {
+        childList: true
+    });
 }

@@ -201,64 +201,48 @@
                      }
                      break;
              }
-             if (choosedCanvas !== null) {
-                 // _A4_ORIGINAL_WIDTH 
-                 // start creating scaled canvas 
-                 var selectedQulity = slider.slider("value");
-                 choosedCanvas.forEach((canvas, canvasIndex) => {
-                     //
-                     var newImgElement = document.createElement("img");
-                     newImgElement.height = canvas.height / selectedQulity;
-                     newImgElement.width = canvas.width / selectedQulity;
-                     //
-                     newImgElement.src = canvas.toDataURL();
-                     document.getElementById("previewModalContent").append(newImgElement);
-                     //
-                     var newCanvas = document.createElement("canvas");
-                     newCanvas.height = canvas.height / selectedQulity
-                     newCanvas.width = canvas.width / selectedQulity
-                     document.getElementById("previewModalContent").append(newCanvas);
-                     //
-                     var contax = newCanvas.getContext("2d");
-                     contax.drawImage(newImgElement, 0, 0, newCanvas.width, newCanvas.height);
-                     // push the canves into array 
-                     choosedCanvas[canvasIndex] = newCanvas.toDataURL("image/png");
 
 
-                     newCanvas.toBlob((blob) => {
-                         //saveAs(blob , "imgPNG.jpeg")
-                         // pas single file
-                         var dataForm = new FormData();
-                         var file = new File([blob], "img.png", {
-                             type: "image/png"
-                         });
+             var pdf = new jsPDF("p", "px", "a4");
 
-                         dataForm.append("imgTemp", file);
+             var width = pdf.internal.pageSize.getWidth();
+             var height = pdf.internal.pageSize.getHeight();
 
-                         // post data to server
-                         /*
-                         $.ajax({
-                             url: "storeAfterImages",
-                             data: dataForm,
-                             method: "POST",
-                             cache: false,
-                             contentType: false,
-                             processData: false,
-                             success: (respose) => {
-                                 console.log(respose)
-                             },
-                         })
-*/
-                     })
+             // _A4_ORIGINAL_WIDTH 
+             // start creating scaled canvas 
+             var selectedQulity = slider.slider("value");
 
-                 });
+             for (let index = 0; index < choosedCanvas.length; index++) {
+                 const canvas = choosedCanvas[index];
+                 var canvasIndex = index;
+                 //
+                 var newImgElement = document.createElement("img");
+                 newImgElement.height = canvas.height / selectedQulity;
+                 newImgElement.width = canvas.width / selectedQulity;
+                 //
+                 newImgElement.src = canvas.toDataURL();
+                 document.getElementById("previewModalContent").append(newImgElement);
+                 //
+                 var newCanvas = document.createElement("canvas");
+                 newCanvas.height = newImgElement.height
+                 newCanvas.width = newImgElement.width
+                 document.getElementById("previewModalContent").append(newCanvas);
+                 //
+                 var contax = newCanvas.getContext("2d");
+                 contax.drawImage(newImgElement, 0, 0, newImgElement.width, newImgElement.height);
+                 // push the canves into array 
                  
-                 socket.emit("storeTemp", {
-                     canvs: canvas,
-                     newFileName: newFileName,
-                 })
+                 choosedCanvas[canvasIndex] = newCanvas.toDataURL();
+                 pdf.addPage();
+                 pdf.setPage(index);
+                 pdf.addImage(newCanvas, 0, 0, width, height);
 
+                 newCanvas.remove();
+                 newImgElement.remove();
              }
+
+            // pdf.save();
+
          },
          // on close btn aciton
          closeBtnAction: (evt) => {
