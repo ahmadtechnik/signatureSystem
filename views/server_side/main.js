@@ -242,10 +242,12 @@ var common = {
  * */
 
 function processSignaturies(comingData) {
+     // remove previos Canvass 
+     $(`.afterCanvas`).remove();
     // clear old canvases stored into object 
     canvasesAfterEditing = [];
 
-    var signImgWidth = 300;
+    var signImgWidth = 400;
     // each the exits canvass
     $.each(xCanvases, (index, canvas) => {
         // create new canves
@@ -254,6 +256,8 @@ function processSignaturies(comingData) {
         nCanvas.height = canvas.height;
         var nCanvasContext = nCanvas.getContext("2d");
         var pageNum = canvas.getAttribute("page_num");
+
+        nCanvas.setAttribute("class" , "afterCanvas");
 
         // append the new Canvas to body
         document.getElementsByTagName("body")[0].append(nCanvas);
@@ -292,8 +296,8 @@ function processSignaturies(comingData) {
                                 // start draw the sign on the canvas 
                                 nCanvasContext.drawImage(
                                     img,
-                                    X * 4 - (signImgWidth / 2),
-                                    Y * 4 - (img.height / 2),
+                                    X * 5 - (signImgWidth / 2),
+                                    Y * 5 - (img.height / 2),
                                     signImgWidth,
                                     img.height
                                 );

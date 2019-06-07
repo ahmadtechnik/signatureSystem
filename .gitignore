@@ -90,8 +90,8 @@ typings/
 
 
 # ignore jpg 
-.jpg 
-.jpeg
-.png
+*.jpg 
+*.jpeg
+*.png
 # ignore pdf files
-.pdf
+*.pdf

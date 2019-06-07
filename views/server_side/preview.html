@@ -90,12 +90,12 @@
   </div>
 
 </div>
-<script>
+<script id="previewScriptToRemove">
   // global vars to use in other scopes
   var pdfFile = null;
 
   // page origin size
-  var _A4_ORIGINAL_WIDTH = 2480;
+  var _A4_ORIGINAL_WIDTH = 3308;
   var imgHeight = null;
 
   // init document key down, to detect if user pressd any 
@@ -110,6 +110,10 @@
   // store canvas in this object to
   // to pass them to other device..
   var xCanvases = [];
+
+  // to count how many time was this file saves
+  var _SAVE_COUNTER = 0;
+
 
   // if only one signaturies it have to be just number one... 
   if (parseInt(numberOfSignaturies) === 1) {
@@ -235,6 +239,10 @@
       $(document).off("keydown");
       $(document).off("keyup");
 
+      $('#previewScriptToRemove').remove();
+
+      // remove previos Canvass 
+      $(`.afterCanvas`).remove();
     },
     // on modal deny
     onDeny: (modal) => {
@@ -260,7 +268,9 @@
 
   // handeling singe page
   function handelSinglePage(page) {
-
+    // remove previos Canvass 
+    $(`.afterCanvas`).remove();
+    
     // set pdf page view port scale
     var viewport = page.getViewport(_A4_ORIGINAL_WIDTH / page.getViewport(1).width);
 
@@ -309,7 +319,7 @@
 
         // create img tag
         var img = $(
-          `<img id="img_canv_${page.pageNumber}" width="${x.width / 4}" height="${x.height / 4}" 
+          `<img id="img_canv_${page.pageNumber}" width="${x.width / 5}" height="${x.height / 5}" 
       class="page_img" pageNum="${page.pageNumber}" style="border:1px black solid" >`
         );
 
@@ -341,8 +351,8 @@
         var singlImgeContainer =
           $(`<div id="singleImgeContainer" img_num="${page.pageNumber}" ></div>`);
 
-        singlImgeContainer.width(x.width / 4)
-        singlImgeContainer.height(x.height / 4);
+        singlImgeContainer.width(x.width / 5)
+        singlImgeContainer.height(x.height / 5);
         singlImgeContainer.css({
           position: "relative"
         })
@@ -435,7 +445,8 @@
       var sign = $(
         `<a class="ui tag red label signPlaceStyle" imgID="${imgID}" 
       cordX="${cord[imgID].x.toFixed(0)}" cordY="${cord[imgID].y.toFixed(0)}" >
-        <span style="font-size : 10px;" >${_COLLECTED_NAMES_FORM[pressedKeyboardKey]}</span> : ${pressedKeyboardKey}</a>`
+        <span style="font-size : 10px;" >${_COLLECTED_NAMES_FORM[pressedKeyboardKey]
+           !== undefined ? _COLLECTED_NAMES_FORM[pressedKeyboardKey] : ""}</span> : ${pressedKeyboardKey}</a>`
       );
       var closIcon = $(`<i class="delete icon"></i>`);
       sign.append(closIcon);

@@ -24,13 +24,11 @@
                      <label for="pagesNumbersArray">this seciton try to type (1 , 2 , 3 )</label>
                  </div>
                  <div class="ui field">
-                     <label>Please select quality <span id="qualityValue" style="font-size: 20px;">2</span> </label>
+                     <label>Please select quality <span id="qualityValue" style="font-size: 20px;">200 DPI</span>
+                     </label>
                      <div id="slider">
                          <div id="resolotionSelector" class="ui-slider-handle"></div>
                      </div>
-                     <p>Number (1) means that the single page will be 2480px width
-                         <br>Number (2) means that the single page will be 2480px / 2 width</p>
-
                  </div>
              </div>
 
@@ -57,6 +55,12 @@
      // in case was range it should be 1 , if specific pages should be 2
      var _SELECTED_METHOD = 1;
      var _SLIDER_VALUE = 100;
+
+     // GLOBAL after canvass
+     var _AFTER_SCALED = [];
+     var _SCALE_VALUE = 2;
+
+
      //
      $(`#pagesSelectorModal`).modal({
          closable: false,
@@ -68,11 +72,17 @@
              $(`#scripteToRemove`).remove();
              // to hide secound dimmer modal
              $(`#previewModal`).dimmer("hide");
+             // to remove all generated canvas from document 
+             $(`.scaled`).remove();
+             // to remove generated elements from document
+             $(`#scaledElements`).remove();
+
+             // reset save amount counter 
 
          },
          // on modal show, init events 
          onShow: () => {
-
+             // 
              $(`#pagesNumber`).text("Total Pages are : " + _PDF_DOC_PAGES_NUM);
              //
              spin.spinner({
@@ -109,14 +119,31 @@
              }).dimmer("show");
              //
              slider.slider({
-                 max: 2,
+                 max: 4,
                  min: 1,
                  step: 1,
-                 value: 2,
+                 value: 3,
                  slide: (event, ui) => {
-                     $(`#qualityValue`).text(ui.value)
+                     _SCALE_VALUE = ui.value;
+                     switch (ui.value) {
+                         case 1:
+                             $(`#qualityValue`).text(400 + " DPI")
+                             break;
+                         case 2:
+                             $(`#qualityValue`).text(300 + " DPI")
+                             break;
+                         case 3:
+                             $(`#qualityValue`).text(200 + " DPI")
+                             break;
+                         case 4:
+                             $(`#qualityValue`).text(100 + " DPI")
+                             break;
+                     }
                  }
              })
+
+             // init elements
+             initElementsToSave();
          }
      }).modal(`show`);
 
@@ -125,7 +152,6 @@
      $(`#pagesSelectorOkBtn`).click((evt) => {
 
          elementsActions.okBtnAction(evt);
-
          // to hide modal after submition
          //$(`#pagesSelectorModal`).modal("hide");
      });
@@ -146,103 +172,8 @@
      // 
      var elementsActions = {
          okBtnAction: (evt) => {
-             switch (_SELECTED_METHOD) {
-                 // in case was pages range, to get selected values
-                 case 1:
-                     var fromVal = $(spin.get(0)).spinner("value");
-                     var toVal = $(spin.get(1)).spinner("value");
-                     if (fromVal === null || toVal === null) {
-                         alert("PLEASE TYPE RENAGE NUMBER ")
-                     }
-                     // in case was all input fine and there is no mistake
-                     else {
-                         _CHOOSED_PAGES_ = {
-                             method: "range",
-                             data: {
-                                 from: fromVal,
-                                 to: toVal
-                             }
-                         }
-                     }
-                     break;
-                 case 2:
-                     var selectedValues = drop.dropdown("get value");
-                     if (selectedValues.length > 0) {
-                         _CHOOSED_PAGES_ = {
-                             method: "specific",
-                             data: selectedValues
-                         }
-                     } else {
-                         alert("PLEASE TYPE RENAGE NUMBER ")
-                     }
-                     break;
-             }
-             // start process images to save them in the hard disk
-             var choosedCanvas = [];
-             var dataForm = new FormData();
-             // to get all choosen canvass 
-             // then pass them to server as object base64
-             switch (_CHOOSED_PAGES_.method) {
-                 case "range":
-                     var from = parseInt(_CHOOSED_PAGES_.data.from);
-                     var to = parseInt(_CHOOSED_PAGES_.data.to);
-                     // start collecting the selected canvas
-                     for (let index = from; index <= to; index++) {
-                         // add the selected range numbers
-                         choosedCanvas.push(canvasesAfterEditing[index - 1]);
-                     }
-                     break;
-                     // to get selected pages specifics 
-                 case "specific":
-                     var pagesNumbers = _CHOOSED_PAGES_.data;
-                     for (let index = 0; index < pagesNumbers.length; index++) {
-                         var canvIndexToGet = parseInt(pagesNumbers[index]) - 1;
-                         choosedCanvas.push(canvasesAfterEditing[canvIndexToGet]);
-                     }
-                     break;
-             }
-
-
-             var pdf = new jsPDF("p", "px", "a4");
-
-             var width = pdf.internal.pageSize.getWidth();
-             var height = pdf.internal.pageSize.getHeight();
-
-             // _A4_ORIGINAL_WIDTH 
-             // start creating scaled canvas 
-             var selectedQulity = slider.slider("value");
-
-             for (let index = 0; index < choosedCanvas.length; index++) {
-                 const canvas = choosedCanvas[index];
-                 var canvasIndex = index;
-                 //
-                 var newImgElement = document.createElement("img");
-                 newImgElement.height = canvas.height / selectedQulity;
-                 newImgElement.width = canvas.width / selectedQulity;
-                 //
-                 newImgElement.src = canvas.toDataURL();
-                 document.getElementById("previewModalContent").append(newImgElement);
-                 //
-                 var newCanvas = document.createElement("canvas");
-                 newCanvas.height = newImgElement.height
-                 newCanvas.width = newImgElement.width
-                 document.getElementById("previewModalContent").append(newCanvas);
-                 //
-                 var contax = newCanvas.getContext("2d");
-                 contax.drawImage(newImgElement, 0, 0, newImgElement.width, newImgElement.height);
-                 // push the canves into array 
-                 
-                 choosedCanvas[canvasIndex] = newCanvas.toDataURL();
-                 pdf.addPage();
-                 pdf.setPage(index);
-                 pdf.addImage(newCanvas, 0, 0, width, height);
-
-                 newCanvas.remove();
-                 newImgElement.remove();
-             }
-
-            // pdf.save();
-
+             var selectedPages = initElementsToSave();
+             exportAsPDF(selectedPages);
          },
          // on close btn aciton
          closeBtnAction: (evt) => {
@@ -264,5 +195,152 @@
          $(spin.get(0)).spinner("value", 1)
          $(spin.get(1)).spinner("value", _PDF_DOC_PAGES_NUM)
          return pager;
+     }
+
+     // save canvass as pdf file
+     function exportAsPDF(canvass) {
+
+         var pdf = new jsPDF("p", "px", "a4");
+         var width = pdf.internal.pageSize.getWidth();
+         var height = pdf.internal.pageSize.getHeight();
+
+         // check the canvass befor start
+         if (canvass !== null && canvass.length > 0) {
+
+             for (let index = 1; index <= canvass.length; index++) {
+
+                 const canvas = canvass[index - 1];
+
+
+                 pdf.addPage();
+                 pdf.setPage(index);
+                 pdf.addImage(canvas, 0, 0, width, height);
+
+             }
+             pdf.deletePage(canvass.length + 1);
+
+         }
+         pdf.save("ge.pdf");
+
+     }
+
+     // to init the document on modal show
+     // to be ready to download as pdf
+     function initElementsToSave() {
+         var allRight = true;
+         var choosedCanvas = [];
+
+         switch (_SELECTED_METHOD) {
+             // in case was pages range, to get selected values
+             case 1:
+                 var fromVal = $(spin.get(0)).spinner("value");
+                 var toVal = $(spin.get(1)).spinner("value");
+                 if (fromVal === null || toVal === null) {
+                     alert("PLEASE TYPE RENAGE NUMBER ")
+                     allRight = false;
+                 }
+                 // in case was all input fine and there is no mistake
+                 else {
+                     _CHOOSED_PAGES_ = {
+                         method: "range",
+                         data: {
+                             from: fromVal,
+                             to: toVal
+                         }
+                     }
+                 }
+                 break;
+             case 2:
+                 var selectedValues = drop.dropdown("get value");
+                 if (selectedValues.length > 0) {
+                     _CHOOSED_PAGES_ = {
+                         method: "specific",
+                         data: selectedValues
+                     }
+                 } else {
+                     alert("PLEASE TYPE RENAGE NUMBER ")
+                     allRight = false;
+                 }
+                 break;
+         }
+         // start process images to save them in the hard disk
+
+
+         // to get all choosen canvass 
+         // then pass them to server as object base64
+         switch (_CHOOSED_PAGES_.method) {
+             case "range":
+                 var from = parseInt(_CHOOSED_PAGES_.data.from);
+                 var to = parseInt(_CHOOSED_PAGES_.data.to);
+
+                 // start collecting the selected canvas
+                 for (let index = from; index <= to; index++) {
+                     // add the selected range numbers
+                     choosedCanvas.push(canvasesAfterEditing[index - 1]);
+                 }
+                 break;
+                 // to get selected pages specifics 
+             case "specific":
+                 var pagesNumbers = _CHOOSED_PAGES_.data;
+                 for (let index = 0; index < pagesNumbers.length; index++) {
+                     var canvIndexToGet = parseInt(pagesNumbers[index]) - 1;
+                     choosedCanvas.push(canvasesAfterEditing[canvIndexToGet]);
+                 }
+                 break;
+         }
+
+         /**
+          * if first time, 
+          * -create the container div
+          * -append the rescaled canvass with images
+          * else
+          * -clear the container of images and canvass
+          * -reappend the rescaled images with canvases
+          * **/
+
+         if (allRight) {
+             var imgsAndCanvassContainer;
+
+             if ($(`#scaledElements`).length === 0) {
+                 imgsAndCanvassContainer = document.createElement("DIV");
+                 imgsAndCanvassContainer.setAttribute("id", "scaledElements");
+                 document.getElementsByTagName("body")[0].append(imgsAndCanvassContainer);
+                 createTheContainerOfImagesAndCanvas();
+             }
+             // in case was exist to remove old saved canvass and images
+             // then create new object
+             else {
+                 imgsAndCanvassContainer = document.getElementById("scaledElements");
+                 createTheContainerOfImagesAndCanvas()
+             }
+
+         } else {
+             console.log("ERROR...")
+         }
+
+         // to create the elements again
+         function createTheContainerOfImagesAndCanvas() {
+             // start each the selected pages#
+             for (let index = 0; index < choosedCanvas.length; index++) {
+                 const orginalCanvas = choosedCanvas[index];
+                 var img = document.createElement("img");
+                 img.width = orginalCanvas.width / _SCALE_VALUE;
+                 img.height = orginalCanvas.height / _SCALE_VALUE;
+                 img.src = orginalCanvas.toDataURL();
+                 imgsAndCanvassContainer.appendChild(img);
+
+                 //
+                 var nCanvas = document.createElement("canvas");
+                 nCanvas.height = orginalCanvas.height / _SCALE_VALUE;
+                 nCanvas.width = orginalCanvas.width / _SCALE_VALUE;
+                 var nCanvasContext = nCanvas.getContext("2d");
+                 nCanvasContext.drawImage(img, 0, 0, img.width, img.height);
+                 imgsAndCanvassContainer.appendChild(nCanvas);
+
+                 choosedCanvas[index] = nCanvas;
+             }
+             _SAVE_COUNTER++;
+         }
+         return choosedCanvas;
      }
  </script>

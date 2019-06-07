@@ -1,3 +1,15 @@
+function GoInFullscreen(element) {
+    if (element.requestFullscreen)
+        element.requestFullscreen();
+    else if (element.mozRequestFullScreen)
+        element.mozRequestFullScreen();
+    else if (element.webkitRequestFullscreen)
+        element.webkitRequestFullscreen();
+    else if (element.msRequestFullscreen)
+        element.msRequestFullscreen();
+}
+
+
 /* GLOBAL VARs */
 var _PDF_FILE_DOC = null;
 var _NUM_PAGES = null;
@@ -14,9 +26,13 @@ var _SIGNATURE_PAD_CONTAINER = null;
 var _SIGNATURE_PAD_OBJECT;
 
 
-var _A4_ORIGINAL_WIDTH = 2480;
+var _A4_ORIGINAL_WIDTH = 1241;
 
 var _SIGNATURIES_DATA = null;
+
+
+// signature pad hide or not
+var _PAD_IS_IN_SHOW = false;
 
 // start geting display dimantions
 var dHeight, dWidth;
@@ -37,6 +53,10 @@ socket.on("comingRequestToClient", (data) => {
 })
 
 $(document).ready(() => {
+
+    // in order to set window full to screen 
+    //GoInFullscreen(document.getElementsByTagName("body")[0]);
+
     /** to change elements sizes if the display resized */
     elementsSizing();
     setNewSignatureTakerPace()
@@ -58,12 +78,12 @@ $(document).ready(() => {
     _SIGNATURE_PAD_OBJECT = new SignaturePad(_SIGNATURE_CANVAS, {
         onBegin: padSignatureEvent.onBegin,
         onEnd: padSignatureEvent.onEnd,
-        minWidth : 0.5,
-        maxWidth : 2.5,
-        throttle : 10,
-        velocityFilterWeight : 0.7,
-        minDistance : 0,
-        dotSize : 1
+        minWidth: 1.5,
+        maxWidth: 2.5,
+        throttle: 10,
+        velocityFilterWeight: 0.7,
+        minDistance: 0,
+        dotSize: 1
     });
 
 
@@ -72,7 +92,12 @@ $(document).ready(() => {
     $(`#submitSignatureBtn`).click((evt) => {
         btnsActions.SubmitPadBtnAction(evt)
     })
+    // show dimmer on start page
+    //dimmerControler.showDimmer("ready to go...")
 
+    $(`#showHideSignaturePad`).click((evt) => {
+        btnsActions.hideShowSignaturePad(evt)
+    })
 
 });
 
@@ -93,7 +118,7 @@ var comun = {
         var msg = data.msg;
         switch (msg) {
             case "confirmed":
-                dimmerControler.showDimmer();
+                dimmerControler.showDimmer("on the way...");
                 break;
             case "cancaled":
                 dimmerControler.hideDimmer();
@@ -133,10 +158,11 @@ var comun = {
 
 // to control loading page show or hide
 var dimmerControler = {
-    showDimmer: () => {
+    showDimmer: (msg = "coming...") => {
         $(`.loadingDimmer`).dimmer({
             closable: false
         }).dimmer('show');
+        $(`#dimmerMsg`).text(msg)
     },
     hideDimmer: () => {
         $(`.loadingDimmer`).dimmer({
@@ -210,12 +236,36 @@ var btnsActions = {
                 $(`#signaturiesNum`).html("");
                 $(`#signaturiesName`).html("");
 
-                dimmerControler.showDimmer();
+                _PDF_FILE_DOC = null;
+                _NUM_PAGES = null;
+                _PDF_PAGES_AS_CANVAS = null;
+                _PAGER = 1;
+                $(`.previewCanvas`).remove();
+                $(`.previewImg`).remove();
+                $(`.divider_hr`).remove();
+
+                dimmerControler.showDimmer("waiting for next order....");
+                setTimeout(() => {
+                    dimmerControler.showDimmer("ready to go...");
+                }, 5000)
             }
 
             _SIGNATURE_PAD_OBJECT.clear();
         } else {
             // start btn to start signaturies 
+        }
+    },
+    hideShowSignaturePad: (evt) => {
+        if (!_PAD_IS_IN_SHOW) {
+            $(`#signDrowSeciton`).css("right", "10px");
+            _PAD_IS_IN_SHOW = true;
+            $(`#showHideBtnIcon`).removeClass(" left")
+            $(`#showHideBtnIcon`).addClass("right")
+        } else {
+            $(`#signDrowSeciton`).css("right", "-490px");
+            _PAD_IS_IN_SHOW = false;
+            $(`#showHideBtnIcon`).addClass("left")
+            $(`#showHideBtnIcon`).removeClass("right ")
         }
     }
 }
@@ -354,9 +404,9 @@ function singlePageHandling(page) {
     // get orginal view port of the page
     // sotre basic dimantion of port view
     var oWidth = page.getViewport(1).width;
-    var oHeight = page.getViewport(1).height;
+
     var cWidth = $(`#filePreviewSeciton`).width();
-    var cHeight = $(`#filePreviewSeciton`).height();
+
 
     // store width of the new scaled sizes
     var viewPort = page.getViewport(_A4_ORIGINAL_WIDTH / oWidth);
@@ -367,6 +417,7 @@ function singlePageHandling(page) {
     xCanvas.height = viewPort.height;
     xCanvas.width = viewPort.width;
     xCanvas.style.display = "none"
+    xCanvas.setAttribute("class", "previewCanvas");
     $(`#filePreviewSeciton`).append(xCanvas)
 
 
@@ -381,11 +432,13 @@ function singlePageHandling(page) {
         var imgObj = $(`<img/>`)
         imgObj.attr("src", xCanvas.toDataURL());
         imgObj.width(cWidth);
+        imgObj.addClass("previewImg")
         $(`#filePreviewSeciton`).append(imgObj);
         if (_PAGER !== _NUM_PAGES) {
             _PAGER++;
             _PDF_FILE_DOC.getPage(_PAGER).then(singlePageHandling);
-            $(`#filePreviewSeciton`).append("<hr>");
+            $(`#filePreviewSeciton`).append("<hr class='divider_hr'>");
+            dimmerControler.showDimmer("loading pages ...");
         } else {
             dimmerControler.hideDimmer();
         }

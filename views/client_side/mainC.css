@@ -27,13 +27,13 @@ set backgrount for the bottom seciotn
     background: #f5f5f5;
 
     position: fixed;
-    right: 20px;
-    bottom: 20px;
+    right: -490px;
+    bottom: 10px;
+    
+}
 
-}
-.signDrowSecitonCanvas{
-  
-}
+.signDrowSecitonCanvas {}
+
 /* 
  */
 .signaturiesInfoSeciton {
@@ -44,7 +44,7 @@ set backgrount for the bottom seciotn
  */
 .clearSignaturBtn {
     position: absolute;
-    left:  7px;
+    left: 7px;
     bottom: 7px;
     margin: 0px !important;
     border-radius: 0px 0px 25px 25px !important;
@@ -74,15 +74,24 @@ set backgrount for the bottom seciotn
 }
 
 /*  */
-.signDrowSecitonCanvas{
+.signDrowSecitonCanvas {
 
     border-radius: 0px 0px 25px 25px !important;
     -moz-border-radius: 0px 0px 25px 25px;
     -webkit-border-radius: 0px 0px 25px 25px;
 }
+
 /* 
  */
- .signaturiesNum , .signaturiesName{
-     font-size: 25px;
+.signaturiesNum,
+.signaturiesName {
+    font-size: 25px;
+}
 
- }
+/* 
+  */
+.hideAndShowSignaturePad {
+    position: absolute;
+    left: -40px;
+    top: 30px;
+}
