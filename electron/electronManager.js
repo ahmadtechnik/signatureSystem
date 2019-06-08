@@ -4,17 +4,17 @@ const {
     BrowserView,
     ipcMain,
     Menu,
+    Tray
 } = require('electron')
 
 // to disable https untrust sites 
 app.commandLine.appendSwitch('ignore-certificate-errors', 'true');
 
 let mainWindow;
-
+let tr;
 module.exports.initElectronApp = {
     //
     initAppOnReady: () => {
-
         app.on("ready", this.initElectronApp.initMainWin);
         return app;
     },
@@ -28,6 +28,9 @@ module.exports.initElectronApp = {
             },
             show: false
         });
+        mainWindow.on("closed", mainWidowEvents.onWindowClosed)
+        mainWindow.setMenu(null)
+        this.initElectronApp.setTrayMenu()
     },
     mainWinLoadURL: (URL) => {
         mainWindow.loadURL(URL)
@@ -36,6 +39,34 @@ module.exports.initElectronApp = {
     getMainWin: () => {
         return mainWindow;
     },
-    // on main on show
+    //
+    setTrayMenu: () => {
+        tr = new Tray("./alphaIcon.ico");
+        const contextMenu = Menu.buildFromTemplate([{
+                label: 'Item1',
+                type: 'radio'
+            },
+            {
+                label: 'Item2',
+                type: 'radio'
+            },
+            {
+                label: 'Item3',
+                type: 'radio',
+                checked: true
+            },
+            {
+                label: 'Item4',
+                type: 'radio'
+            }
+        ])
+        tr.setToolTip('This is my application.')
+        tr.setContextMenu(contextMenu)
+    }
+}
 
+var mainWidowEvents = {
+    onWindowClosed: () => {
+
+    }
 }

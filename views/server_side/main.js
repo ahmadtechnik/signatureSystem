@@ -65,7 +65,12 @@ $(document).ready(() => {
         correctLevel: QRCode.CorrectLevel.H
     });
 
+    // make QR code draggable
 
+    $(_QR_CODE_CONTAINER).draggable({
+        containment: "body",
+        scroll: false
+    });
 })
 
 function showFilesHistoryBtnAction(event) {
@@ -242,8 +247,8 @@ var common = {
  * */
 
 function processSignaturies(comingData) {
-     // remove previos Canvass 
-     $(`.afterCanvas`).remove();
+    // remove previos Canvass 
+    $(`.afterCanvas`).remove();
     // clear old canvases stored into object 
     canvasesAfterEditing = [];
 
@@ -257,7 +262,7 @@ function processSignaturies(comingData) {
         var nCanvasContext = nCanvas.getContext("2d");
         var pageNum = canvas.getAttribute("page_num");
 
-        nCanvas.setAttribute("class" , "afterCanvas");
+        nCanvas.setAttribute("class", "afterCanvas");
 
         // append the new Canvas to body
         document.getElementsByTagName("body")[0].append(nCanvas);

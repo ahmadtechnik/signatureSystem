@@ -95,3 +95,7 @@ set backgrount for the bottom seciotn
     left: -40px;
     top: 30px;
 }
+/*  */
+body , .dimmer{
+    cursor: none;
+}
