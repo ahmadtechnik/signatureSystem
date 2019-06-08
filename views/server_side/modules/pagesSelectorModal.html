@@ -168,16 +168,20 @@
      // ok btn action, 
      // to start transfare the canvas to server side 
      // then save them inro server as images 
-     // after creating new dir and return dir name
-     // 
+     // after creating new dir and return dir nam
      var elementsActions = {
+         //
          okBtnAction: (evt) => {
-             var selectedPages = initElementsToSave();
-             exportAsPDF(selectedPages);
+             if (canvasesAfterEditing.length > 0 && canvasesAfterEditing !== null) {
+                 var selectedPages = initElementsToSave();
+                 exportAsPDF(selectedPages);
+             } else {
+                 alert("You can not save files which are not exist...");
+             }
          },
          // on close btn aciton
          closeBtnAction: (evt) => {
-
+            $(`#pagesSelectorModal`).modal("hide");
          }
      }
 
@@ -221,7 +225,6 @@
 
          }
          pdf.save("ge.pdf");
-
      }
 
      // to init the document on modal show
@@ -229,118 +232,122 @@
      function initElementsToSave() {
          var allRight = true;
          var choosedCanvas = [];
-
-         switch (_SELECTED_METHOD) {
-             // in case was pages range, to get selected values
-             case 1:
-                 var fromVal = $(spin.get(0)).spinner("value");
-                 var toVal = $(spin.get(1)).spinner("value");
-                 if (fromVal === null || toVal === null) {
-                     alert("PLEASE TYPE RENAGE NUMBER ")
-                     allRight = false;
-                 }
-                 // in case was all input fine and there is no mistake
-                 else {
-                     _CHOOSED_PAGES_ = {
-                         method: "range",
-                         data: {
-                             from: fromVal,
-                             to: toVal
+         if (canvasesAfterEditing.length > 0 && canvasesAfterEditing !== null) {
+             switch (_SELECTED_METHOD) {
+                 // in case was pages range, to get selected values
+                 case 1:
+                     var fromVal = $(spin.get(0)).spinner("value");
+                     var toVal = $(spin.get(1)).spinner("value");
+                     if (fromVal === null || toVal === null) {
+                         alert("PLEASE TYPE RENAGE NUMBER ")
+                         allRight = false;
+                     }
+                     // in case was all input fine and there is no mistake
+                     else {
+                         _CHOOSED_PAGES_ = {
+                             method: "range",
+                             data: {
+                                 from: fromVal,
+                                 to: toVal
+                             }
                          }
                      }
-                 }
-                 break;
-             case 2:
-                 var selectedValues = drop.dropdown("get value");
-                 if (selectedValues.length > 0) {
-                     _CHOOSED_PAGES_ = {
-                         method: "specific",
-                         data: selectedValues
+                     break;
+                 case 2:
+                     var selectedValues = drop.dropdown("get value");
+                     if (selectedValues.length > 0) {
+                         _CHOOSED_PAGES_ = {
+                             method: "specific",
+                             data: selectedValues
+                         }
+                     } else {
+                         alert("PLEASE TYPE RENAGE NUMBER ")
+                         allRight = false;
                      }
-                 } else {
-                     alert("PLEASE TYPE RENAGE NUMBER ")
-                     allRight = false;
-                 }
-                 break;
-         }
-         // start process images to save them in the hard disk
-
-
-         // to get all choosen canvass 
-         // then pass them to server as object base64
-         switch (_CHOOSED_PAGES_.method) {
-             case "range":
-                 var from = parseInt(_CHOOSED_PAGES_.data.from);
-                 var to = parseInt(_CHOOSED_PAGES_.data.to);
-
-                 // start collecting the selected canvas
-                 for (let index = from; index <= to; index++) {
-                     // add the selected range numbers
-                     choosedCanvas.push(canvasesAfterEditing[index - 1]);
-                 }
-                 break;
-                 // to get selected pages specifics 
-             case "specific":
-                 var pagesNumbers = _CHOOSED_PAGES_.data;
-                 for (let index = 0; index < pagesNumbers.length; index++) {
-                     var canvIndexToGet = parseInt(pagesNumbers[index]) - 1;
-                     choosedCanvas.push(canvasesAfterEditing[canvIndexToGet]);
-                 }
-                 break;
-         }
-
-         /**
-          * if first time, 
-          * -create the container div
-          * -append the rescaled canvass with images
-          * else
-          * -clear the container of images and canvass
-          * -reappend the rescaled images with canvases
-          * **/
-
-         if (allRight) {
-             var imgsAndCanvassContainer;
-
-             if ($(`#scaledElements`).length === 0) {
-                 imgsAndCanvassContainer = document.createElement("DIV");
-                 imgsAndCanvassContainer.setAttribute("id", "scaledElements");
-                 document.getElementsByTagName("body")[0].append(imgsAndCanvassContainer);
-                 createTheContainerOfImagesAndCanvas();
+                     break;
              }
-             // in case was exist to remove old saved canvass and images
-             // then create new object
-             else {
-                 imgsAndCanvassContainer = document.getElementById("scaledElements");
-                 createTheContainerOfImagesAndCanvas()
+             // start process images to save them in the hard disk
+
+
+             // to get all choosen canvass 
+             // then pass them to server as object base64
+             switch (_CHOOSED_PAGES_.method) {
+                 case "range":
+                     var from = parseInt(_CHOOSED_PAGES_.data.from);
+                     var to = parseInt(_CHOOSED_PAGES_.data.to);
+
+                     // start collecting the selected canvas
+                     for (let index = from; index <= to; index++) {
+                         // add the selected range numbers
+                         choosedCanvas.push(canvasesAfterEditing[index - 1]);
+                     }
+                     break;
+                     // to get selected pages specifics 
+                 case "specific":
+                     var pagesNumbers = _CHOOSED_PAGES_.data;
+                     for (let index = 0; index < pagesNumbers.length; index++) {
+                         var canvIndexToGet = parseInt(pagesNumbers[index]) - 1;
+                         choosedCanvas.push(canvasesAfterEditing[canvIndexToGet]);
+                     }
+                     break;
              }
 
+             /**
+              * if first time, 
+              * -create the container div
+              * -append the rescaled canvass with images
+              * else
+              * -clear the container of images and canvass
+              * -reappend the rescaled images with canvases
+              * **/
+
+             if (allRight) {
+                 var imgsAndCanvassContainer;
+
+                 if ($(`#scaledElements`).length === 0) {
+                     imgsAndCanvassContainer = document.createElement("DIV");
+                     imgsAndCanvassContainer.setAttribute("id", "scaledElements");
+                     document.getElementsByTagName("body")[0].append(imgsAndCanvassContainer);
+                     createTheContainerOfImagesAndCanvas();
+                 }
+                 // in case was exist to remove old saved canvass and images
+                 // then create new object
+                 else {
+                     imgsAndCanvassContainer = document.getElementById("scaledElements");
+                     createTheContainerOfImagesAndCanvas()
+                 }
+
+             } else {
+                 console.log("ERROR...")
+             }
+
+             // to create the elements again
+             function createTheContainerOfImagesAndCanvas() {
+                 // start each the selected pages#
+                 for (let index = 0; index < choosedCanvas.length; index++) {
+                     const orginalCanvas = choosedCanvas[index];
+                     var img = document.createElement("img");
+                     img.width = orginalCanvas.width / _SCALE_VALUE;
+                     img.height = orginalCanvas.height / _SCALE_VALUE;
+                     img.src = orginalCanvas.toDataURL();
+                     imgsAndCanvassContainer.appendChild(img);
+
+                     //
+                     var nCanvas = document.createElement("canvas");
+                     nCanvas.height = orginalCanvas.height / _SCALE_VALUE;
+                     nCanvas.width = orginalCanvas.width / _SCALE_VALUE;
+                     var nCanvasContext = nCanvas.getContext("2d");
+                     nCanvasContext.drawImage(img, 0, 0, img.width, img.height);
+                     imgsAndCanvassContainer.appendChild(nCanvas);
+
+                     choosedCanvas[index] = nCanvas;
+                 }
+                 _SAVE_COUNTER++;
+             }
+
+             return choosedCanvas;
          } else {
-             console.log("ERROR...")
+             alert("Please upload the pdf file");
          }
-
-         // to create the elements again
-         function createTheContainerOfImagesAndCanvas() {
-             // start each the selected pages#
-             for (let index = 0; index < choosedCanvas.length; index++) {
-                 const orginalCanvas = choosedCanvas[index];
-                 var img = document.createElement("img");
-                 img.width = orginalCanvas.width / _SCALE_VALUE;
-                 img.height = orginalCanvas.height / _SCALE_VALUE;
-                 img.src = orginalCanvas.toDataURL();
-                 imgsAndCanvassContainer.appendChild(img);
-
-                 //
-                 var nCanvas = document.createElement("canvas");
-                 nCanvas.height = orginalCanvas.height / _SCALE_VALUE;
-                 nCanvas.width = orginalCanvas.width / _SCALE_VALUE;
-                 var nCanvasContext = nCanvas.getContext("2d");
-                 nCanvasContext.drawImage(img, 0, 0, img.width, img.height);
-                 imgsAndCanvassContainer.appendChild(nCanvas);
-
-                 choosedCanvas[index] = nCanvas;
-             }
-             _SAVE_COUNTER++;
-         }
-         return choosedCanvas;
      }
  </script>

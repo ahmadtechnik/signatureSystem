@@ -1,12 +1,12 @@
 <!-- modal -->
 <div class="ui modal " id="previewModal">
-  <div class="header">Select signaturies places</div>
+  <div class="header">Select signatories places</div>
 
   <div class=" scrolling  content" id="previewModalContent">
     <div class="ui celled internally grid  stackable" id="lockableModalContainer">
       <div class="four column row orange fileTopInfosContainer">
         <div class="column four wide ">File name : <span id="fileNameText"></span></div>
-        <div class="column four wide">Signaturies number :<span id="signsNumberText"></span></div>
+        <div class="column four wide">Signatories number :<span id="signsNumberText"></span></div>
         <div class="column four wide">File type : <span id="fileTypeText"></span></div>
         <div class="column four wide">Pages number : <span id="pagesNumberText"></span></div>
       </div>
@@ -29,10 +29,12 @@
       <!--  -->
       <div class="ui dimmer">
         <div class="content">
+          <div id="ancherDiv_1"></div>
           <h2 class="ui inverted icon header">
             <i class="huge notched circle loading icon"></i>
             WORKING ON SIGNATURE DEVICE...
           </h2>
+          <br>
           Please wait until the signatories finishing..
         </div>
       </div>
@@ -89,6 +91,12 @@
     </div>
   </div>
 
+  <div class="leftSideTools">
+    <div class="ui buttons vertical mini circular">
+      <div class="ui icon button circular red"><i class="eraser icon"></i></div>
+      <div class="ui icon button circular blue"><i class="pencil alternate icon"></i></div>
+    </div>
+  </div>
 </div>
 <script id="previewScriptToRemove">
   // global vars to use in other scopes
@@ -222,6 +230,15 @@
       // in case was the uploaded file image not pdf
       else {}
       initImportatElements()
+
+      // add scroll to function
+      $.fn.scrollTo = function (elem, speed) {
+        $(this).animate({
+          scrollTop: $(this).scrollTop() - $(this).offset().top + $(elem).offset().top
+        }, speed == undefined ? 1000 : speed);
+        return this;
+      };
+
     },
     // on modal submited
     // here will start send the data 
@@ -270,7 +287,7 @@
   function handelSinglePage(page) {
     // remove previos Canvass 
     $(`.afterCanvas`).remove();
-    
+
     // set pdf page view port scale
     var viewport = page.getViewport(_A4_ORIGINAL_WIDTH / page.getViewport(1).width);
 
@@ -378,41 +395,17 @@
      * **/
   }
 
-  //  action after file rendering
-
-  function createImageElement(x, page) {
-
-
-  }
 
   // image mouseover action
   function imagemouseOverAction(event, img) {
     var bouds = $(img).get(0).getBoundingClientRect()
 
+    console.log("MOVE");
 
     // get current mouse corser cordination 
     // relatice to single image
     var x = (event.pageX - $(img).offset().left) + $(window).scrollLeft();
     var y = (event.pageY - $(img).offset().top) + $(window).scrollTop();
-
-
-    /**
-    create circle 
-    $(`#corser`).css({
-      top: (event.pageY),
-      left: (event.pageX)
-    })
-    set postion reviewer postion 
-    $(`#textT`).text(
-      "Y : " +
-      (y.toFixed(1)) +
-      "  X : " +
-      (x.toFixed(1)) +
-      " IMG : " + $(img).attr("id")
-    )
-    **/
-
-
 
     // insert mouse postion into an object
     // to call them again leter
@@ -420,7 +413,6 @@
       x: x,
       y: y
     }
-
   }
 
 
@@ -448,7 +440,11 @@
         <span style="font-size : 10px;" >${_COLLECTED_NAMES_FORM[pressedKeyboardKey]
            !== undefined ? _COLLECTED_NAMES_FORM[pressedKeyboardKey] : ""}</span> : ${pressedKeyboardKey}</a>`
       );
+
       var closIcon = $(`<i class="delete icon"></i>`);
+
+
+
       sign.append(closIcon);
 
       //add remove ation for every single sign place label
@@ -468,7 +464,13 @@
         background: ""
       });
 
-      //console.log("height : ", getSignLabelHeight, "width : ", getSignLabelWidth)
+      // change coordinations on theelements move
+      sign.draggable({
+        stop: onLabelDrag,
+        containment: "#" + imgID,
+        scroll: false,
+      });
+
 
       // add the sign place on the image
       var singleImageContainer = $(`div[img_num='${$(img).attr("pagenum")}']`);
@@ -481,12 +483,12 @@
         Y: cord[imgID].y.toFixed(0),
         SN: pressedKeyboardKey,
         pageNum: pageNum,
-        removed: false
+        removed: false,
       }
 
       // check if name of signature was entered..
-      if (_COLLECTED_NAMES_FORM[pressedKeyboardKey] !== "" && _COLLECTED_NAMES_FORM[pressedKeyboardKey] !==
-        undefined) {
+      if (_COLLECTED_NAMES_FORM[pressedKeyboardKey] !== "" &&
+        _COLLECTED_NAMES_FORM[pressedKeyboardKey] !== undefined) {
         clickCord["signName"] = _COLLECTED_NAMES_FORM[pressedKeyboardKey];
       }
 
@@ -501,6 +503,9 @@
     // hide after tool btns
     // $(`.afterToolBtn`).css("display", "none");
   }
+
+  // on label drag
+  function onLabelDrag(event, ui) {}
 
   // if user want to remove sign place label
   // here is the action that for
@@ -547,13 +552,14 @@
       $(`#lockableModalContainer`).dimmer({
         closable: false
       }).dimmer("show");
-
+      $(`#previewModalContent`).scrollTo("#ancherDiv_1", 2000)
       return false;
     } else {
       alert("NO PLACES SELECTED TO PUT THE SIGNATURE INSIDE... M2 ")
     }
 
   }
+
 
   // declare paper sizes to call them later.
   var landscapeA4Sizes = {

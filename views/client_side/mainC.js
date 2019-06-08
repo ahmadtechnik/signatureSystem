@@ -93,7 +93,7 @@ $(document).ready(() => {
         btnsActions.SubmitPadBtnAction(evt)
     })
     // show dimmer on start page
-    //dimmerControler.showDimmer("ready to go...")
+    dimmerControler.showDimmer("ready to go...")
 
     $(`#showHideSignaturePad`).click((evt) => {
         btnsActions.hideShowSignaturePad(evt)

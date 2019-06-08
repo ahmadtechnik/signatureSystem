@@ -62,3 +62,11 @@
 .afterToolBtn {
         display: none;
 }
+
+/*  */
+.leftSideTools {
+        position: fixed;
+        left: -30px;
+        top: 0px;
+        background: #d05c5c;
+}
