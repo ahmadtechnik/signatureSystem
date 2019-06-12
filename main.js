@@ -9,15 +9,15 @@ var os = require("os")
 var socketIOImport = require("./socket.ioManager/socket-io");
 
 // start with electron
-var electronObj = require("./electron/electronManager");
+//var electronObj = require("./electron/electronManager");
 
 
-electronObj.initElectronApp.initAppOnReady();
+//electronObj.initElectronApp.initAppOnReady();
 /**
  * first step, opening the HTTP and HTTPS services
  */
 httpManagment.startListen((started, openPorts) => {
-  electronObj.initElectronApp.initAppOnReady();
+  //electronObj.initElectronApp.initAppOnReady();
   /** in case https and http from modul started*/
   if (started) {
     //get HTTP and HTTPS objects to cotrol them
@@ -28,8 +28,8 @@ httpManagment.startListen((started, openPorts) => {
 
     getIPv4((ip4) => {
       // start main node app 
-      electronObj.initElectronApp.mainWinLoadURL(`https://${ip4}:3000/server_side_home`);
-      electronObj.initElectronApp.getMainWin().show();
+      //electronObj.initElectronApp.mainWinLoadURL(`https://${ip4}:3000/server_side_home`);
+      //electronObj.initElectronApp.getMainWin().show();
     })
 
   }

@@ -29,6 +29,7 @@ module.exports.initElectronApp = {
             show: false
         });
         mainWindow.on("closed", mainWidowEvents.onWindowClosed)
+        mainWindow.webContents.openDevTools();
         mainWindow.setMenu(null)
         this.initElectronApp.setTrayMenu()
     },
