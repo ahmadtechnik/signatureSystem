@@ -27,9 +27,7 @@ httpManagment.startListen((started, openPorts) => {
     socketIOImport.socketObjectSetter(https);
 
     getIPv4((ip4) => {
-      // start main node app 
-      //electronObj.initElectronApp.mainWinLoadURL(`https://${ip4}:3000/server_side_home`);
-      //electronObj.initElectronApp.getMainWin().show();
+      console.log(ip4);
     })
 
   }

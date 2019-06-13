@@ -95,3 +95,6 @@ typings/
 *.png
 # ignore pdf files
 *.pdf
+
+# exe files
+*.exe
