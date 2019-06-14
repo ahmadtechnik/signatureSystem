@@ -1,9 +1,9 @@
 /**
  * import importants libs
  */
-var httpManagment = require("./HTTPs/httpserver");
+var httpManagment = require( "./HTTPs/httpserver");
 //var electronManager = require("./electron/electronManager");
-var socketIOManager = require("./socket.ioManager/socket-io");
+var socketIOManager = require( "./socket.ioManager/socket-io");
 
 var os = require("os")
 var socketIOImport = require("./socket.ioManager/socket-io");
@@ -33,7 +33,6 @@ httpManagment.startListen((started, openPorts) => {
   }
 
 });
-
 
 // to get IPv4 
 function getIPv4(ipGetter) {

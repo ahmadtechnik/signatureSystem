@@ -10,6 +10,8 @@ var formidable = require("formidable");
 var util = require("util");
 var io = require("./../socket.ioManager/socket-io");
 
+
+
 /**
  * SSL cert
  */
@@ -84,21 +86,21 @@ app.set('view engine', 'ejs');
  *  jquery ui
  *  semantic ui CSS and JS
  */
-app.use("/bootstrap", express.static("node_modules/bootstrap/dist/"));
-app.use("/jquery", express.static("node_modules/jquery/dist/"));
-app.use("/jquery-ui", express.static("node_modules/jquery-ui/"));
-app.use("/semantic-ui", express.static("node_modules/semantic-ui-css/"));
-app.use("/socket.io", express.static("node_modules/socket.io-client/dist/"));
-app.use("/assets", express.static("views/assets/"));
+app.use("/bootstrap", express.static(path.join(__dirname , "/../node_modules/bootstrap/dist/")));
+app.use("/jquery", express.static(path.join(__dirname ,"/../node_modules/jquery/dist/")));
+app.use("/jquery-ui", express.static(path.join(__dirname ,"/../node_modules/jquery-ui")));
+app.use("/semantic-ui", express.static(path.join(__dirname ,"/../node_modules/semantic-ui-css/")));
+app.use("/socket.io", express.static(path.join(__dirname ,"/../node_modules/socket.io-client/dist/")));
+app.use("/assets", express.static(path.join(__dirname , "/../views/assets/")));
+app.use("/storage", express.static(path.join(__dirname , "/../storage/")));
 
-app.use("/storage", express.static("storage/"));
 /**
  * use main dir server side
  */
-app.use("/", express.static("views/server_side/"));
+app.use("/", express.static(path.join(__dirname , "/../views/server_side/")));
 
 /** use main dir client side  */
-app.use("/", express.static("views/client_side/"));
+app.use("/", express.static(path.join(__dirname ,"/../views/client_side/")));
 
 /**
  * Select the home page for express server.
@@ -116,7 +118,7 @@ app.get("/server_side_home", function (req, res) {
      */
     getIPv4((ipv4) => {
         if (ipv4 !== false) {
-            res.render("server_side/index.ejs", {
+            res.render(path.join(__dirname , "/../views/server_side/index.ejs"), {
                 hostname: os.hostname(),
                 portinuse: localPort,
                 pagetitle: "K1 Computer Signature System",
@@ -138,7 +140,7 @@ app.get("/upload_document", (req, res) => {
      * store the local port of the server 
      * */
     var localPort = req.socket.localPort;
-    res.render("server_side/upload.ejs", {
+    res.render(path.join(__dirname , "/../views/server_side/upload.ejs"), {
         hostname: os.hostname(),
         portinuse: localPort,
         pagetitle: "K1 Computer Signature System"
