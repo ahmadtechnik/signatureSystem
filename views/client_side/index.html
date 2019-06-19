@@ -24,6 +24,9 @@
     <!-- import signature pad -->
     <script src="assets/signaturePad/js/signature_pad.umd.js"></script>
 
+    <!-- import jquery ui lib -->
+    <script src="assets/jQueryUI/jquery-ui.js"></script>
+    <link rel="stylesheet" type="text/css" href="assets/jQueryUI/jquery-ui.css">
 </head>
 
 <body>
@@ -33,7 +36,7 @@
         <div class="content">
             <h2 class="ui inverted icon header">
                 <i class="huge notched circle loading icon"></i>
-                <span id="dimmerMsg" ></span>
+                <span id="dimmerMsg"></span>
             </h2>
         </div>
     </div>
@@ -45,19 +48,24 @@
     <!--  -->
     <div class="signatureTakerSection startSigningAction" id="signatureTakerSection">
         <!--  -->
-        <div class="signDrowSeciton " id="signDrowSeciton">
+        <div class="signDrowSeciton resizable_" id="signDrowSeciton">
             <!--  -->
-            <canvas class="signDrowSecitonCanvas" id="signDrowSecitonCanvas" ></canvas>
+            <canvas class="signDrowSecitonCanvas" id="signDrowSecitonCanvas"></canvas>
             <!--  -->
-            <div class="submitSignatureBtn  ui icon button green large disabled" id="submitSignatureBtn">
+            <div class="submitSignatureBtn ui button green disabled" id="submitSignatureBtn">
                 <i class="check icon"></i>
             </div>
             <!--  -->
-            <div class="clearSignaturBtn ui icon button red" id="clearSignaturBtn">
+            <div class="clearSignaturBtn ui  button red" id="clearSignaturBtn">
                 <i class="trash alternate icon"></i>
             </div>
             <div class="ui button icon teal hideAndShowSignaturePad" id="showHideSignaturePad">
                 <i class="angle double left icon" id="showHideBtnIcon"></i>
+            </div>
+            <!-- colors btns -->
+            <div class="ui buttons small icon colorsBtnsBar">
+                <div class="ui button black selectColorBtnAction" id="black"><i class="pencil alternate icon"></i></div>
+                <div class="ui button blue selectColorBtnAction" id="blue"><i class="pencil alternate icon"></i></div>
             </div>
         </div>
         <!--  -->
@@ -65,7 +73,7 @@
             <div class="signaturiesName" id="signaturiesName"></div>
             <div class="signaturiesNum" id="signaturiesNum"></div>
         </div>
-        
+
         <div class="ui dimmer">
             <div class="content">
                 <h2 class="ui inverted icon header">

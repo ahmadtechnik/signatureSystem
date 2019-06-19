@@ -5,14 +5,6 @@
 
 var socket = io.connect("/server_side_device" /*`${protocol}://${hostname}:${portinuse}`*/ );
 
-var _CLIENTS_COUNTR = 0;
-socket.on("connect", () => {
-    common.onServerConnected()
-})
-// on comint request to server from the client
-socket.on("comingRequestToServer", (data) => {
-    common.onClientRequested(data);
-})
 
 // global vars .
 var _QR_CODE_PLACE = null;
@@ -41,11 +33,29 @@ var emitData = (key, data) => {
     socket.emit(key, data);
 }
 
+//
+var _CLIENTS_COUNTR = [];
+socket.on("connect", () => {
+    common.onServerConnected()
+})
+// on comint request to server from the client
+socket.on("comingRequestToServer", (data) => {
+    common.onClientRequested(data);
+});
+// in case socket informed the server that there is an client disconnected
+socket.on("clientDisconnected", (data) => {
+
+});
+socket.on("newClintConnected", (data) => {
+    _CLIENTS_COUNTR.push(data.clientConnected);
+});
 
 /**
  * set document on ready
  */
 $(document).ready(() => {
+
+
     /**
      * Set btn Action : to load upload JES page
      * **/
@@ -196,18 +206,14 @@ var common = {
     onClientRequested: (data) => {
         var timer;
         switch (data.msg) {
-            case "clientConnected":
-                common.client_side_device_connected();
-                break;
-            case "clientDisconnected":
-                break;
+
             case "padCleared":
-                console.log("PAD CLEARED ...")
                 break;
             case "signPreview":
                 var sign = data.data;
                 // show received signature from client
                 $(`#signaturePreviewImg`).attr("src", data.asImg);
+
                 break;
             case "finishedSigning":
                 // start puting data on the images
@@ -223,11 +229,6 @@ var common = {
         }
     },
 
-    /** add action to count connected clients  */
-    client_side_device_connected: () => {
-        console.log("device added to counter")
-        _CLIENTS_COUNTR++
-    }
 }
 
 /** 

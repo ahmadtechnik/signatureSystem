@@ -5,14 +5,10 @@ var httpManagment = require( "./HTTPs/httpserver");
 //var electronManager = require("./electron/electronManager");
 var socketIOManager = require( "./socket.ioManager/socket-io");
 
-var os = require("os")
+var os = require("os");
 var socketIOImport = require("./socket.ioManager/socket-io");
 
-// start with electron
-//var electronObj = require("./electron/electronManager");
 
-
-//electronObj.initElectronApp.initAppOnReady();
 /**
  * first step, opening the HTTP and HTTPS services
  */
@@ -25,11 +21,9 @@ httpManagment.startListen((started, openPorts) => {
     var expressApp = openPorts.expressApp;
     // start socket io with the same server 
     socketIOImport.socketObjectSetter(https);
-
     getIPv4((ip4) => {
       console.log(ip4);
     })
-
   }
 
 });

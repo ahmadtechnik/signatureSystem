@@ -40,22 +40,18 @@ var dHeight, dWidth;
 
 // init socket connection... 
 var socket = io.connect("/client_side_device");
+
 socket.on("connect", () => {
-    // call onClientConnectedToSocket
-    comun.onClientConnectedToSocket();
-    comun.emitMSG({
-        msg: "clientConnected"
-    });
-})
+
+});
 // on new message to client-side device 
 socket.on("comingRequestToClient", (data) => {
-    comun.comingRequestToClient(data)
-})
+    console.log("HELLO")
+    comun.comingRequestToClient(data);
+});
 
 $(document).ready(() => {
 
-    // in order to set window full to screen 
-    //GoInFullscreen(document.getElementsByTagName("body")[0]);
 
     /** to change elements sizes if the display resized */
     elementsSizing();
@@ -63,7 +59,6 @@ $(document).ready(() => {
     $(window).resize(() => {
         elementsSizing();
         setNewSignatureTakerPace()
-
     });
 
     _SIGNATURE_CANVAS = document.getElementById("signDrowSecitonCanvas");
@@ -97,7 +92,11 @@ $(document).ready(() => {
 
     $(`#showHideSignaturePad`).click((evt) => {
         btnsActions.hideShowSignaturePad(evt)
-    })
+    });
+
+    //  to assign select color btns actions
+    $(`.selectColorBtnAction`).click(changePenColorBtn);
+
 
 });
 
@@ -110,11 +109,11 @@ $(document).ready(() => {
 var comun = {
     /** on client connected to socket */
     onClientConnectedToSocket: (data) => {
-        console.log("Connected to socket", data);
+
     },
     /** on comingRequestToClient */
     comingRequestToClient: (data) => {
-        console.log(data)
+    
         var msg = data.msg;
         switch (msg) {
             case "confirmed":
@@ -319,10 +318,10 @@ function elementsSizing() {
     dHeight = $(window).height();
     dWidth = $(window).width();
     // set size of preview seciotn
-    $("#filePreviewSeciton").height(dHeight - (dHeight * 20 / 100) - 3);
+    $("#filePreviewSeciton").height(dHeight - (dHeight * 10 / 100) - 5);
     $("#filePreviewSeciton").width(dWidth);
     // set size of signature section
-    $("#signatureTakerSection").height(dHeight * 20 / 100);
+    $("#signatureTakerSection").height(dHeight * 10 / 100);
     $("#signatureTakerSection").width(dWidth);
 }
 /**
@@ -488,4 +487,10 @@ function cropImageFromCanvas(ctx, canvas) {
     canvas.width = w;
     canvas.height = h;
     ctx.putImageData(cut, 0, 0);
+}
+
+
+function changePenColorBtn() {
+    var selectedColor = $(this).attr("id");
+    _SIGNATURE_PAD_OBJECT.penColor = selectedColor;
 }

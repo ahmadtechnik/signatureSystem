@@ -13,7 +13,6 @@ set backgrount for the bottom seciotn
 
 */
 .signatureTakerSection {
-
     width: 100%;
 }
 
@@ -45,9 +44,9 @@ set backgrount for the bottom seciotn
 .clearSignaturBtn {
     position: absolute;
     left: 7px;
-    bottom: 7px;
+    top: -35px;
     margin: 0px !important;
-    border-radius: 0px 0px 25px 25px !important;
+    border-radius: 25px 25px 0px 0px !important;
     -moz-border-radius: 0px 0px 25px 25px;
     -webkit-border-radius: 0px 0px 25px 25px;
 }
@@ -55,15 +54,19 @@ set backgrount for the bottom seciotn
 /*  */
 .submitSignatureBtn {
     position: absolute;
-    bottom: 7px;
+    top: -35px;
     right: 7px;
-    ;
+
     margin: 0px !important;
-    border-radius: 0px 0px 25px 25px !important;
+    border-radius: 25px 25px 0px 0px !important;
     -moz-border-radius: 0px 0px 25px 25px;
     -webkit-border-radius: 0px 0px 25px 25px;
 }
-
+.colorsBtnsBar{
+    position: absolute;
+    top: -35px;
+    left: 100px;
+}
 /* 
  */
 .pageAmountContainer {
@@ -95,7 +98,5 @@ set backgrount for the bottom seciotn
     left: -40px;
     top: 30px;
 }
-/*  */
-body , .dimmer{
-    cursor: none;
-}
+
+

@@ -1,0 +1,17 @@
+{
+    "newFutureToAdd" : [
+        "send file by email address",
+        "send file by to fax machine",
+        "move save as PDF btn to next to close btn DONE",
+        "make user able to select the pages numbers after upload the file directly",
+        "make the file name as defualt in file name field",
+        "make the user able to add default signature with unknown password"
+    ],
+    "errors" : [
+        "the system does not accept the file name after click next btn DONE",
+        "sometime the signature img does not comes from some devices",
+        "the server dissconnect sometimes",
+        "show the mouse curser on the client side page DONE",
+        "error 400 from client side page"
+    ]
+}

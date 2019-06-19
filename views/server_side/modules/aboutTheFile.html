@@ -68,42 +68,49 @@
         ];
     }
     /** set the old file name in the input filed **/
-    $("#newNameLabel").attr("placeholder", returnFileExtions(uploaded_file)[1]);
+    $("#newNameLabel").attr("value", returnFileExtions(uploaded_file)[1]);
     /** change the extions file beside the file name field **/
     $(`#fileExtention`).text(returnFileExtions(uploaded_file)[0].toUpperCase());
+ 
 
     /**
      * Add action for nextStepModalBtn 
      * to print fileds to user
      * **/
     $(`#nextStepModalBtn`).click((event) => {
-        /**
-         * store the new entered name
-         * with the extention of the file
-         * and the entered number of the signaturies
-         * 
-         * **/
-        newFileName = $(`#newNameLabel`).val();
-        numberOfSignaturies = $(`#signaturies_number`).val();
 
-        $(`#nextStepModalBtn`).off("click");
-        $(`#nextStepModalBtn`).css("display", "none");
-        // create field in amount of the signaturies 
-        for (let index = 0; index < parseInt(numberOfSignaturies); index++) {
-            // create fields to get signaturies names
-            var fieldContainer = $(`<div class="field " ></div>`);
-            var fieldLabed = $(`<label>Name for : ${index +1}</label>`);
-            var fieldInput = $(
-                `<input  id="nameNum_${index + 1 }" type="text" placeholder="optional" signName="${index +1}" />`
-            );
-            fieldContainer.append(fieldLabed);
-            fieldContainer.append(fieldInput);
-            $(`#signaturiesNamesFields`).append(fieldContainer);
-        };
+        // check if file name  is not empty 
+        if ($("#newNameLabel").val() !== "") {
+            $("#newNameLabel").parent().parent().removeClass("error");
 
-        $(`#OKMODALBTN`).css("display", "");
-    
+            /**
+             * store the new entered name
+             * with the extention of the file
+             * and the entered number of the signaturies
+             * 
+             * **/
+            newFileName = $(`#newNameLabel`).val();
+            numberOfSignaturies = $(`#signaturies_number`).val();
 
+            $(`#nextStepModalBtn`).off("click");
+            $(`#nextStepModalBtn`).css("display", "none");
+            // create field in amount of the signaturies 
+            for (let index = 0; index < parseInt(numberOfSignaturies); index++) {
+                // create fields to get signaturies names
+                var fieldContainer = $(`<div class="field " ></div>`);
+                var fieldLabed = $(`<label>Name for : ${index +1}</label>`);
+                var fieldInput = $(
+                    `<input  id="nameNum_${index + 1 }" type="text" placeholder="optional" signName="${index +1}" />`
+                );
+                fieldContainer.append(fieldLabed);
+                fieldContainer.append(fieldInput);
+                $(`#signaturiesNamesFields`).append(fieldContainer);
+            };
+
+            $(`#OKMODALBTN`).css("display", "");
+        } else {
+            $("#newNameLabel").parent().parent().addClass("error");
+        }
     })
 
     /**

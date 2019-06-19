@@ -38,6 +38,8 @@
   </div>
 
   <div class="actions">
+    <!--  -->
+    <div class="ui  button blue mini afterToolBtn" id="downloadPDF"><i class="icon file pdf"></i>Save PDF</div>
     <div class="ui button negative red mini">Close</div>
     <div class="ui primary button positive">Submit</div>
   </div>
@@ -61,13 +63,9 @@
       </div>
     </div>
     <!--  -->
-    <button class="ui icon mini button pp" id="clearSignaturePad" data-content="Clear Signature Pad.">
+    <button class="ui icon mini button pp" id="clearSignaturePad">
       <i class="sync alternate icon "></i>
     </button>
-    <!--  -->
-    <div class="ui icon button blue mini afterToolBtn" id="downloadPDF">
-      <i class="icon file pdf"></i>
-    </div>
     <!--  -->
     <div class="ui icon button green mini afterToolBtn" id="printPages">
       <i class="icon print"></i>
@@ -496,7 +494,7 @@
       // in case the element was not found in the object
     }
     // hide after tool btns
-    // $(`.afterToolBtn`).css("display", "none");
+    $(`.afterToolBtn`).css("display", "none");
   }
 
   // on label drag
@@ -550,7 +548,7 @@
       $(`#previewModalContent`).scrollTo("#ancherDiv_1", 2000)
       return false;
     } else {
-      alert("NO PLACES SELECTED TO PUT THE SIGNATURE INSIDE... M2 ")
+      alert("NO PLACES SELECTED TO PUT THE SIGNATURE INSIDE... M2 ");
     }
 
   }
@@ -612,7 +610,7 @@
     });
 
     // hide after tool btns
-    // $(`.afterToolBtn`).css("display", "none");
+    $(`.afterToolBtn`).css("display", "none");
   }
 
   // all btns action

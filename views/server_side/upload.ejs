@@ -219,11 +219,14 @@
                                 msg: "cancaled"
                             });
                         },
+                        onShow : () => {
+                            
+                        },
                         onHidden: modal => {
                             $(`.askUserToEnterFileName`).remove();
                         },
 
-                    }).modal("show")
+                    }).modal("show");
                 });
 
 
