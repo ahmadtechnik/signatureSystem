@@ -12,6 +12,7 @@
         "sometime the signature img does not comes from some devices",
         "the server dissconnect sometimes",
         "show the mouse curser on the client side page DONE",
-        "error 400 from client side page"
+        "error 400 from client side page",
+        "saved file changed the name and removes the extention of PDF file"
     ]
 }
