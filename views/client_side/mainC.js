@@ -30,6 +30,8 @@ var _A4_ORIGINAL_WIDTH = 1241;
 
 var _SIGNATURIES_DATA = null;
 
+var _SIGNATURES_AS_PNG_DATA = [];
+var _SIGNATURES_AS_PNG_COUNTER = null;
 
 // signature pad hide or not
 var _PAD_IS_IN_SHOW = false;
@@ -89,6 +91,7 @@ $(document).ready(() => {
     // show dimmer on start page
     dimmerControler.showDimmer("ready to go...")
 
+
     $(`#showHideSignaturePad`).click((evt) => {
         btnsActions.hideShowSignaturePad(evt)
     });
@@ -100,10 +103,7 @@ $(document).ready(() => {
 });
 
 
-
 /**********************************************************/
-
-
 
 var comun = {
     /** on client connected to socket */
@@ -153,7 +153,7 @@ var comun = {
                 window.location.reload();
                 break;
             case "getSignatureAsPNG":
-
+                _SIGNATURES_AS_PNG_COUNTER = data.data.signatoriesNumber;
                 getSignatureAsPNGData(data.data.signatoriesNumber);
                 break;
 
@@ -275,12 +275,37 @@ var btnsActions = {
             $(`#showHideBtnIcon`).removeClass("right ")
         }
     },
-    submitToGetPNG: () => {
+    submitToGetPNG: (numb) => {
+
         /**
          * check if the canvas is not empty
          * then start count signatories number
+         * - _SIGNATURES_AS_PNG_DATA 
          */
-        
+        if (!_SIGNATURE_PAD_OBJECT.isEmpty()) {
+            if (_SIGNATURES_AS_PNG_COUNTER >= 1) {
+
+                // store the signature into object
+                var signData = {
+                    signData: _SIGNATURE_PAD_OBJECT.toData(),
+                    signIndex: _SIGNATURES_AS_PNG_COUNTER
+                }
+                _SIGNATURES_AS_PNG_DATA.push(signData);
+
+                _SIGNATURE_PAD_OBJECT.clear();
+                _SIGNATURES_AS_PNG_COUNTER--;
+
+                if (_SIGNATURES_AS_PNG_COUNTER === 0) {
+                    // start transmition the data to server.
+                    _SIGNATURE_PAD_OBJECT.clear();
+                    $(`#submitSignatureBtn`).addClass("disabled");
+                    // i need to encrypt the data before i send them to server side.
+                }
+            }
+        } else {
+            console.log("Signature pad is empty... ")
+        }
+
     }
 }
 
@@ -461,13 +486,14 @@ function singlePageHandling(page) {
 function getSignatureAsPNGData(signatureNumber) {
     $(`#submitSignatureBtn`).removeClass("disabled");
 
-
     // remove old event from btn 
     $(`#submitSignatureBtn`).unbind("click");
 
     // set new event for the submit button of the canvas
 
-    $(`#submitSignatureBtn`).on("click", btnsActions.submitToGetPNG);
+    $(`#submitSignatureBtn`).on("click", () => {
+        btnsActions.submitToGetPNG(signatureNumber);
+    });
     // hide the dimmer
     dimmerControler.hideDimmer();
 }

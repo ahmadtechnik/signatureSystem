@@ -42,19 +42,30 @@ socket.on("connect", () => {
 socket.on("comingRequestToServer", (data) => {
     common.onClientRequested(data);
 });
-// in case socket informed the server that there is an client disconnected
-socket.on("clientDisconnected", (data) => {
-
-});
+/**
+ * in case new client device was connected
+ */
 socket.on("newClintConnected", (data) => {
     _CLIENTS_COUNTR.push(data.clientConnected);
+    
+});
+/**
+ * in case client device was disconnected to remove the device from list 
+ */
+socket.on("thisClientIDwasLogedout", (data) => {
+    var disconnectedDeviceID = data.clientID;
+    console.log(disconnectedDeviceID);
+});
+
+/** back response from getAllClientRequest */
+socket.on("takeHereAllClients", (data) => {
+    console.log(data)
 });
 
 /**
  * set document on ready
  */
 $(document).ready(() => {
-
 
     /**
      * Set btn Action : to load upload JES page
@@ -86,6 +97,9 @@ $(document).ready(() => {
         containment: "body",
         scroll: false
     });
+
+    /** request all clients from server */
+    socket.emit("giveMeAllClients");
 })
 
 function showFilesHistoryBtnAction(event) {
@@ -368,13 +382,13 @@ var onAppend = function (elem, f) {
  */
 var getSignAsPng = (evt) => {
     var response = $.ajax({
-        async : false,
-        url : "getSignAsPNG",
-        success : (data) => {
-            
+        async: false,
+        url: "getSignAsPNG",
+        success: (data) => {
+
         }
     });
-    if(response.status === 200){
+    if (response.status === 200) {
         $(`#loadPagesSection`).html(response.responseText);
     }
     $('.ui.sidebar').sidebar('toggle');

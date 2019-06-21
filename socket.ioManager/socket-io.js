@@ -11,7 +11,7 @@ var socket = null;
 var clientSide
 var serverside
 
-
+var _COLLECTOR_OF_CLIENTS = {};
 
 exports.socketObjectSetter = (server) => {
     /**
@@ -55,15 +55,35 @@ var onClientSideConnected = (client) => {
     serverside.emit("newClintConnected", {
         clientConnected: client.id
     });
-
     /** on receiving message from client to server */
-    client.on("comingRequestToServer", onComingRequestToServer)
+    client.on("comingRequestToServer", onComingRequestToServer);
+
+    // add the connected client to the object
+    _COLLECTOR_OF_CLIENTS[client.id.split("#")[1]] = client.id.split("#")[1];
+
+    // emit new clients status to server side device
+    serverside.emit("takeHereAllClients", _COLLECTOR_OF_CLIENTS);
 }
 /** on client client-side disconnected */
 var onClientSideDeviceDisconnected = () => {
-    console.log("client-side device disconnected");
-    /** emit to server-side device that there an client-client side device is disconnected */
-    serverside.emit("clientDisconnected", {});
+    // see which device is connected to socket.
+    var connectedDevices = {};
+    for (var device in clientSide.connected) {
+        var deviseID = device.split("#")[1];
+        connectedDevices[deviseID] = deviseID;
+    }
+    // each all elements in global collector .
+    for (var element in _COLLECTOR_OF_CLIENTS) {
+        if (connectedDevices[element] === undefined) {
+            // emit the logened out device to server-device 
+            serverside.emit("thisClientIDwasLogedout" , {
+                clientID : element
+            });
+            _COLLECTOR_OF_CLIENTS[element] = undefined;
+        }
+    }
+   // emit new clients status to server side device
+   serverside.emit("takeHereAllClients", _COLLECTOR_OF_CLIENTS);
 }
 
 var onComingRequestToServer = (data) => {
@@ -80,16 +100,19 @@ var onServerSideConnected = (client) => {
     /* on Cordinations serverSidePage */
 
     /** confirm file button cliecked onserver side */
-    client.on("comingRequestToClient", comingRequestToClient)
+    client.on("comingRequestToClient", comingRequestToClient);
     // on store imgages timp from server-side page
-    client.on("storeTemp", onStoreTemp)
+    client.on("storeTemp", onStoreTemp);
+
+    // request clients amount from server
+    client.on("giveMeAllClients", onServerSideDeviceRequestClientAmount);
+
+
 }
 /** on client server-side disconnected */
 var onServerSideDeviceDisconnected = () => {
     console.log("server-side device disconnected : ");
 }
-
-
 /**
  * on server side send message to client that 
  * there is an coming new file need to be signed
@@ -97,6 +120,15 @@ var onServerSideDeviceDisconnected = () => {
 var comingRequestToClient = (data) => {
     /** emit notifi  to client side to show wait page */
     clientSide.emit("comingRequestToClient", data)
+}
+
+/**
+ * 
+ */
+function onServerSideDeviceRequestClientAmount(data) {
+    console.log(_COLLECTOR_OF_CLIENTS);
+    serverside.emit("takeHereAllClients", _COLLECTOR_OF_CLIENTS);
+    //serverside.emit("takeHereAllClients" , clientSide.clients() );
 }
 
 /**
