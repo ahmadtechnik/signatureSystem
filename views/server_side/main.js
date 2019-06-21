@@ -64,6 +64,11 @@ $(document).ready(() => {
      * set hsow files history btn action 
      */
     $(`#showFilesHistory`).click(showFilesHistoryBtnAction);
+    /**
+     * get signature as png to copy it and past it anywhere
+     */
+    $(`#getSignAsPng`).click(getSignAsPng);
+
 
     // generate qr code for client side
     new QRCode(_QR_CODE_CONTAINER, {
@@ -356,4 +361,21 @@ var onAppend = function (elem, f) {
     observer.observe(elem, {
         childList: true
     });
+}
+
+/**
+ * @param {object} evt 
+ */
+var getSignAsPng = (evt) => {
+    var response = $.ajax({
+        async : false,
+        url : "getSignAsPNG",
+        success : (data) => {
+            
+        }
+    });
+    if(response.status === 200){
+        $(`#loadPagesSection`).html(response.responseText);
+    }
+    $('.ui.sidebar').sidebar('toggle');
 }

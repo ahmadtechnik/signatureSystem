@@ -1,0 +1,79 @@
+<div class="ui modal" id="getSignAsPNGModal" class="getSignAsPNGModal">
+    <div class=" header ">
+        Signature Getter Modal.
+    </div>
+    <div class="ui content">
+        <!--  -->
+        <div class="ui form ">
+            <!--  -->
+            <div class="field">
+                <label for="signatoriesNumberGetPNG">Signatories Number</label>
+                <input type="number" name="" id="signatoriesNumberGetPNG">
+            </div>
+            <!--  -->
+            <div class="field floated right float">
+                <div class="ui button green" id="broadcastDataToServerPNGGetter">Go</div>
+            </div>
+        </div>
+        <div class="communClientSectionPNGGetter" id="communClientSectionPNGGetter">
+
+        </div>
+    </div>
+    <div class="actions">
+        <div class="ui button green ok">Done</div>
+    </div>
+</div>
+<script id="getSignScriptToRemove" class="getSignScriptToRemove">
+    /**
+     * modal btns actions
+     * **/
+    var btnsAcitons = {
+        goBtnAction: () => {
+            /**
+             * - first check if signatories number is not empty
+             * - then emit data to client-side device
+             * - show demmir on to make user know that he's waiting for something
+             * **/
+            if ($(`#signatoriesNumberGetPNG`).val() === "" || $(`#signatoriesNumberGetPNG`).val() < 0 || $(
+                    `#signatoriesNumberGetPNG`).val() > 10) {
+                $(`#signatoriesNumberGetPNG`).parent().addClass("error");
+                $(`#signatoriesNumberGetPNG`).popup({
+                    content: "Unacceptable Number",
+                    inline: true,
+                    position: "right center",
+                    color: "red"
+                }).popup("toggle");
+            } else {
+                // start communication.
+                var signNumb = parseInt($(`#signatoriesNumberGetPNG`).val()) // $(`#signatoriesNumberGetPNG`).val()
+                if(!isNaN(signNumb)){
+                    common.emitMSG({
+                        msg : "getSignatureAsPNG",
+                        data  : {
+                            signatoriesNumber  : signNumb
+                        }
+                    })
+                }
+                // destroy the popup message.
+                $(`#signatoriesNumberGetPNG`).popup("destroy");
+                $(`#signatoriesNumberGetPNG`).parent().removeClass("error");
+            }
+            $(`#signatoriesNumberGetPNG`).popup("destroy");
+        }
+    }
+
+
+    /** 
+     * modal controller
+     * **/
+    $('#getSignAsPNGModal').modal({
+        closable: false,
+        onHidden: () => {
+            $('#getSignAsPNGModal').remove();
+            $(`#getSignScriptToRemove`).remove();
+        },
+        onShow: () => {
+            $(`#broadcastDataToServerPNGGetter`).click(btnsAcitons.goBtnAction);
+        }
+    }).modal("show");
+</script>

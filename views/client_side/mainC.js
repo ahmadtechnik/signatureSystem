@@ -39,14 +39,13 @@ var dHeight, dWidth;
 //document.addEventListener('contextmenu', event => event.preventDefault());
 
 // init socket connection... 
-var socket = io.connect("/client_side_device");
-
+var socket = io("/client_side_device");
+// on socket connected
 socket.on("connect", () => {
 
 });
 // on new message to client-side device 
 socket.on("comingRequestToClient", (data) => {
-    console.log("HELLO")
     comun.comingRequestToClient(data);
 });
 
@@ -113,7 +112,7 @@ var comun = {
     },
     /** on comingRequestToClient */
     comingRequestToClient: (data) => {
-    
+
         var msg = data.msg;
         switch (msg) {
             case "confirmed":
@@ -129,12 +128,18 @@ var comun = {
                 console.log(data);
                 break;
             case "_signature_data":
+
                 _OBJ_FIRST = 1;
                 _SIGNATURIES_DATA = data.data;
                 renderCurrentSentFile(_SIGNATURIES_DATA);
                 // init first signature name
                 signaturiesFilter(_SIGNATURIES_DATA, _OBJ_FIRST);
+
                 $(`#submitSignatureBtn`).removeClass("disabled");
+                // to rebind the old action to the submit btn 
+                // after receiving new _signature_data from server
+                $(`#submitSignatureBtn`).bind("click", btnsActions.SubmitPadBtnAction);
+
                 _SIGNATURE_PAD_OBJECT.clear();
                 _SIGNS_DATA = [];
                 break;
@@ -147,6 +152,11 @@ var comun = {
             case "refresh":
                 window.location.reload();
                 break;
+            case "getSignatureAsPNG":
+
+                getSignatureAsPNGData(data.data.signatoriesNumber);
+                break;
+
         }
     },
     // shortcut to emit message to server-side device
@@ -211,14 +221,11 @@ var btnsActions = {
             _SIGNATURE_CANVAS.width = oldWidth;
             _SIGNATURE_CANVAS.height = oldHeight;
 
+            // to change reviewed data to user on client-side home page.
             _OBJ_FIRST++;
-
             var tname = _SIGNATURIES_DATA.signatoriesNamesForm[_OBJ_FIRST];
-            if (tname === "") {
-                $(`#signaturiesNum`).html(`<label class="ui header">Signer number : ${_OBJ_FIRST}</label>`);
-            } else {
-                $(`#signaturiesName`).html(`<label class="ui header">MR/MISS : ${tname}<sup>${_OBJ_FIRST}</sup></label>`);
-            }
+            $(`#signaturiesName`)
+                .html(`<label class="ui header">${tname !== undefined ? "MISS./MR. : " + tname :  "NUM : " + _OBJ_FIRST }<sup>${_OBJ_FIRST}</sup></label>`);
 
             // that's mean all parties was signed 
             // i have to re send data to server side
@@ -232,7 +239,7 @@ var btnsActions = {
 
                 $(`#submitSignatureBtn`).addClass("disabled");
 
-                $(`#signaturiesNum`).html("");
+
                 $(`#signaturiesName`).html("");
 
                 _PDF_FILE_DOC = null;
@@ -244,9 +251,10 @@ var btnsActions = {
                 $(`.divider_hr`).remove();
 
                 dimmerControler.showDimmer("waiting for next order....");
+
                 setTimeout(() => {
                     dimmerControler.showDimmer("ready to go...");
-                }, 5000)
+                }, 5000);
             }
 
             _SIGNATURE_PAD_OBJECT.clear();
@@ -266,6 +274,13 @@ var btnsActions = {
             $(`#showHideBtnIcon`).addClass("left")
             $(`#showHideBtnIcon`).removeClass("right ")
         }
+    },
+    submitToGetPNG: () => {
+        /**
+         * check if the canvas is not empty
+         * then start count signatories number
+         */
+        
     }
 }
 
@@ -378,22 +393,16 @@ function renderCurrentSentFile(data) {
 
 /**  */
 function signaturiesFilter(data, nameIndex) {
-    console.log(nameIndex);
     var signatoriesNamesForm = data.signatoriesNamesForm;
-
+    console.log(signatoriesNamesForm, nameIndex);
     // in case was signaturies number more then 1 
 
     var tname = signatoriesNamesForm[nameIndex];
     var index = nameIndex
-    if (tname === "") {
-        $(`#signaturiesNum`).html(`<label class="ui header">Signer number : ${index}</label>`);
-    } else {
-        $(`#signaturiesName`).html(`<label class="ui header">MR/MISS : ${tname}<sup>${index}</sup></label>`);
-    }
-
-
+    $(`#signaturiesName`)
+        .html(`<label class="ui header">${tname !== undefined ? "MISS./MR. : " + tname : "NUM : " + _OBJ_FIRST }<sup>${_OBJ_FIRST}</sup></label>`);
+    //
     $(`#submitSignatureBtn`).removeClass("disabled");
-
 }
 /**
  * handling single page
@@ -443,6 +452,24 @@ function singlePageHandling(page) {
         }
         $(`#pageAmountContainer`).text(_PAGER);
     })
+}
+
+/**
+ * to send the Sign as PNG to server-side device
+ */
+
+function getSignatureAsPNGData(signatureNumber) {
+    $(`#submitSignatureBtn`).removeClass("disabled");
+
+
+    // remove old event from btn 
+    $(`#submitSignatureBtn`).unbind("click");
+
+    // set new event for the submit button of the canvas
+
+    $(`#submitSignatureBtn`).on("click", btnsActions.submitToGetPNG);
+    // hide the dimmer
+    dimmerControler.hideDimmer();
 }
 
 /**
