@@ -70,3 +70,11 @@
         top: 0px;
         background: #d05c5c;
 }
+
+/* 
+ */
+.clientSideDevicesSimples {
+        position: fixed;
+        left: 10px;
+        bottom: 10px;
+}

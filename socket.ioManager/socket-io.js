@@ -126,7 +126,6 @@ var comingRequestToClient = (data) => {
  * 
  */
 function onServerSideDeviceRequestClientAmount(data) {
-    console.log(_COLLECTOR_OF_CLIENTS);
     serverside.emit("takeHereAllClients", _COLLECTOR_OF_CLIENTS);
     //serverside.emit("takeHereAllClients" , clientSide.clients() );
 }

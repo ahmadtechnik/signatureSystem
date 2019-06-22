@@ -45,21 +45,28 @@ socket.on("comingRequestToServer", (data) => {
 /**
  * in case new client device was connected
  */
-socket.on("newClintConnected", (data) => {
-    _CLIENTS_COUNTR.push(data.clientConnected);
-    
-});
+
+ 
 /**
- * in case client device was disconnected to remove the device from list 
+ * in case client device was disconnected to remove the device from list
+ * - in this case i have to inform the server side devie user that 
+ * - the client with the current ID was loged out from socket
  */
 socket.on("thisClientIDwasLogedout", (data) => {
     var disconnectedDeviceID = data.clientID;
-    console.log(disconnectedDeviceID);
+    /**
+     * to remove the disconnected device..
+     */
+    $(`#${disconnectedDeviceID}`).remove();
 });
 
 /** back response from getAllClientRequest */
 socket.on("takeHereAllClients", (data) => {
-    console.log(data)
+    $.each(data , (element, index) => {
+        $(`#${element}`).remove();
+        $(`#clientSideDevicesSimples`)
+        .append(`<div id="${element}" class="ui button icon blue"><i class="laptop icon"></i></div>`);
+    });
 });
 
 /**
