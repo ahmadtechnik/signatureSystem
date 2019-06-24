@@ -13,6 +13,8 @@
         "the server dissconnect sometimes",
         "show the mouse curser on the client side page DONE",
         "error 400 from client side page",
-        "saved file changed the name and removes the extention of PDF file"
+        "saved file changed the name and removes the extention of PDF file",
+        "there is an error after submit button, in case user uploaded file and the client side device starts to get that file, in this case the server crached. I have to put try catch block"
+        
     ]
 }
