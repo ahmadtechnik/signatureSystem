@@ -329,6 +329,13 @@ var btnsActions = {
                     });
                     /** clear the @_SIGNATURES_AS_PNG_DATA after sending it */
                     _SIGNATURES_AS_PNG_DATA = [];
+                    
+                    /** reassign old submit btn action */
+                    $(`#submitSignatureBtn`).bind("click", btnsActions.SubmitPadBtnAction);
+
+                    /** show the dimmer again after assiging button action */
+                    dimmerControler.showDimmer("ready to go : ..." + _THIS_DEVICE_SOCKET_ID
+                        .substr(_THIS_DEVICE_SOCKET_ID.length - 5));
                 }
             }
         } else {
