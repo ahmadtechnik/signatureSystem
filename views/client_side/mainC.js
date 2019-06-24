@@ -36,6 +36,7 @@ var _SIGNATURES_AS_PNG_COUNTER = null;
 // signature pad hide or not
 var _PAD_IS_IN_SHOW = false;
 
+var _THIS_DEVICE_SOCKET_ID = null;
 // start geting display dimantions
 var dHeight, dWidth;
 //document.addEventListener('contextmenu', event => event.preventDefault());
@@ -44,14 +45,19 @@ var dHeight, dWidth;
 var socket = io("/client_side_device");
 // on socket connected
 socket.on("connect", () => {
-
+    _THIS_DEVICE_SOCKET_ID = socket.id.split("#")[1];
+    // show dimmer on start page
+    dimmerControler.showDimmer("ready to go : " + "...." + _THIS_DEVICE_SOCKET_ID.substr(_THIS_DEVICE_SOCKET_ID.length - 5))
 });
 // on new message to client-side device 
 socket.on("comingRequestToClient", (data) => {
     comun.comingRequestToClient(data);
 });
 
+
+
 $(document).ready(() => {
+
 
 
     /** to change elements sizes if the display resized */
@@ -89,7 +95,7 @@ $(document).ready(() => {
         btnsActions.SubmitPadBtnAction(evt)
     })
     // show dimmer on start page
-    dimmerControler.showDimmer("ready to go...")
+    dimmerControler.showDimmer("ready to go. " + (_THIS_DEVICE_SOCKET_ID !== null ? _THIS_DEVICE_SOCKET_ID.substr(_THIS_DEVICE_SOCKET_ID.length - 5) : ""));
 
 
     $(`#showHideSignaturePad`).click((evt) => {
@@ -155,6 +161,13 @@ var comun = {
             case "getSignatureAsPNG":
                 _SIGNATURES_AS_PNG_COUNTER = data.data.signatoriesNumber;
                 getSignatureAsPNGData(data.data.signatoriesNumber);
+                break;
+            case "spacRefresh":
+                if (data.targetedClient !== undefined) {
+                    if (_THIS_DEVICE_SOCKET_ID === data.targetedClient) {
+                        window.location.reload();
+                    }
+                }
                 break;
 
         }
@@ -276,7 +289,6 @@ var btnsActions = {
         }
     },
     submitToGetPNG: (numb) => {
-
         /**
          * check if the canvas is not empty
          * then start count signatories number
@@ -285,12 +297,23 @@ var btnsActions = {
         if (!_SIGNATURE_PAD_OBJECT.isEmpty()) {
             if (_SIGNATURES_AS_PNG_COUNTER >= 1) {
 
+                var currentCanv = document.getElementById("signDrowSecitonCanvas");
+                var currentCanvContext = currentCanv.getContext("2d");
+
+                var oldWidth = currentCanv.width;
+                var oldHeight = currentCanv.height;
+
+                cropImageFromCanvas(currentCanvContext, currentCanv);
+
                 // store the signature into object
                 var signData = {
-                    signData: _SIGNATURE_PAD_OBJECT.toData(),
-                    signIndex: _SIGNATURES_AS_PNG_COUNTER
+                    signData: _SIGNATURE_PAD_OBJECT.toDataURL(),
+                    signIndex: _SIGNATURES_AS_PNG_COUNTER,
                 }
                 _SIGNATURES_AS_PNG_DATA.push(signData);
+
+                currentCanv.width = oldWidth;
+                currentCanv.height = oldHeight;
 
                 _SIGNATURE_PAD_OBJECT.clear();
                 _SIGNATURES_AS_PNG_COUNTER--;
@@ -300,6 +323,12 @@ var btnsActions = {
                     _SIGNATURE_PAD_OBJECT.clear();
                     $(`#submitSignatureBtn`).addClass("disabled");
                     // i need to encrypt the data before i send them to server side.
+                    comun.emitMSG({
+                        msg: "signaturesAsPngData",
+                        data: _SIGNATURES_AS_PNG_DATA
+                    });
+                    /** clear the @_SIGNATURES_AS_PNG_DATA after sending it */
+                    _SIGNATURES_AS_PNG_DATA = [];
                 }
             }
         } else {
@@ -500,8 +529,8 @@ function getSignatureAsPNGData(signatureNumber) {
 
 /**
  * to trim canvos 
- * @param {canvasContext} ctx 
- * @param {canvas} canvas 
+ * @param {canvasContext} ctx .
+ * @param {canvas} canvas .
  */
 function cropImageFromCanvas(ctx, canvas) {
 
@@ -518,10 +547,8 @@ function cropImageFromCanvas(ctx, canvas) {
         for (x = 0; x < w; x++) {
             index = (y * w + x) * 4;
             if (imageData.data[index + 3] > 0) {
-
                 pix.x.push(x);
                 pix.y.push(y);
-
             }
         }
     }
@@ -540,6 +567,8 @@ function cropImageFromCanvas(ctx, canvas) {
     canvas.width = w;
     canvas.height = h;
     ctx.putImageData(cut, 0, 0);
+
+
 }
 
 

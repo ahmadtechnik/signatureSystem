@@ -21,7 +21,7 @@
   <script src="assets/pdfjs/pdf.js"></script>
   <script src="assets/pdfjs/pdf.worker.js"></script>
 
-<!-- TEST SCRIPTs -->
+  <!-- TEST SCRIPTs -->
 
   <script src="https://unpkg.com/jspdf@latest/dist/jspdf.min.js"></script>
   <!-- import socket io  -->
@@ -29,24 +29,27 @@
 
 
   <!-- import qrCode generator -->
-   <script src="assets/qrCode/qrcode.js"></script>
+  <script src="assets/qrCode/qrcode.js"></script>
 
-   <!-- import jquery ui libs and style -->
-<script src="assets/jQueryUI/jquery-ui.js"></script>
-<link rel="stylesheet" type="text/css" href="assets/jQueryUI/jquery-ui.css">
+  <!-- import jquery ui libs and style -->
+  <script src="assets/jQueryUI/jquery-ui.js"></script>
+  <link rel="stylesheet" type="text/css" href="assets/jQueryUI/jquery-ui.css">
 
-<!-- import file server script -->
-<script src="assets/fileServer/fileServer.js"></script>
+  <!-- import file server script -->
+  <script src="assets/fileServer/fileServer.js"></script>
 
-<!-- import jsPDF -->
-<script src="assets/jsPDF/jspdf.min.js"></script>
+  <!-- import jsPDF -->
+  <script src="assets/jsPDF/jspdf.min.js"></script>
+
+     <!-- import signature pad -->
+    <script src="assets/signaturePad/js/signature_pad.umd.js"></script>
 </head>
 
 <body>
-       <div class="signaturePreviewSection" id="signaturePreviewSection">
-       <img id="signaturePreviewImg" >
-   
-       </div>
+  <div class="signaturePreviewSection" id="signaturePreviewSection">
+    <img id="signaturePreviewImg">
+
+  </div>
 
   <div class="ui sidebar inverted vertical menu ">
     <!-- To add new items here-->
@@ -60,37 +63,45 @@
 
   </div>
   <div class="pusher">
-
-    <div class="ui segments  black ">
-      <div class="ui segment left inverted black">
-        <h1 class="ui header center alinged centered"><%- pagetitle %></h1>
-      </div>
-
-      <div class="ui progress bottom attached indicating " id="uploadProgress" style="display: none">
-        <div class="bar"></div>
-      </div>
-    </div>
-
-    <div class="ui container">
-      <div class="segments piled ui horizontal">
-        <div class="ui segment clearing ">
-          <div class="ui button red  left floated" onclick="$('.ui.sidebar').sidebar('toggle');">Show Sidbar Menu</div>
+    <div class="mainPusherContainer">
+      <div class="ui segments  black ">
+        <div class="ui segment left inverted black">
+          <h1 class="ui header center alinged centered"><%- pagetitle %></h1>
         </div>
-        <div class="ui segment right floated ">
-          <div class="ui red ribbon label">Hostname :
+
+        <div class="ui progress bottom attached indicating " id="uploadProgress" style="display: none">
+          <div class="bar"></div>
+        </div>
+      </div>
+
+      <div class="ui container">
+        <div class="segments piled ui horizontal">
+          <div class="ui segment clearing ">
+            <div class="ui button red  left floated" onclick="$('.ui.sidebar').sidebar('toggle');">Show Sidbar Menu
+            </div>
           </div>
-          <span><%- protocol  %>://<%- ipv4 %>:<%- portinuse %>/<%-route%></span>
+          <div class="ui segment right floated ">
+            <div class="ui red ribbon label">Hostname :
+            </div>
+            <span><%- protocol  %>://<%- ipv4 %>:<%- portinuse %>/<%-route%></span>
+          </div>
+          <div class="ui segment">
+            <span>You are in Page : <span class="" id="pageTitle"></span></span>
+          </div>
         </div>
-        <div class="ui segment">
-          <span>You are in Page : <span class="" id="pageTitle"></span></span>
-        </div>
-      </div>
 
-      <div class="ui container fluid" id="loadPagesSection"></div>
-      <div class="qr_client_link_path" id="qr_client_link_path"></div>
-      <div class="clientSideDevicesSimples ui vertical buttons mini" id="clientSideDevicesSimples"></div>
+        <div class="ui container fluid" id="loadPagesSection"></div>
+        <div class="qr_client_link_path" id="qr_client_link_path"></div>
+        <div class="clientSideDevicesSimples ui vertical buttons mini" id="clientSideDevicesSimples"></div>
+        <div class="timerCounter" id="timerCounter"></div>
+      </div>
     </div>
   </div>
+  </div>
+    <div class="ui dimmer">
+    <div class="content">
+      <h2 class="ui inverted header">Please Connect to any Signature Device..</h2>
+    </div>
   </div>
 </body>
 <script>

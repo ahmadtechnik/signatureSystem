@@ -36,39 +36,111 @@ var emitData = (key, data) => {
 //
 var _CLIENTS_COUNTR = [];
 socket.on("connect", () => {
-    common.onServerConnected()
+    common.onServerConnected();
+    checkCleintSideDevicesFilter();
 })
 // on comint request to server from the client
 socket.on("comingRequestToServer", (data) => {
     common.onClientRequested(data);
 });
 /**
- * in case new client device was connected
+ * this varable holding client-side devices IDs 
+ * in case was this varable null or empty
+ * the server should not do any thing befor
+ * the user turn the client-side device on
+ * to be sure that after all steps will never 
+ * lost the data
  */
-
- 
+var _ALL_CLIENTS_SIDE_DEVICES_IDs = null;
 /**
  * in case client device was disconnected to remove the device from list
  * - in this case i have to inform the server side devie user that 
  * - the client with the current ID was loged out from socket
  */
-socket.on("thisClientIDwasLogedout", (data) => {
-    var disconnectedDeviceID = data.clientID;
-    /**
-     * to remove the disconnected device..
-     */
-    $(`#${disconnectedDeviceID}`).remove();
-});
-
 /** back response from getAllClientRequest */
 socket.on("takeHereAllClients", (data) => {
-    $.each(data , (element, index) => {
-        $(`#${element}`).remove();
-        $(`#clientSideDevicesSimples`)
-        .append(`<div id="${element}" class="ui button icon blue"><i class="laptop icon"></i></div>`);
+    $(`.deviceIconBtn`).remove();
+    var colors = ["blue", "red", "black", "orange", "tral", "yellow", "violet", "purple", "pink", "brown", "grey"];
+    $.each(data, (element, index) => {
+        var random = colors[Math.floor(Math.random() * colors.length)]
+        var btn = $(`<div id="${element}" myColor="${random}" class="ui ${random} button icon  deviceIconBtn" data-position="right center"></div>`);
+        btn.append(`<i class="laptop icon"></i>`);
+        $(`#clientSideDevicesSimples`).append(btn);
+        btn.popup({
+            content: ".." + element.substr(element.length - 6)
+        });
+        btn.click(onClientSideDeviceBtnIcon);
     });
+    _ALL_CLIENTS_SIDE_DEVICES_IDs = data;
+    checkCleintSideDevicesFilter();
 });
 
+/** 
+ * this function will filter the connected devices in case 
+ * there was not any device connected it should alarm the 
+ * user to turn the at least one client-side device on
+ */
+var _HIDER_TIMER = null;
+var _INVERTEL = null;
+
+function checkCleintSideDevicesFilter() {
+    if (false) {
+        var bodyDimmer = $(`body`).dimmer({
+            closable: false,
+            transition: "horizontal flip"
+        });
+        var modals = $(`.modal`);
+        /**
+         * make sure that the client devices container is not null object
+         */
+        var coverDimmer = bodyDimmer.dimmer("is active");
+
+        var counter = $(`#timerCounter`);
+        if (_ALL_CLIENTS_SIDE_DEVICES_IDs !== null) {
+            /**
+             * after making sure the client-side devices object is not null 
+             * now we have to check if that object contain any device or not 
+             * in case was not contain any device it should show alarm to
+             * server-side device 
+             */
+            if (Object.keys(_ALL_CLIENTS_SIDE_DEVICES_IDs).length > 0) {
+                bodyDimmer.dimmer('hide');
+                // now pause the timer
+                if (_HIDER_TIMER !== null) {
+                    _HIDER_TIMER.pause();
+                    _HIDER_TIMER = null;
+                    _INVERTEL !== null ? clearInterval(_INVERTEL) : null;
+                    console.log("Timer/interval Cleared ...");
+                }
+                counter.html("").transition("hide");
+            } else {
+
+                _HIDER_TIMER = new timer(() => {
+                    /* show body dimmer to user */
+                    bodyDimmer.dimmer('show');
+                }, 10000);
+                /** to get the left time from timer */
+                _INVERTEL = setInterval(() => {
+                    if (_HIDER_TIMER !== null) {
+                        /** check if dimmer of body is not active to start showing counter */
+                        if (_HIDER_TIMER.getTimeLeft() >= 0) {
+                            counter.html((_HIDER_TIMER.getTimeLeft() / 1000).toFixed()).transition("show");
+                        } else {
+                            counter.html("").transition("hide");
+                            _INVERTEL = null;
+                            clearInterval(_INVERTEL);
+                            _HIDER_TIMER = null;
+                            clearTimeout(_HIDER_TIMER);
+                        }
+                    }
+                }, 1000);
+                modals.modal("hide");
+            }
+        } else {
+
+        }
+    }
+}
 /**
  * set document on ready
  */
@@ -232,7 +304,6 @@ var common = {
     onClientRequested: (data) => {
         var timer;
         switch (data.msg) {
-
             case "padCleared":
                 break;
             case "signPreview":
@@ -250,7 +321,33 @@ var common = {
                 clearTimeout(timer);
                 timer = setTimeout(() => {
                     $(`#signaturePreviewSection`).css("display", "none");
-                }, 5000)
+                }, 5000);
+                break;
+            case "signaturesAsPngData":
+                /** 
+                 * this action will be active after the client send the data to server
+                 * @signaturesData {object} signatures object to hold object of data
+                 *  */
+                var signaturesData = data.data;
+                var holderElement = $(`#communClientSectionPNGGetter`);
+                $.each(signaturesData, (index, value) => {
+                    var signatureData = value.signData;
+                    var signautreIndex = value.signIndex;
+
+                    var img = $(`<div class="ui segment" id="img_${index + 1}"><img class="signaturePNGimg" src="${signatureData}"/></div>`);
+
+                    var imgHolder = $(`<div class="ui column SignaturePNGimageContainer" ></div>`);
+                    var copyBtn = $(`<div class="ui button blue icon mini copyImageToClipboard"><i class="copy icon"></i></div>`);
+
+                    copyBtn.click(() => {
+
+                    });
+
+                    imgHolder.append(img);
+                    imgHolder.append(`<span>Signum : ${index + 1}</span>`);
+                    imgHolder.append(copyBtn);
+                    holderElement.append(imgHolder);
+                });
                 break;
         }
     },
@@ -399,4 +496,101 @@ var getSignAsPng = (evt) => {
         $(`#loadPagesSection`).html(response.responseText);
     }
     $('.ui.sidebar').sidebar('toggle');
+};
+
+// on connected device icon btn
+// in case server-side device user clicked
+// on some device-button refresh the device
+// 
+function onClientSideDeviceBtnIcon() {
+    /** get  the device id */
+    var deviceID = $(this).attr("id");
+    common.emitMSG({
+        msg: "spacRefresh",
+        targetedClient: deviceID,
+    });
+    $(this).remove();
+}
+
+/**
+ * in case i want get leaft time in timersetout function
+ * in this case i choose the timer then
+ */
+
+var nativeSetTimeout = window.setTimeout;
+window.bindTimeout = function (listener, interval) {
+
+    function setTimeout(code, delay) {
+        var elapsed = 0,
+            h;
+
+        h = window.setInterval(function () {
+            elapsed += interval;
+            if (elapsed < delay) {
+                listener(delay - elapsed);
+            } else {
+                window.clearInterval(h);
+            }
+        }, interval);
+        return nativeSetTimeout(code, delay);
+    }
+
+    window.setTimeout = setTimeout;
+    setTimeout._native = nativeSetTimeout;
+};
+
+
+
+
+function timer(callback, delay) {
+    var id, started, remaining = delay,
+        running
+
+    this.start = function () {
+        running = true
+        started = new Date()
+        id = setTimeout(callback, remaining)
+    }
+
+    this.pause = function () {
+        running = false
+        clearTimeout(id)
+        remaining -= new Date() - started
+    }
+
+    this.getTimeLeft = function () {
+        if (running) {
+            this.pause()
+            this.start()
+        }
+
+        return remaining
+    }
+
+    this.getStateRunning = function () {
+        return running
+    }
+
+    this.start()
+}
+
+/**
+ * @param {element} element 
+ * this function to copy the image from signature image 
+ * to clipboard.
+ */
+
+function SelectText(element) {
+    var doc = document;
+    if (doc.body.createTextRange) {
+        var range = document.body.createTextRange();
+        range.moveToElementText(element);
+        range.select();
+    } else if (window.getSelection) {
+        var selection = window.getSelection();
+        var range = document.createRange();
+        range.selectNodeContents(element);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
 }
