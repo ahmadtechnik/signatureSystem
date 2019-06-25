@@ -134,20 +134,37 @@ var comun = {
                 console.log(data);
                 break;
             case "_signature_data":
+                try {
+                    _OBJ_FIRST = 1;
+                    _SIGNATURIES_DATA = data.data;
+                    try {
+                        renderCurrentSentFile(_SIGNATURIES_DATA);
+                        console.log("renderCurrentSentFile Starts ..");
+                    } catch (error) {
+                        console.log("Error  : renderCurrentSentFile", error);
+                    }
+                    try {
+                        // init first signature name
+                        signaturiesFilter(_SIGNATURIES_DATA, _OBJ_FIRST);
+                        console.log("signaturiesFilter  Starts ..");
+                    } catch (error) {
+                        console.log("Error : signaturiesFilter", error);
+                    }
+                    $(`#submitSignatureBtn`).removeClass("disabled");
+                    console.log("remove disable btn class Starts ..");
 
-                _OBJ_FIRST = 1;
-                _SIGNATURIES_DATA = data.data;
-                renderCurrentSentFile(_SIGNATURIES_DATA);
-                // init first signature name
-                signaturiesFilter(_SIGNATURIES_DATA, _OBJ_FIRST);
+                    // to rebind the old action to the submit btn 
+                    // after receiving new _signature_data from server
+                    $(`#submitSignatureBtn`).bind("click", btnsActions.SubmitPadBtnAction);
+                    console.log("bind old btn action Starts ..");
 
-                $(`#submitSignatureBtn`).removeClass("disabled");
-                // to rebind the old action to the submit btn 
-                // after receiving new _signature_data from server
-                $(`#submitSignatureBtn`).bind("click", btnsActions.SubmitPadBtnAction);
-
-                _SIGNATURE_PAD_OBJECT.clear();
-                _SIGNS_DATA = [];
+                    _SIGNATURE_PAD_OBJECT.clear();
+                    console.log("Clear Signature PAD starts . ");
+                    _SIGNS_DATA = [];
+                    console.log("Clear _SIGNS_DATA PAD starts . ");
+                } catch (error) {
+                    console.log("Error receiving data signature data : ", error)
+                }
                 break;
             case "clearPad":
                 _SIGNATURE_PAD_OBJECT.clear();
@@ -329,7 +346,7 @@ var btnsActions = {
                     });
                     /** clear the @_SIGNATURES_AS_PNG_DATA after sending it */
                     _SIGNATURES_AS_PNG_DATA = [];
-                    
+
                     /** reassign old submit btn action */
                     $(`#submitSignatureBtn`).bind("click", btnsActions.SubmitPadBtnAction);
 
@@ -425,29 +442,52 @@ function renderCurrentSentFile(data) {
     _SENT_FILE_NAME = data.requested_file_name;;
     _POS_DATA_ = data.postions_data;
     _SENT_FILE_TYPE = data.extention;
-    // get wanted file
-    $.ajax({
-        url: "get_pdf_dile_by_name",
-        method: "GET",
-        contentType: "application/json",
-        data: {
-            fileName: _SENT_FILE_NAME,
-            fileType: _SENT_FILE_TYPE
-        },
-        // after geting binary PDF from Server .
-        success: (data) => {
+    console.log(data);
+    try {
+        // get wanted file
+        $.ajax({
+            url: "get_pdf_dile_by_name",
+            method: "GET",
+            contentType: "application/json",
+            data: {
+                fileName: _SENT_FILE_NAME,
+                fileType: _SENT_FILE_TYPE
+            },
+            // after geting binary PDF from Server .
+            success: (data) => {
+                try {
+                    // read pdf document
+                    PDFJS.getDocument({
+                        data: data
+                    }).then((pdf) => {
+                        // make document global
+                        _PDF_FILE_DOC = pdf;
+                        _NUM_PAGES = pdf.numPages;
+                        pdf.getPage(_PAGER).then(singlePageHandling)
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                } catch (error) {
+                    console.log("Erorr reading PDF file data : ", error);
+                }
+            }
+        })
 
-            // read pdf document
-            PDFJS.getDocument({
-                data: data
-            }).then((pdf) => {
-                // make document global
-                _PDF_FILE_DOC = pdf;
-                _NUM_PAGES = pdf.numPages;
-                pdf.getPage(_PAGER).then(singlePageHandling)
-            })
+        function convertDataURIToBinary(dataURI) {
+            var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+            var base64 = dataURI.substring(base64Index);
+            var raw = window.atob(base64);
+            var rawLength = raw.length;
+            var array = new Uint8Array(new ArrayBuffer(rawLength));
+
+            for (var i = 0; i < rawLength; i++) {
+                array[i] = raw.charCodeAt(i);
+            }
+            return array;
         }
-    })
+    } catch (error) {
+
+    }
 
 
 }

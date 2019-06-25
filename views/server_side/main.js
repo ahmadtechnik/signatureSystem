@@ -489,7 +489,7 @@ var getSignAsPng = (evt) => {
         async: false,
         url: "getSignAsPNG",
         success: (data) => {
-
+            
         }
     });
     if (response.status === 200) {

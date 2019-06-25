@@ -86,21 +86,21 @@ app.set('view engine', 'ejs');
  *  jquery ui
  *  semantic ui CSS and JS
  */
-app.use("/bootstrap", express.static(path.join(__dirname , "/../node_modules/bootstrap/dist/")));
-app.use("/jquery", express.static(path.join(__dirname ,"/../node_modules/jquery/dist/")));
-app.use("/jquery-ui", express.static(path.join(__dirname ,"/../node_modules/jquery-ui")));
-app.use("/semantic-ui", express.static(path.join(__dirname ,"/../node_modules/semantic-ui-css/")));
-app.use("/socket.io", express.static(path.join(__dirname ,"/../node_modules/socket.io-client/dist/")));
-app.use("/assets", express.static(path.join(__dirname , "/../views/assets/")));
-app.use("/storage", express.static(path.join(__dirname , "/../storage/")));
+app.use("/bootstrap", express.static(path.join(__dirname, "/../node_modules/bootstrap/dist/")));
+app.use("/jquery", express.static(path.join(__dirname, "/../node_modules/jquery/dist/")));
+app.use("/jquery-ui", express.static(path.join(__dirname, "/../node_modules/jquery-ui")));
+app.use("/semantic-ui", express.static(path.join(__dirname, "/../node_modules/semantic-ui-css/")));
+app.use("/socket.io", express.static(path.join(__dirname, "/../node_modules/socket.io-client/dist/")));
+app.use("/assets", express.static(path.join(__dirname, "/../views/assets/")));
+app.use("/storage", express.static(path.join(__dirname, "/../storage/")));
 
 /**
  * use main dir server side
  */
-app.use("/", express.static(path.join(__dirname , "/../views/server_side/")));
+app.use("/", express.static(path.join(__dirname, "/../views/server_side/")));
 
 /** use main dir client side  */
-app.use("/", express.static(path.join(__dirname ,"/../views/client_side/")));
+app.use("/", express.static(path.join(__dirname, "/../views/client_side/")));
 
 /**
  * Select the home page for express server.
@@ -117,18 +117,23 @@ app.get("/server_side_home", function (req, res) {
      * pass data (hostname, port, page tilte)
      */
     getIPv4((ipv4) => {
-        if (ipv4 !== false) {
-            res.render(path.join(__dirname , "/../views/server_side/index.ejs"), {
-                hostname: os.hostname(),
-                portinuse: localPort,
-                pagetitle: "K1 Computer Signature System",
-                protocol: req.protocol,
-                route: "server_side_home",
-                ipv4: ipv4
-            });
-        } else {
-            console.log("in this device exist more then one ethernet device");
+        try {
+            if (ipv4 !== false) {
+                res.render(path.join(__dirname, "/../views/server_side/index.ejs"), {
+                    hostname: os.hostname(),
+                    portinuse: localPort,
+                    pagetitle: "K1 Computer Signature System",
+                    protocol: req.protocol,
+                    route: "server_side_home",
+                    ipv4: ipv4
+                });
+            } else {
+                console.log("in this device exist more then one ethernet device");
+            }
+        } catch (error) {
+
         }
+
     })
 })
 
@@ -136,15 +141,19 @@ app.get("/server_side_home", function (req, res) {
  * To render upload EJS file
  */
 app.get("/upload_document", (req, res) => {
-    /** 
-     * store the local port of the server 
-     * */
-    var localPort = req.socket.localPort;
-    res.render(path.join(__dirname , "/../views/server_side/upload.ejs"), {
-        hostname: os.hostname(),
-        portinuse: localPort,
-        pagetitle: "K1 Computer Signature System"
-    });
+    try {
+        /** 
+         * store the local port of the server 
+         * */
+        var localPort = req.socket.localPort;
+        res.render(path.join(__dirname, "/../views/server_side/upload.ejs"), {
+            hostname: os.hostname(),
+            portinuse: localPort,
+            pagetitle: "K1 Computer Signature System"
+        });
+    } catch (error) {
+
+    }
 });
 
 /**
@@ -155,16 +164,21 @@ app.post("/uploaded_file", (req, res) => {
      * init formidable object to start receive data form
      */
     var form = new formidable.IncomingForm;
-    /**
-     * start parsing the reqest from client
-     */
-    var parserFrom = form.parse(req)
-        .on("field", onField)
-        .on("file", onFile)
-        .on("fileBegin", onFileBegin)
-        .on("progress", onProgress)
-        .on("error", onError)
-        .on("end", onEnd);
+    try {
+        /**
+         * start parsing the reqest from client
+         */
+        var parserFrom = form.parse(req)
+            .on("field", onField)
+            .on("file", onFile)
+            .on("fileBegin", onFileBegin)
+            .on("progress", onProgress)
+            .on("error", onError)
+            .on("end", onEnd);
+    } catch (error) {
+        console.log("Error Saving file into server : ", error);
+    }
+
     /**
      * to get other params in the passed form data
      */
@@ -211,6 +225,7 @@ app.post("/uploaded_file", (req, res) => {
             err: err
         });
     }
+
 })
 
 /** 
@@ -233,7 +248,7 @@ app.get(`/getPagesSelectorModal`, (req, res) => {
  * to give the user the ability to copy the sign and past in
  * anywhere on other document out side the app
  */
-app.get("/getSignAsPNG" , (req, res) => {
+app.get("/getSignAsPNG", (req, res) => {
     res.sendFile(root_app + "/views/server_side/modules/getSignAsPNG.html");
 })
 /**  --------------------------- CLIENT SIDE REQEQUSTS ----------------------- */
@@ -248,16 +263,36 @@ app.get("/getWaitModal", (req, res) => {
 })
 
 // send pdf file by name
-app.get("/get_pdf_dile_by_name", (response, request) => {
-    var fileName = response.query.fileName;
-    var fileType = response.query.fileType;
+app.get("/get_pdf_dile_by_name", (req, res) => {
+
+    var fileName = req.query.fileName;
+    var fileType = req.query.fileType;
     var filePath = root_app + '/storage/' + fileName;
-    request.writeHead(200, {
+
+    res.writeHead(200, {
         'Content-Type': fileName,
         'Content-Disposition': `attachment; filename="${fileName}"`
     });
-    console.log()
-    request.end(fs.readFileSync(filePath, "binary"));
+
+    console.log(fileName);
+
+    fs.readFile(path.join(filePath), "binary", (err, data) => {
+        if (!err) {
+            console.log("there is no error reading file..") //
+
+            try {
+                res.write(data);
+                res.end();
+            } catch (error) {
+                console.log("ERROR ON ENDDD..");
+            }
+        } else {
+            console.log("err ...");
+        }
+    });
+    req.on("error", () => {
+        console.log("ON ERROR ...")
+    })
 })
 
 
