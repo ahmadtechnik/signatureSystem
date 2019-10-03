@@ -1,5 +1,5 @@
 {
-  "name": "Signature System Server",
+  "name": "Signature_System_Server",
   "version": "1.0.0",
   "description": "A minimal Electron application",
   "main": "main.js",
