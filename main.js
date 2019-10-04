@@ -1,9 +1,9 @@
 /**
  * import importants libs
  */
-var httpManagment = require( "./HTTPs/httpserver");
+var httpManagment = require("./HTTPs/httpserver");
 //var electronManager = require("./electron/electronManager");
-var socketIOManager = require( "./socket.ioManager/socket-io");
+var socketIOManager = require("./socket.ioManager/socket-io");
 
 var os = require("os");
 var socketIOImport = require("./socket.ioManager/socket-io");
@@ -21,9 +21,7 @@ httpManagment.startListen((started, openPorts) => {
     var expressApp = openPorts.expressApp;
     // start socket io with the same server 
     socketIOImport.socketObjectSetter(https);
-    getIPv4((ip4) => {
-      console.log(ip4);
-    })
+    console.log("Your current Hostname is : " + "https://" + os.hostname() + ":3000");
   }
 
 });

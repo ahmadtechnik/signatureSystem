@@ -110,17 +110,13 @@ app.get("/server_side_home", function (req, res) {
      * store the local port of the server 
      * */
     var localPort = req.socket.localPort;
-    console.log("SOME ONE TRING");
+    
     /**
      * if user send get to get the server side main page
      * i have to send importatnt data to the view
      * pass data (hostname, port, page tilte)
      */
-    getIPv4((ipv4) => {
-
-
-    })
-    var ipv4 = true;
+    var ipv4 = os.hostname();
     try {
         if (ipv4 !== false) {
             res.render(path.join(__dirname, "/../views/server_side/index.ejs"), {
@@ -207,7 +203,7 @@ app.post("/uploaded_file", (req, res) => {
     /**
      * set event on file uploading progrssing
      */
-    function onProgress(bytesReceived, bytesExpected) { };
+    function onProgress(bytesReceived, bytesExpected) {};
     /**
      * 
      * on end action
