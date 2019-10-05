@@ -8,6 +8,7 @@ var socketIOManager = require("./socket.ioManager/socket-io");
 var os = require("os");
 var socketIOImport = require("./socket.ioManager/socket-io");
 
+console.log("After check pull requst from GIT")
 
 /**
  * first step, opening the HTTP and HTTPS services
