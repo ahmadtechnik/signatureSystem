@@ -49,7 +49,7 @@ module.exports.startListen = function (started) {
      * it will start open the https port
      * Start Check port in range from 20 to 100 to open httpsserver
      */
-    portscanner.findAPortNotInUse(3000, 3020, "0.0.0.0", function (error, port) {
+    portscanner.findAPortNotInUse(443, 443, "0.0.0.0", function (error, port) {
         console.log('HTTPS ON PORT : ' + port);
         /**
          *  start listening to HTTPS port
