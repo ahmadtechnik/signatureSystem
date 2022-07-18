@@ -16,7 +16,7 @@
     "gm": "^1.23.1",
     "https": "^1.0.0",
     "jquery": "^3.4.1",
-    "jquery-ui": "^1.12.1",
+    "jquery-ui": "^1.13.2",
     "nodemon": "^1.19.1",
     "pdf-image": "^2.0.0",
     "pdf-poppler": "^0.2.1",
